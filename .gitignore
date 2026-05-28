@@ -1,6 +1,7 @@
 .DS_Store
 *.skill
 *.skill.bak
+release.sh
 .venv/
 __pycache__/
 *.pyc
