@@ -21,7 +21,7 @@ This template defines the structure of the audit's output. Follow it precisely. 
 
 ## Findings
 
-Found [N] anthropological bugs (confidence ≥80):
+Found [N] Babel bugs (confidence ≥80):
 
 ### 1. [Brief description of the finding] — confidence [80-100]
 

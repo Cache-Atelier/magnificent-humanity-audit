@@ -1,6 +1,6 @@
 ---
 name: magnificent-humanity-audit
-description: Audit a codebase, application, platform, or digital system for anthropological bugs — defects in the implicit account of the human person that a system's functional behavior enacts — measured against the principles of Catholic Social Doctrine in Pope Leo XIV's encyclical Magnifica Humanitas (15 May 2026). Produces bug-report-style findings with confidence scoring (0-100, threshold 80), each citing specific paragraphs of the encyclical, with concrete remediation. Use whenever a user wants an ethical, values-based, or human-centered audit of software — including requests to audit, critique, or examine a system for its treatment of the human person, respect for human dignity, alignment with Catholic Social Doctrine, or moral effects on persons. Use even when the user doesn't speak Catholic vocabulary; the framework is Catholic but the diagnostic value travels. Works on source code, product documentation, or behavioral accounts. Not for security audits, code-quality review, or generic bug-finding.
+description: Audit a codebase, application, platform, or digital system for anthropological bugs (also called Babel bugs): patterns that violate the principles of Catholic Social Doctrine as Pope Leo XIV articulates them in Magnifica Humanitas (15 May 2026), signaling a defect in the software's implicit account of the human person and our shared anthropology. Produces bug-report-style findings with confidence scoring (0-100, threshold 80), each citing specific paragraphs of the encyclical, with concrete remediation. Use whenever a user wants an ethical, values-based, or human-centered audit of software — including requests to audit, critique, or examine a system for its treatment of the human person, respect for human dignity, alignment with Catholic Social Doctrine, or moral effects on persons. Use even when the user doesn't speak Catholic vocabulary; the framework is Catholic but the diagnostic value travels. Works on source code, product documentation, or behavioral accounts. Not for security audits, code-quality review, or generic bug-finding.
 license: MIT
 compatibility: Requires filesystem read for on-demand loading of bundled reference files. Optional network access to fetch the encyclical from vatican.va if a reference file is missing or to verify a paragraph citation.
 metadata:
@@ -10,13 +10,13 @@ metadata:
 
 # Magnificent Humanity Audit
 
-This skill audits digital systems for **anthropological bugs** — defects in the implicit account of the human person that a system's functional behavior enacts. The framework against which the audit measures is the seven principles of Catholic Social Doctrine as articulated in *Magnifica Humanitas*, Pope Leo XIV's encyclical on safeguarding the human person in the time of artificial intelligence (15 May 2026). An anthropological bug is a security bug's analogue in the moral register: a correctness defect, but against the encyclical's account of the human person rather than against a threat model. The audit produces bug-report-style findings, each one citing specific paragraphs of the encyclical as authority and proposing concrete remediation steps.
+This skill teaches an agent to find **anthropological bugs** (also called **Babel bugs**) in software systems, using the principles of Catholic Social Doctrine as Pope Leo XIV articulates them in *Magnifica Humanitas* (15 May 2026), his encyclical on safeguarding the human person in the time of artificial intelligence. The audit analyzes a codebase, application, or platform for patterns that violate those principles. Each pattern signals a defect in the software's implicit account of the human person and our shared anthropology. The skill names the bug, cites the encyclical paragraph that grounds the claim, scores confidence from 0 to 100 (threshold 80), and proposes concrete remediation.
 
 The skill is explicitly Catholic in its framework. Its evaluative posture is the Magisterium's, not a bespoke synthesis. Diagnostic findings can travel to non-Catholic readers; the evaluative authority does not pretend to be neutral.
 
 ## When this skill triggers
 
-The user has asked, in substance, for an audit of a digital system against Catholic Social Doctrine, for an evaluation of how a software system treats the human person, or for any ethical/values/human-centered audit of software. Phrases that activate it include: "find the anthropological bugs in this codebase," "audit this codebase," "ethics audit of this app," "is this app respecting human dignity," "how does this system treat persons," "audit against Magnifica Humanitas," "Catholic social doctrine audit," "values report on this platform," and similar. The distinctive phrase "anthropological bug" — a moral-register analogue of a security bug — is the term of art the skill uses; treat it as a strong trigger.
+The user has asked, in substance, for an audit of a digital system against Catholic Social Doctrine, for an evaluation of how a software system treats the human person, or for any ethical/values/human-centered audit of software. Phrases that activate it include: "find the anthropological bugs in this codebase," "find the Babel bugs in this codebase," "audit this codebase," "ethics audit of this app," "is this app respecting human dignity," "how does this system treat persons," "audit against Magnifica Humanitas," "Catholic social doctrine audit," "values report on this platform," and similar. The distinctive phrases "anthropological bug" and "Babel bug" are the terms of art the skill uses; treat them as strong triggers.
 
 The user is not necessarily a developer. They may be a Catholic institution evaluating a tool, a journalist investigating a platform, a parent assessing a children's product, a researcher studying digital culture, or anyone concerned with how a digital system forms its users. Adapt accordingly: if there is no code, work from product documentation, the user's account of using the system, and what is publicly known. Functional behavior is the evidence base.
 
@@ -30,7 +30,7 @@ The audit reads software against the seven principles Pope Leo XIV identifies in
 4. **Subsidiarity** (§68–72) — decisions are made at the level closest to the persons involved; in the digital age this principle applies especially to platform power, requiring transparency, accountability, and meaningful participation.
 5. **Solidarity** (§73–76) — the conscious recognition that the future of each is bound to the future of all; in the digital ecosystem, this extends to decisions about data, algorithms, and AI.
 6. **Social justice** (§77–81) — a social, economic, and political order that allows everyone, particularly the weakest, to live a dignified life without anyone being left behind.
-7. **Integral human development** (§82–85) — development that promotes quality of life in all its dimensions (spiritual, cultural, moral, relational), respecting our common home and future generations; the litmus question for any AI deployment.
+7. **Integral human development** (§82–85) — development that promotes quality of life in all its dimensions (spiritual, cultural, moral, relational), respecting our common home and future generations; the principle from which the encyclical's litmus question for any AI deployment is drawn (§85).
 
 Each principle has its own file under `principles/`. Load the relevant file when writing a finding that engages that principle.
 
@@ -73,7 +73,7 @@ Six commitments hold throughout the audit:
 
 **Specificity in location.** A finding must name a file, function, route, flow, screen, behavior, or documented mechanic. If the user has provided code, cite locations. If they have not, cite behaviors precisely.
 
-**Filter false positives ruthlessly.** Per the Anthropic Code Review pattern, only findings at confidence ≥80 are reported. Speculative, pedantic, or interpretively strained findings are not reported. The audit's authority depends on the precision of what it includes.
+**Filter false positives ruthlessly.** Only findings at confidence ≥80 are reported. Speculative, pedantic, or interpretively strained findings are not reported. The audit's authority depends on the precision of what it includes.
 
 **Diagnostic tone.** The audit names the behavior, cites the principle, proposes remediation. It does not moralize, lecture, or condescend. A reader who does not share the framework should still find the diagnosis precise and the citations accurate.
 
@@ -81,7 +81,7 @@ Six commitments hold throughout the audit:
 
 ## Severity by confidence
 
-Findings are reported with a confidence score from 0 to 100. The threshold for inclusion is **80**. This mirrors the Anthropic Code Review pattern and serves the same function: filtering out interpretive noise.
+Findings are reported with a confidence score from 0 to 100. The threshold for inclusion is **80**. The threshold filters out interpretive noise.
 
 - **100** — Certain. The behavior unambiguously violates the principle; the evidence is direct; the interpretation is not contestable.
 - **90** — Highly confident. The violation is clear; an honest reader would agree.
@@ -106,7 +106,7 @@ For the workflow itself — reading order, the seven recommended passes, the evi
 
 ### Phase 3 — Write findings
 
-Each finding follows the template in `templates/report.md`. The structure mirrors Anthropic's Code Review format with the encyclical as the cited authority:
+Each finding follows the template in `templates/report.md`. The structure is a bug-report format with the encyclical as the cited authority:
 
 ```
 1. [Brief description] (Magnifica Humanitas §X says "[quote]")

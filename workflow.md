@@ -97,7 +97,7 @@ The motion from log to finding is the next phase.
 
 From the evidence log, identify the entries that meet the bar for inclusion. The bar:
 
-- **Confidence ≥ 80.** Per the Anthropic Code Review pattern. If you are not confident the violation is real, do not include the finding. Use the confidence scale in `SKILL.md`.
+- **Confidence ≥ 80.** If you are not confident the violation is real, do not include the finding. Use the confidence scale in `SKILL.md`.
 - **Location is specific.** A file, function, route, flow, screen, behavior, or documented mechanic — not "the system in general."
 - **The principle is cited with paragraph.** Not "human dignity" but "*Magnifica Humanitas* §51." When in doubt about which paragraph, consult `encyclical-reference.md`.
 - **Remediation is concrete.** What can be changed? Tactical first; structural note where applicable.
@@ -107,7 +107,7 @@ Each finding follows the template in `templates/report.md`. The format is precis
 
 ### What to filter out
 
-Mirror the Anthropic Code Review filter rules:
+Apply these filter rules:
 
 - **Pre-existing patterns the codebase has flagged as deliberate.** Comments, design docs, ADRs that name the choice and reason for it. If the system's authors have acknowledged a trade-off and explained it, that does not automatically excuse the violation, but it changes how the finding should be framed (and may reduce confidence).
 - **Pedantic nitpicks.** Findings that depend on tiny interpretive choices rather than the system's actual functional behavior.
