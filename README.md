@@ -2,9 +2,33 @@
 
 A skill that teaches your agent to find anthropological bugs (Babel bugs?) in software systems using the principles of Catholic Social Doctrine as laid out by Pope Leo XIV in his encyclical *Magnifica Humanitas*. This skill analyzes a codebase for patterns that violate these principles, signaling a defect in the software's implicit account of the human person and our shared anthropology. The skill names the bug, cites the encyclical paragraph that grounds the claim, gives a confidence score, and proposes remediation.
 
-"We are called to reflect on the great “construction sites” of our era and ask: What are we building? As technological development rapidly transforms languages, relationships, institutions and forms of power, we believers must and can choose which projects to work on and in what manner, so as to safeguard and value the grandeur of humanity that has been given to us as a gift. This is a choice not only for our future but also for our present, since artificial intelligence and other emerging technologies are already part of our daily lives." P. 90
+From §90 of the encyclical:
+
+>We are called to reflect on the great “construction sites” of our era and ask: What are we building? As technological development rapidly transforms languages, relationships, institutions and forms of power, we believers must and can choose which projects to work on and in what manner, so as to safeguard and value the grandeur of humanity that has been given to us as a gift. This is a choice not only for our future but also for our present, since artificial intelligence and other emerging technologies are already part of our daily lives.
 
 **Full Encyclical:** https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html
+
+
+## How to use
+
+Install the skill (see [Install](#install)), then ask your agent to audit something — a codebase, a product, or a behavioral account of using a system. The skill triggers on requests like:
+
+- "Find the anthropological bugs in this codebase"
+- "Find the Babel bugs in this codebase"
+- "Audit this app against Catholic Social Doctrine"
+- "Run a *Magnifica Humanitas* audit on this platform"
+- "Is this system respecting human dignity?"
+- "Ethics / values audit of this app"
+
+You don't have to speak Catholic vocabulary; the framework is Catholic, but the diagnostic value travels. The agent returns a structured report with paragraph-cited findings, confidence scores, and remediation steps.
+
+
+## What this skill is and isn't
+
+The skill isn't a substitute for moral judgment, a guarantee of comprehensiveness, or a way to score political points against a platform. It doesn't impute bad faith. Every finding is treated as an opportunity for reform.
+
+The framework is Catholic, and the audit doesn't pretend otherwise. Diagnostic findings can travel to readers who don't share the tradition (the labels and remediation steps work regardless), but the evaluative authority does not claim to be neutral. *Magnifica Humanitas* is cited because the encyclical is the authority. Readers outside the Catholic framework can still engage the findings on their own terms.
+
 
 ## Audience
 
@@ -19,33 +43,15 @@ Built with these readers in mind:
 
 The audit works on full source, partial source, product documentation alone, or a behavioral account of using the system. The encyclical's principles are about functional behavior, so the evidence base can be whatever the auditor has.
 
-## Triggering
 
-The skill triggers on requests like:
-
-- "Find the anthropological bugs in this codebase"
-- "Find the Babel bugs in this codebase"
-- "Audit this codebase against Catholic Social Doctrine"
-- "Run a *Magnifica Humanitas* audit on this app"
-- "Is this system respecting human dignity?"
-- "Catholic social teaching audit"
-- "Ethics audit / values report on this platform"
-
-You don't have to speak Catholic vocabulary to use it. The framework is Catholic; the diagnostic value travels.
-
-## What this skill is and isn't
-
-The skill isn't a substitute for moral judgment, a guarantee of comprehensiveness, or a way to score political points against a platform. It doesn't impute bad faith. Every finding is treated as an opportunity for reform.
-
-The framework is Catholic, and the audit doesn't pretend otherwise. Diagnostic findings can travel to readers who don't share the tradition (the labels and remediation steps work regardless), but the evaluative authority does not claim to be neutral. *Magnifica Humanitas* is cited because the encyclical is the authority. Readers outside the Catholic framework can still engage the findings on their own terms.
-
-
-**Author:** Cache Atelier
+**Author:** [Cache Atelier](https://cacheatelier.work)
 **License:** [MIT](LICENSE)
 **Encyclical:** https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html
 **Skill spec:** [AgentSkills](https://agentskills.io/specification) (works with any AgentSkills-compliant agent, including Claude Code, OpenCode, Hermes, and others)
 
 ## Install
+
+*The best way to install is to simply give your agent the current url, but all standard skill pathways are also supported:*
 
 ### With the AgentSkills CLI (any AgentSkills-compatible agent)
 
@@ -75,28 +81,6 @@ git clone https://github.com/cache-atelier/magnificent-humanity-audit.git ~/.cla
 ### Claude Cowork and other hosted Claude environments
 
 Download `magnificent-humanity-audit.skill` from the [latest release](https://github.com/Cache-Atelier/magnificent-humanity-audit/releases/latest) and drop it into your workspace's skill installer.
-
-> The ChatGPT consumer app does not natively support AgentSkills. ChatGPT users can install via [Codex CLI](https://github.com/openai/codex) (OpenAI's CLI agent, which does support AgentSkills) instead.
-
-### Pack your own `.skill` file
-
-If your agent (or an offline workflow) needs a single-file `.skill` package, pack the repo from its parent directory so the archive contains a top-level folder named after the skill:
-
-```bash
-cd ..
-zip -r magnificent-humanity-audit.skill magnificent-humanity-audit \
-  -x "magnificent-humanity-audit/.git/*" \
-  -x "*.DS_Store"
-```
-
-### Validate
-
-Using the official AgentSkills reference validator:
-
-```bash
-pip install -e git+https://github.com/agentskills/agentskills.git#subdirectory=skills-ref
-skills-ref validate /path/to/magnificent-humanity-audit
-```
 
 ## Repo structure
 
