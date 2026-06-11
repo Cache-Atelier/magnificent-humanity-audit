@@ -1,0 +1,264 @@
+[
+ {
+  "id": "C05",
+  "title": "The 'ONE prose measure' resolves to four+ different widths \u2014 footer rule 22% short, summary rule 18px long, code figure ~80px wide",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "--prose is 52ch (line 59, documented as 'the ONE prose measure'), but ch resolves against each element's own font-size, and three blocks add explicit overrides. Measured: masthead/scorecard/findings rules = 474px; the summary's closing rule = 492.5px (.summary .content-col{max-width:54ch}, line 235, also catches the rule's wrapper); the footer rule = 367.5px \u2014 107px short \u2014 because footer.report{font-size:.92rem} (line 397) shrinks the ch before the column cap computes, which also forces the credit to wrap mid-link ('Magnificent Humanity / Audit agent skill', before-footer-dark.png). Inside one card, .f-explain (1rem), remedy (1.03), quote (1.08) and figure.code (19px inherited) each cap at different widths, so the right edge wanders within a single finding. The dek (54ch, line 201) drifts too.",
+  "recommendation": "Define the measure in a font-size-independent unit: --prose:29.6rem (exactly the 474px that 52ch resolves to at the 19px body). Every existing max-width:var(--prose) declaration then lands on one identical right edge \u2014 the footer is fixed automatically with no other change. Remove the three explicit overrides (dek 54ch, summary 54ch, ratings-key 60ch \u2014 the last as part of C02) so they inherit the unified measure.",
+  "css_js_sketch": ":root{--prose:29.6rem}  /* line 59 \u2014 474px, i.e. 52ch at the 19px body, now font-size-independent */\n.dek{max-width:none}                       /* line 201 */\n.summary .content-col{max-width:var(--prose)}  /* line 235 */\n/* .ratings-key 60ch removed in C02; footer needs no change \u2014 29.6rem no longer shrinks at .92rem */",
+  "evidence": "before-footer-dark.png / before-footer-light.png (short rule + mid-link wrap), before-scorecard-top-dark.png (summary rule), before-finding-card-dark.png (code figure wider than prose); measured 474 / 492.5 / 367.5px; final-rail-stars-v3.html lines 59, 125, 201, 235, 397\u2013398",
+  "lenses": [
+   "spacing-rhythm",
+   "closings-footer",
+   "finding-card",
+   "micro-typography"
+  ],
+  "amendments": [
+   "Comment the 29.6rem with its derivation (52ch at the 19px body) so the magic number stays legible to future editors.",
+   "Verify the 29.6rem value against the rendered 52ch before hardcoding; the ratings-key override removal is already owned by C02."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The design's own promise is ONE prose measure and the footer rule visibly breaks it; converting --prose to a font-size-independent unit makes the page more itself with no visual change elsewhere.",
+   "risk: Y \u2014 29.6rem is verified equal to the current 52ch at the 19px body, every var(--prose) consumer is a max-width so the unit swap cannot overflow --measure, and it removes the ch-resolves-per-font-size footgun for good.",
+   "value: Y \u2014 The footer rule visibly 22% short and the wandering right edge are real, and the single-token fix repairs them all at once."
+  ]
+ },
+ {
+  "id": "C19",
+  "title": "Collapse the eight near-identical body sizes (and the remedy > explanation inversion) to a three-step scale",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "Running text is set at eight nearly-identical sizes with five line-heights: f-explain 1.0/1.58 (line 327), remedy li 1.03/1.5 (371), plain li 1.03/1.55 (383), cite-gloss .96/1.45 (362), structural .98/1.5 (376), sc-note .98/1.45 (287), lead 1.0/1.5 (381), summary 1.06/1.56 (236), footer .92/1.55 (397). Within one card the remedy bullets are 3% larger and looser than the explanation above them \u2014 an inverted hierarchy (the card's argument is its smallest text), perceptible as 'something is off' without reading as intent. Paragraph gaps also drift (.8rem in f-explain, line 328, vs .85rem in content-col, line 126).",
+  "recommendation": "Tokenize a three-step prose scale and map every class onto it: primary 1rem/1.55 (f-explain, remedy, plain, lead), secondary .96rem/1.5 (gloss, structural, sc-note), small .92rem/1.55 (footer, dropped). Keep summary at 1.06/1.55 as the deliberate lead tier. Unify the paragraph gap on .85rem.",
+  "css_js_sketch": ":root{--fs-body:1rem; --lh-body:1.55; --fs-2nd:.96rem; --lh-2nd:1.5}\n.f-explain,ul.remedy li,ul.plain li,.movement p.lead{font-size:var(--fs-body); line-height:var(--lh-body)}\n.cite-gloss,.structural p,.sc-note{font-size:var(--fs-2nd); line-height:var(--lh-2nd)}\n.f-explain p{margin:0 0 .85rem}  /* match .content-col p, line 126 */",
+  "evidence": "final-rail-stars-v3.html lines 126, 236, 287, 327\u2013328, 362, 371, 376, 381, 383, 397; before-finding-card-dark.png (remedy optically heavier than explanation)",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [
+   "Keep the summary's 1.06 lead tier as stated, and land alongside C55 so the prose and mono scales are tokenized in one pass.",
+   "Add the missing ul.plain.dropped li{font-size:.92rem} the prose promises but the sketch omits, and land after C05 so size changes can't move ch-based measures."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Eight near-identical sizes with the card's argument set smaller than its bullets reads as drift, not hierarchy; a three-step tokenized scale is the systemic restraint this page deserves.",
+   "risk: Y \u2014 Token mapping is low risk and the remedy>explanation inversion is real, but the sketch under-specifies the dropped tier.",
+   "value: Y \u2014 The remedy-larger-than-explanation inversion is the kind of 'something is off' a reader feels without naming, and collapsing eight sizes to three tokens prevents future drift."
+  ]
+ },
+ {
+  "id": "C47",
+  "title": "Tokenize the drifting caption gaps, intra-finding block margins, and asterism margins",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "Spacing values playing the same role drift by small unjustified amounts: caption bottom margins are 1rem (.sum-cap, 233), 1.2rem (.sc-cap, 247) and 1.3rem (.m-cap, 380); intra-finding block top margins are 1.1rem (figure.code, 331), 1.2rem (remedy/structural, 370/375) and 1.4rem (cite-cap, 350); the asterism is 2.8rem top / 2.6rem bottom (296). None of these deltas reads as hierarchy \u2014 they read as drift.",
+  "recommendation": "Tokenize the rhythm: one caption gap, one intra-finding block gap, a symmetric asterism margin. Coordinate with C12 (sum-cap), C13 (sc-cap), C22 (remedy gap) and C45 (cite-cap) which set the deliberate exceptions.",
+  "css_js_sketch": ":root{--gap-cap:1.2rem; --gap-blk:1.2rem}\n.sc-cap,.movement .m-cap{margin-bottom:var(--gap-cap)}\nfigure.code{margin-top:var(--gap-blk)}  /* was 1.1rem */\n.f-aster{margin:2.7rem 0}              /* was 2.8rem 0 2.6rem */",
+  "evidence": "final-rail-stars-v3.html lines 233, 247, 296, 331, 350, 370, 375, 380; before-synthesis-dark.png vs before-closings-dark.png",
+  "lenses": [
+   "spacing-rhythm"
+  ],
+  "amendments": [
+   "Apply last, after C12/C13/C22/C45 establish the deliberate exceptions, so the tokens encode final intent rather than the current drift.",
+   "Drop the .sc-cap line from this candidate and let C13's contextual .9rem win \u2014 they set conflicting bottom margins on the same property.",
+   "Apply last, after C12/C13/C22/C45 set their deliberate values, or the token pass will overwrite them."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The drifting near-values read as cascade noise, not hierarchy, and tokenizing them is how this stylesheet already works.",
+   "risk: Y \u2014 Tokenization itself is safe, but it CONFLICTS with C13 on .sc-cap margin-bottom (1.2rem vs .9rem) and must defer to the candidates it acknowledges as deliberate exceptions (C12, C22, C45).",
+   "value: Y \u2014 Pure system hygiene no reader will perceive, acceptable only as the cleanup pass bundled behind the accepted spacing fixes \u2014 mild sequencing conflict with C12/C13/C22/C45."
+  ]
+ },
+ {
+  "id": "C07",
+  "title": "Dark theme's muted-text tier is collapsed: --tx-2 should be base-500, not base-300",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "Light has a real three-step hierarchy (body 18.6:1 vs secondary base-600 at 5.0:1 \u2014 a 3.7x ratio). Dark sets --tx-2 to base-300 (line 68), only a 1.29x step from body base-200 (9.3:1 vs 12.0:1), so the dek, meta labels, section captions, glosses and footer all read at near-body weight \u2014 the default theme looks flat where light looks layered (compare before-masthead-dark.png vs before-masthead-light.png). This also deviates from the Flexoki spec itself, which assigns dark tx-2 = base-500. Separately, --tx-3 is defined in both themes (lines 35, 68) but consumed nowhere \u2014 a dead token (grep confirms).",
+  "recommendation": "Set dark --tx-2 to base-500 per the Flexoki spec: 5.19:1 on black still clears the file's own 4.5:1 floor at the smallest tx-2 sizes (.64\u2013.7rem mono labels) and lands almost exactly on light's 4.97:1 \u2014 true parity. Either delete the unused --tx-3 or put it to work on the faintest marks (e.g. the dropped-list dash bullets).",
+  "css_js_sketch": "[data-theme=\"dark\"]{ --tx-2:var(--base-500); }  /* line 68 \u2014 5.19:1 on --black, parity with light's 4.97:1 */\n/* and either delete --tx-3 from both blocks or use it: */\nul.plain.dropped li::before{color:var(--tx-3)}",
+  "evidence": "final-rail-stars-v3.html lines 35, 68; grep: --tx-3 declared twice, used zero times; before-masthead-dark.png vs before-masthead-light.png; computed base-300/#100F0F = 9.31:1 vs base-200 = 11.98:1",
+  "lenses": [
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Just delete the dead --tx-3 token rather than inventing a new use for it; add uses only when a real need appears.",
+   "If C23 also lands, add a dark override for figure.code figcaption (e.g. color:var(--base-300)) \u2014 base-500 on base-900 measures 4.04:1, under the file's 4.5 floor; base-500 is fine on black (5.19) and base-950 (4.67)."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The default theme reading flat where light reads layered is a hierarchy failure, and base-500 is what the Flexoki spec itself prescribes \u2014 this is conforming to the settled palette, not changing it.",
+   "risk: Y \u2014 Matches the Flexoki spec and verifies AA on every current dark surface, but CONFLICTS with C23 on the code figcaption \u2014 the amendment resolves it.",
+   "value: Y \u2014 Dark is the default theme and its collapsed text hierarchy makes every page harder to scan than light; restoring the Flexoki-spec base-500 gives the reader back the layering the design promises."
+  ]
+ },
+ {
+  "id": "C23",
+  "title": "Dark code panel is one ramp step off black and visually disappears \u2014 use base-900 for surface parity with light",
+  "severity": "medium",
+  "area": "code",
+  "priority": "should",
+  "problem": "In light, --code-bg is base-100 \u2014 two steps off the paper (1.24:1 surface contrast) and the block clearly reads as a panel. In dark it is base-950 (line 71) \u2014 one step, 1.11:1 \u2014 so the panel surface vanishes and the block is held together by its border alone. Same component, different material presence per theme.",
+  "recommendation": "Move dark --code-bg to base-900 (1.28:1 vs black \u2014 the same perceptual offset as light, and the same semantic slot: dark's --ui step). Nudge three syntax tokens to keep the file's documented 4.5:1 floor on the new surface, using the derive-off-the-ramp precedent already in the file (#5290C5, line 74). The pre-wrap fade keys off var(--code-bg) and follows automatically.",
+  "css_js_sketch": "[data-theme=\"dark\"]{\n  --code-bg:var(--base-900);  /* 1.28:1 vs bg \u2014 parity with light's 1.24:1 */\n  --hl-comment:#94928B;  /* 4.79:1 on base-900 */\n  --hl-number:#9A8FD0;   /* 5.12:1 */\n  --hl-builtin:#5E9ACB;  /* 4.94:1 */\n}",
+  "evidence": "final-rail-stars-v3.html lines 38, 71\u201374, 331, 339; before-finding-card-light.png vs before-code-citations-dark.png; computed base-950 vs #100F0F = 1.11:1, base-900 = 1.28:1, light base-100 vs paper = 1.24:1",
+  "lenses": [
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Also nudge --hl-function (orange-400 measures 4.498:1 on base-900 \u2014 exactly at the floor, e.g. lighten one step) and, if C07 lands, override the dark code figcaption color (base-500 on base-900 = 4.04:1 fails)."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Same component, different material presence per theme is a parity failure; base-900 is the same semantic slot light uses, and the off-ramp contrast nudges follow the file's own #5290C5 precedent.",
+   "risk: Y \u2014 Surface parity is right and most tokens verify (cyan 5.22, green 4.77), but two contrast edges need the amendment; CONFLICTS with C07 on the figcaption.",
+   "value: Y \u2014 The dark code panel still reads fine via its border and syntax color in the screenshots \u2014 surface parity is a connoisseur point, but the contrast math is done and it's token-only."
+  ]
+ },
+ {
+  "id": "C55",
+  "title": "Unify the three near-identical mono micro-sizes on one token",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "Within one card the mono voice uses .70rem (figcaption, 332), .72rem (pre, 341; .dc, 392) and .74rem (cite-ref, 358; skip-link, 101) \u2014 differences of ~0.4px at the 16px root that read as cascade noise, not hierarchy, and make future tuning error-prone.",
+  "recommendation": "Define one --mono-micro token (.72rem) for the figcaption, pre, cite-ref and dropped-counts; if a deliberate step is wanted later, change it in one place.",
+  "css_js_sketch": ":root{--mono-micro:.72rem}\nfigure.code figcaption{font-size:var(--mono-micro)}\nfigure.code pre{font-size:var(--mono-micro)}\n.cite-ref{font-size:var(--mono-micro)}\nul.plain.dropped .dc{font-size:var(--mono-micro)}",
+  "evidence": "final-rail-stars-v3.html lines 101, 332, 341, 358, 392",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Three mono sizes 0.4px apart are cascade noise that makes future tuning error-prone; one --mono-micro token is pure housekeeping (land with C19's prose tokens).",
+   "risk: Y \u2014 Sub-pixel size unification with no measure consequences (cite-ref's 3.5rem column absorbs the .02rem change); skip-link intentionally left out is fine.",
+   "value: Y \u2014 0.4px deltas are invisible to every reader; worth taking only as bundled token hygiene."
+  ]
+ },
+ {
+  "id": "C39",
+  "title": "Define an on-brand ::selection instead of the OS default blue",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "No ::selection rule exists anywhere (grep confirms). Selecting text \u2014 constant behavior for readers of a quotable report \u2014 paints the stock saturated UA blue across the warm paper and the #100F0F ground: the one interaction color that ignores the tuned Flexoki accents.",
+  "recommendation": "One rule using the color-mix pattern already used for chip tints (lines 45\u201347, 77\u201379) so the wash derives from the theme's own accent and flips automatically with data-theme.",
+  "css_js_sketch": "::selection{background:color-mix(in oklab, var(--accent) 28%, var(--bg)); color:var(--tx)}",
+  "evidence": "grep '::selection' returns nothing; color-mix precedent at final-rail-stars-v3.html lines 45\u201347, 77\u201379",
+  "lenses": [
+   "product-polish",
+   "color-theme-parity"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Stock UA blue across warm paper is the one interaction color outside the tuned palette; deriving the wash from the theme's own accent via the existing color-mix pattern is on-brand and invisible until touched.",
+   "risk: Y \u2014 One rule using the file's established color-mix pattern; computed selection contrast verifies comfortably in both themes (\u22488.3:1 dark, \u224812:1 light).",
+   "value: Y \u2014 Readers select and copy this report constantly and stock UA blue ignores the tuned palette \u2014 a one-line nicety worth bundling."
+  ]
+ },
+ {
+  "id": "C40",
+  "title": "Masthead and footer links have no hover state; existing hovers snap instead of easing",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "The repo link (.mm-value a, line 214) and both footer links (line 400) have no :hover rule at all \u2014 the only link hovers are the scorecard rows and the toggle (lines 185, 276\u2013278) \u2014 and none of the hovers that do exist are eased, while the body's theme change is eased at .2s (line 95). The artifact's only outbound credits give zero interaction feedback.",
+  "recommendation": "One shared quiet hover (text shifts to primary ink, underline keeps the accent \u2014 matching the toggle's hover logic) plus a single .15s ease on links and the toggle. The reduced-motion block (line 410) already neutralizes it.",
+  "css_js_sketch": "a,#theme-toggle{transition:color .15s ease, text-decoration-color .15s ease}\n.mm-value a:hover,footer.report a:hover{color:var(--tx); text-decoration-color:var(--accent)}",
+  "evidence": "final-rail-stars-v3.html lines 95, 185, 214, 276\u2013278, 400, 410; before-masthead-dark.png, before-footer-dark.png",
+  "lenses": [
+   "product-polish",
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The artifact's only outbound credits giving zero hover feedback, and every hover snapping while the theme eases, is a small coherence gap; one shared eased hover closes it without new vocabulary.",
+   "risk: Y \u2014 Global a transition is safe (reduced-motion block neutralizes it) and hover states reuse existing tokens only.",
+   "value: Y \u2014 Zero hover feedback on the only outbound credits is unpolished but minor; one shared rule fixes it."
+  ]
+ },
+ {
+  "id": "C54",
+  "title": "Theme the Firefox scrollbar with scrollbar-color to match the WebKit thumb",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "Code scrollbars are themed only for WebKit (lines 342\u2013343); Firefox gets scrollbar-width:thin (line 341) with UA default colors (grep confirms no scrollbar-color), which \u2014 especially before C10 lands \u2014 can render a light default thumb inside the dark code panel.",
+  "recommendation": "Add the standard two-value scrollbar-color alongside the existing rules, using the same tokens so both engines render an identically muted, theme-following thumb.",
+  "css_js_sketch": "figure.code pre{scrollbar-width:thin; scrollbar-color:var(--ui-3) var(--code-bg)}",
+  "evidence": "final-rail-stars-v3.html lines 341\u2013343; grep 'scrollbar-color' returns nothing",
+  "lenses": [
+   "color-theme-parity",
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Theming one engine's scrollbar and not the other's is a parity gap with a one-line standard fix using the same tokens.",
+   "risk: Y \u2014 Standard-property one-liner using existing tokens; complements C10 rather than depending on it.",
+   "value: Y \u2014 Firefox-only thumb color parity is a one-line guard that matters more before C10 lands than after."
+  ]
+ },
+ {
+  "id": "C59",
+  "title": "Add text-size-adjust to prevent iOS landscape font inflation",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "html carries only scroll-behavior (line 90); with no text-size-adjust, iOS Safari in landscape arbitrarily inflates some blocks (prose, but not the mono rail labels), breaking the tuned 19px measure and the rail's type hierarchy.",
+  "recommendation": "One declaration on html alongside the existing scroll-behavior.",
+  "css_js_sketch": "html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%}",
+  "evidence": "final-rail-stars-v3.html line 90; grep 'text-size-adjust' returns nothing",
+  "lenses": [
+   "product-polish"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 One zero-cost standard declaration protects the tuned 19px measure and the rail hierarchy from iOS landscape inflation; every Stripe-grade page ships it.",
+   "risk: Y \u2014 Inert everywhere except the iOS landscape case it guards; one declaration on the existing html rule.",
+   "value: Y \u2014 Standard guard against iOS landscape inflation that would visibly distort the tuned measure; one declaration, no downside."
+  ]
+ },
+ {
+  "id": "C49",
+  "title": "Give the masthead more air above the overline",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "header.report has padding:3.6rem 0 0 (line 188), putting the overline \u224868px from the viewport top \u2014 visibly less than the masthead's own internal bands below the dek (1.6rem meta + 2.4rem rule + 2.4rem section). The formal serif masthead starts slightly crowded against browser chrome rather than opening like a title page.",
+  "recommendation": "Increase desktop top padding to ~5.5rem so the document opens with deliberate white space; keep 3.6rem under the 680px breakpoint where vertical economy matters.",
+  "css_js_sketch": "header.report{padding:5.5rem 0 0}\n@media(max-width:680px){ header.report{padding:3.6rem 0 0} }",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html line 188",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A title page should open with deliberate white space, and the current top padding is visibly tighter than the masthead's own internal bands; keeping 3.6rem on mobile shows the right judgment.",
+   "risk: Y \u2014 Padding-only change with the mobile value preserved; compatible with C06's toggle placement at top:1.5rem.",
+   "value: Y \u2014 More opening air is a taste call that does improve the title-page feel, but nobody distrusts the current 68px."
+  ]
+ },
+ {
+  "id": "C48",
+  "title": "Set the closing captions in the running caption voice, not the masthead overline's loud tracking",
+  "severity": "low",
+  "area": "closings",
+  "priority": "could",
+  "problem": "The three closing captions (.m-cap, line 380) are .86rem with the loud --track-label (.13em) \u2014 the masthead overline's frame voice (lines 189\u2013192) \u2014 while sibling section captions .sum-cap/.sc-cap are .92rem with --track-cap (.06em). The comment at line 30 shows a deliberate bookend, but three consecutive loud-tracked section heads read as a different register from the two captions above them; one closing element could bookend the overline, three section heads cannot.",
+  "recommendation": "Set .m-cap to the running caption voice (.92rem, --track-cap), reserving --track-label for the masthead overline alone.",
+  "css_js_sketch": ".movement .m-cap{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.92rem; color:var(--tx-2); margin:0 0 1.2rem; font-weight:500}",
+  "evidence": "before-closings-dark.png vs before-scorecard-top-dark.png; final-rail-stars-v3.html lines 30, 189\u2013192, 231\u2013234, 245\u2013248, 380",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A bookend executed three times in a row stops being a bookend \u2014 sections at the same outline level as Synthesis should share its caption voice, and the loud --track-label is rightly reserved for the overline alone.",
+   "risk: Y \u2014 Single-rule retune using existing tracking tokens; no layout consequence.",
+   "value: Y \u2014 The register shift in the closing captions is perceptible only on direct comparison with the captions far above; quiet improvement, not reader-blocking."
+  ]
+ }
+]

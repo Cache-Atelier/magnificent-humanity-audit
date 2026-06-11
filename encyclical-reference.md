@@ -30,6 +30,55 @@ The encyclical's litmus question, applied to AI and every emerging technology, i
 
 These are the paragraphs to cite when writing audit findings. Each entry gives the paragraph reference, the substantive content in compressed form, and a key phrase or quotation that can anchor a citation.
 
+### Verbatim paragraph notes
+
+For the load-bearing paragraphs, a per-paragraph note in [`paragraphs/`](paragraphs/) holds the **full verbatim text** of the paragraph plus a one-line gloss and the principles and loci it serves. **Load a note on demand** — only when a finding actually cites that paragraph — and quote from it directly, so citations use the encyclical's exact words rather than a paraphrase. The topic entries below remain the fast way to *locate* a paragraph by theme; the notes are where you go to *quote* it precisely. Paragraphs without a note are cited from the anchor phrase in their entry below, or, for exact wording, from the canonical text at vatican.va.
+
+- §9 — [Technology is never neutral](paragraphs/009-technology-never-neutral.md)
+- §10 — [The Babel syndrome](paragraphs/010-babel-syndrome.md)
+- §51 — [Earning one's own worth](paragraphs/051-earn-your-worth.md)
+- §53 — [Dignity neither acquired nor earned](paragraphs/053-dignity-neither-earned.md)
+- §61 — [The common good is a 'plus'](paragraphs/061-common-good-is-a-plus.md)
+- §63 — [Short-termism erodes the common good](paragraphs/063-polarization-erodes-common-good.md)
+- §67 — [Algorithms and data are universally destined](paragraphs/067-digital-goods-universal-destination.md)
+- §70 — [Decisions made closest to the person](paragraphs/070-decisions-already-taken.md)
+- §71 — [Subsidiarity and platform power](paragraphs/071-platform-power-subsidiarity.md)
+- §72 — [A handful of actors](paragraphs/072-handful-of-actors.md)
+- §76 — [The digital ecosystem](paragraphs/076-digital-ecosystem.md)
+- §80 — [Justice prevents new exclusions](paragraphs/080-justice-prevents-new-exclusions.md)
+- §85 — [The litmus question](paragraphs/085-litmus-question.md)
+- §92 — [The technocratic paradigm](paragraphs/092-technocratic-paradigm.md)
+- §94 — [Having more without being more](paragraphs/094-having-more-not-being-more.md)
+- §95 — [Concentrated platform power](paragraphs/095-concentrated-platform-power.md)
+- §99 — [What AI is not](paragraphs/099-what-ai-is-not.md)
+- §100 — [Ease, objectivity, simulation](paragraphs/100-ease-objectivity-simulation.md)
+- §101 — [The ecological cost of AI](paragraphs/101-energy-water-environment.md)
+- §102 — [AI is not neutral](paragraphs/102-ai-not-neutral-bias.md)
+- §103 — [Selecting who is worthy](paragraphs/103-algorithm-selects-who-is-worthy.md)
+- §104 — [What a tool measures, ignores, optimizes](paragraphs/104-what-it-measures-ignores-optimizes.md)
+- §105 — [Accountability](paragraphs/105-accountability.md)
+- §108 — [Data as a common good](paragraphs/108-data-as-common-good.md)
+- §109 — [Justice shapes design from the outset](paragraphs/109-justice-shapes-design.md)
+- §110 — [Disarming AI](paragraphs/110-disarm-ai.md)
+- §111 — [The developer's responsibility](paragraphs/111-developers-responsibility.md)
+- §112 — [The anti-human vision](paragraphs/112-anti-human-vision.md)
+- §117 — [Perfected or surpassed](paragraphs/117-perfected-or-surpassed.md)
+- §129 — [More human, more worthy](paragraphs/129-more-human-litmus.md)
+- §132 — [Truth as a common good](paragraphs/132-truth-rational-and-relational.md)
+- §134 — [Arendt on fact and fiction](paragraphs/134-arendt-fact-and-fiction.md)
+- §135 — [Communication creates a culture](paragraphs/135-communication-creates-culture.md)
+- §136 — [Platforms shape the imagination](paragraphs/136-platforms-shape-imagination.md)
+- §140 — [Extinguishing the desire to ask](paragraphs/140-extinguishing-the-question.md)
+- §141 — [Unsupervised exposure of minors](paragraphs/141-minors-unsupervised-exposure.md)
+- §142 — [Opposing platform interests for minors](paragraphs/142-oppose-platform-interests.md)
+- §150 — [Deskilling and worker surveillance](paragraphs/150-deskilling-and-surveillance.md)
+- §170 — [The attention economy](paragraphs/170-attention-economy.md)
+- §171 — [Profiling and the architecture of visibility](paragraphs/171-profiling-and-visibility.md)
+- §172 — [An object to be optimized](paragraphs/172-object-to-be-optimized.md)
+- §173 — [The invisible labor behind AI](paragraphs/173-invisible-labor.md)
+- §178 — [Digital colonialism](paragraphs/178-digital-colonialism.md)
+- §179 — [Supply-chain due diligence](paragraphs/179-supply-chain-due-diligence.md)
+
 ### On technology in general
 
 **§4** — "Technology should not be considered, in itself, as a force antagonistic to humanity." Technology is "a profoundly human reality" but each phase reveals the ambiguity of tools that can cause harm when not oriented toward the good. "Never has humanity had such power over itself" (citing *Laudato Si'* §104).
@@ -105,6 +154,8 @@ These are the paragraphs to cite when writing audit findings. Each entry gives t
 **§93** — Quotes Guardini: "Contemporary man has not been trained to use power well." More power does not necessarily mean better.
 
 **§94** — Citing Paul VI: "The most extraordinary scientific progress, the most astounding technical feats and the most amazing economic growth, unless accompanied by authentic moral and social progress, will in the long run go against man." The result without ethical progress: "having more" without "being more." Persons evaluated by outcomes they produce.
+
+**§95** — *On concentrated platform power.* Control over platforms, infrastructure, data and computing power rests not with States but with major economic and technological actors, who "set the conditions for access, determine the rules of visibility and shape the very possibilities for participation." When concentrated in a few hands, such power "tends to become opaque and evade public oversight," giving rise to new dependencies, exclusions, manipulations and inequalities. Pairs with §71 (subsidiarity) and §171 (architecture of visibility).
 
 ### On artificial intelligence specifically
 

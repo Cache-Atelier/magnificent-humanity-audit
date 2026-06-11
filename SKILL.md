@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires filesystem read for on-demand loading of bundled reference files. Optional network access to fetch the encyclical from vatican.va if a reference file is missing or to verify a paragraph citation.
 metadata:
   author: Cache Atelier
-  version: "1.0"
+  version: "2.1"
 ---
 
 # Magnificent Humanity Audit
@@ -33,6 +33,14 @@ The audit reads software against the seven principles Pope Leo XIV identifies in
 7. **Integral human development** (§82–85) — development that promotes quality of life in all its dimensions (spiritual, cultural, moral, relational), respecting our common home and future generations; the principle from which the encyclical's litmus question for any AI deployment is drawn (§85).
 
 Each principle has its own file under `principles/`. Load the relevant file when writing a finding that engages that principle.
+
+## How the audit is organized: the relation model
+
+A finding has **no standalone verdict** — a bug only *violates* or *strains* a principle, never "violates" in the abstract. Each finding therefore carries `principle_relations`: every principle it engages, each with its relation (`violates` or `tension` — displayed as **"strains"**). From those relations, each of the seven principles derives an **aggregate verdict** (`violates` if any finding violates it; `tension` if findings only strain it; `honors` if no finding engages it — never displayed as a rating, since a bug-finding audit awards no honors; an unengaged principle simply renders unmarked).
+
+The report renders this as: the overarching **synthesis** — the Babel-versus-rebuilt-Jerusalem judgment (§9, §90) with a data-computed stat line — then a **findings × principles matrix** ("The findings, by principle": one row per finding, one column per principle, relation dots at the intersections), then **one flat list of findings in reading order** (findings carrying any violates-relation first, then by descending confidence), numbered `01`..`NN`. Each finding still names a `primary_principle` (its home bucket in the data, always `principle_relations[0]`), but the rendered report never groups findings under principle headings.
+
+The structured object that carries all of this — the relation model, the verdict-derivation rule, the display vocabulary, and the ordinal discipline — is defined once in `templates/findings-schema.md`. Both the default HTML report and the Markdown copy render from that one object.
 
 ## The nine loci
 
@@ -92,6 +100,8 @@ Things that warrant low confidence and exclusion: pre-existing patterns the code
 
 Severity beyond confidence is conveyed by the language of the finding itself. A finding that says "the system treats persons as commodities" conveys gravity directly. A finding that says "the consent flow could be more granular" conveys a lesser concern. The audit does not impose a separate CRITICAL/MAJOR/MINOR scale on top of confidence.
 
+Confidence is a property of each *finding*. The **per-principle verdict** is a separate, *derived* axis — computed from the findings' `principle_relations` (any violates-relation → `violates`; only strains → `tension`; unengaged → `honors`, rendered unmarked), not assigned freely. The derivation rule lives in `templates/findings-schema.md`. It is not a severity scale layered on findings; it is a roll-up that lets a reader see, at a glance, where the system stands on each of the seven principles.
+
 ## Method
 
 ### Phase 1 — Survey
@@ -106,24 +116,27 @@ For the workflow itself — reading order, the seven recommended passes, the evi
 
 ### Phase 3 — Write findings
 
-Each finding follows the template in `templates/report.md`. The structure is a bug-report format with the encyclical as the cited authority:
+Each finding is authored as a **structured `Finding` object**, not as free prose — its fields are defined in `templates/findings-schema.md`. The shift that matters: **code evidence and encyclical citations are discrete fields**, not sentences buried in a paragraph. A finding carries:
 
-```
-1. [Brief description] (Magnifica Humanitas §X says "[quote]")
-   Location: [file:line / feature / flow]
-   Confidence: [80-100]
-   
-   Behavior: [what the system functionally does]
-   Violation: [how this contradicts the principle, with the paragraph reference]
-   Resembles: [diagnostic label if applicable: technocratic-paradigm, transhumanism, or posthumanism]
-   
-   Remediation:
-   — [Tactical fix 1]
-   — [Tactical fix 2]
-   Structural note: [optional — when remediation requires non-local change]
-```
+- `title`, `confidence` (80–100 only), and `principle_relations` — every principle the finding engages, primary first, each with its relation (`violates` or `tension`); `primary_principle` mirrors the first entry;
+- `code_evidence[]` — each a `{location, language, snippet}`, so it renders as a real code block;
+- `behavior` — the factual account of what the system does;
+- `citations[]` — each a `{paragraph, quote, gloss}`, with the **verbatim** quote (≤25 words) taken from the paragraph's note in `paragraphs/`, so it renders as a blockquote;
+- `violation` — the moral reading tying the behavior to the cited paragraphs;
+- `resembles` — a diagnostic label and gloss, or null;
+- `remediation[]` and an optional `structural_note`.
 
-Only findings at confidence ≥80 are included.
+Load `templates/report.md` for the layout these fields render into, and the relevant `paragraphs/` notes (linked from `encyclical-reference.md`) to get the verbatim quotes exact. Only findings at confidence ≥80 are included.
+
+### Phase 3b — Consolidate
+
+Because the loci are organized by area, the same underlying behavior surfaces under several reading passes — engagement optimization, for instance, shows up under telemetry, attention design, and truth at once. Pre-consolidation overlap is expected and is not a defect; leaving it unmerged is. After verifying findings, run an editorial pass:
+
+1. **Merge** findings that describe the same underlying behavior-and-violation into one, combining their code locations and keeping the strongest, most accurate citations. Record each merged-away finding in `dropped[]` with `reason: merged_into:<id>`.
+2. **Assign** each surviving finding its `principle_relations`: the principle it most centrally engages first (this is its `primary_principle`), then every other principle it engages — and for each, judge the relation: does the behavior *contradict* that principle (`violates`) or *strain* it (`tension`)? These per-principle judgments drive the scorecard.
+3. **Name the breadth.** A finished report typically carries 4–12 findings after consolidation. If more than ~12 remain, that is not a filtering failure but a signal that the system is in tension across many surfaces — say so in the synthesis.
+
+A locus-organized reading routinely produces roughly twice the findings that survive consolidation; that is the process working, not a problem to hide.
 
 ### Phase 4 — Synthesize
 
@@ -131,9 +144,16 @@ Produce a short synthesis at the top of the report, organized by the encyclical'
 
 The synthesis answers: which principles are most centrally honored or violated? What kind of person does sustained use of this system tend to form (the Wojtyłan question, repeated at §129)? Where does the system stand against the encyclical's litmus question: *does it truly help individuals and peoples become more humane and fraternal, while respecting our common home and future generations?* (§85).
 
+The synthesis sets `synthesis.verdict_image` (toward Babel, toward the rebuilt Jerusalem, or genuinely contested) for the system as a whole, and is paired with the **per-principle verdicts** that form the scorecard: for each of the seven principles, derive `honors` / `tension` / `violates` from its findings using the rule in `templates/findings-schema.md`, and write a one-line `verdict_summary`. The synthesis is the overarching judgment; the scorecard is that judgment made concrete principle by principle.
+
 ## Output
 
-Default output is a full report following `templates/report.md`. If the user requests a shorter format, condense findings while retaining the principle cited, the confidence score, and the remediation. Always preserve the structure of individual findings — they are the audit's evidence base. Never report findings below confidence 80.
+The audit produces **one structured object** (the `report` defined in `templates/findings-schema.md`) and renders it two ways:
+
+- **Default — a styled HTML artifact** (`templates/report.html`): self-contained, dark by default with a light theme, with the masthead, the synthesis (verdict pill + data-computed stat line), the **findings × principles matrix**, one flat reading-ordered list of finding cards (sticky marginalia rail with the dotted ENGAGES list and confidence, syntax-highlighted code evidence, encyclical quotes with hanging §-refs, ✦ remediation lists), the closing sections, a persistent mini-nav on wide screens, and a print-ready stylesheet. To produce it, assemble the `report` object, then substitute it for the `@@REPORT_DATA@@` sentinel in `templates/report.html` (escaping any `</` in the embedded JSON) and write the result as the output file. The agent writes no presentation markup — only the data; everything on the page is computed from the object at render time.
+- **Secondary — a Markdown copy** (`templates/report.md`): the same object rendered as Markdown, for sharing or uploading to an LLM. Generate it alongside the HTML by default.
+
+If the user requests a shorter format, condense `behavior` and `remediation` while retaining each finding's principle relations, paragraph citations, confidence, and remediation. Always keep the findings × principles matrix and the per-finding structure. Never report findings below confidence 80.
 
 ## Diagnostic labels
 
@@ -155,12 +175,15 @@ Full elaboration of each label lives in `diagnostic-labels/`. Load the relevant 
 
 ## Files
 
-- `encyclical-reference.md` — operationally relevant paragraphs of *Magnifica Humanitas* in moderate depth, organized for citation. Load early; consult throughout. The agent should rarely need to web-fetch the encyclical itself, but it remains available at https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html for edge cases.
+- `encyclical-reference.md` — operationally relevant paragraphs of *Magnifica Humanitas* in moderate depth, organized for citation, plus an index of the per-paragraph verbatim notes. Load early; consult throughout. The agent should rarely need to web-fetch the encyclical itself, but it remains available at https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html for edge cases.
+- `paragraphs/` — one short note per load-bearing paragraph, holding the **full verbatim text** plus a gloss and the principles/loci it serves. Loaded **on demand** — only when a finding cites that paragraph — so citations quote the encyclical's exact words. Indexed from `encyclical-reference.md`.
 - `principles/` — one file per principle, each with the encyclical's articulation, what honoring and violating look like in software, code signatures, common remediations, and typical diagnostic labels. The evaluative spine of the audit.
 - `workflow.md` — reading passes, evidence log discipline, motion from observation to finding, worked example.
 - `loci/` — nine files covering where in code to look for evidence on each principle. Plus an optional appendix on AI in adversarial and warfare contexts.
 - `figures-cited.md` — brief notes on the people Pope Leo XIV explicitly cites in the encyclical: Augustine, Aquinas, Guardini, Frankl, Arendt, Plato, Tolkien, La Pira, Saint Benedict, and the recent papal predecessors. Loaded when a citation needs context.
 - `diagnostic-labels/` — three labels the encyclical itself names: `technocratic-paradigm`, `transhumanism`, `posthumanism`. Loaded when writing the "Resembles" line of a finding.
-- `templates/report.md` — output template.
+- `templates/findings-schema.md` — the canonical structured `report` object, the relation model and verdict-derivation rule, the display vocabulary (violates/strains, ordinals), and the HTML/MD rendering contract. The single source of truth both renderers obey; load before writing findings.
+- `templates/report.html` — the **default** output: a self-contained, styled HTML artifact (Flexoki theming, dark default + light, findings × principles matrix, flat finding cards with marginalia rails, syntax-highlighted code, encyclical blockquotes, persistent nav, print styles). The agent fills its `@@REPORT_DATA@@` sentinel with the structured object; it writes no presentation markup.
+- `templates/report.md` — the **secondary** Markdown rendering of the same object, for sharing or LLM upload.
 
-Load on demand. For a full audit, the typical order is: `encyclical-reference.md` and `workflow.md` first, then the relevant `principles/` files and `loci/` files during the reading passes, then `diagnostic-labels/` files when writing findings, and `figures-cited.md` when a citation in the encyclical needs context.
+Load on demand. For a full audit, the typical order is: `encyclical-reference.md` and `workflow.md` first, then the relevant `principles/` and `loci/` files during the reading passes, then `diagnostic-labels/` files and the specific `paragraphs/` notes when writing findings, then `templates/findings-schema.md` and the two `templates/report.*` files when rendering output, and `figures-cited.md` when a citation in the encyclical needs context.

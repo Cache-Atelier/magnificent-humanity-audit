@@ -1,0 +1,506 @@
+{
+  "meta": {
+    "system_name": "X “For You” Feed Algorithm",
+    "date": "2026-06-02",
+    "scope": "The open-sourced X recommendation stack (home-mixer, phoenix, grox, thunder, candidate-pipeline)",
+    "evidence_base": "source_code",
+    "repo_url": "https://github.com/xai-org/x-algorithm",
+    "principles_in_scope": "all"
+  },
+  "synthesis": {
+    "verdict_image": "babel",
+    "text": "Read functionally, this system has one telos: to predict and maximize engagement. The final feed score is a weighted sum of predicted engagement probabilities — favorite, reply, repost, and crucially dwell time, with a not-dwelled penalty. No term represents truth, formation, well-being, or whether the user valued the time they spent.\n\nAround that objective the system builds the apparatus the encyclical names most precisely: it profiles users on inferred attributes — predicting gender even for accounts hours old — and force-enables that profiling on roughly half of live traffic; it exports identifiable telemetry to private training corpora with no consent or deletion; it enacts consequential automated judgments over speech with no appeal and no accountable owner; it has no misinformation category; and it fetches the viewer's age, then discards it.\n\nThe principles most centrally violated are subsidiarity, the attention-economy and profiling power, social justice, and the universal destination of goods. It is not pure Babel — the system attenuates for author diversity, listens to explicit aversion, runs a mandatory per-recipient safety filter, and honors deletion in-network. But against the §85 litmus — does it help the person become more humane? — the objective never asks; it optimizes session length. On the evidence of what it measures and ignores, this system is built toward Babel — structurally, not maliciously."
+  },
+  "principles": [
+    {
+      "key": "dignity",
+      "name": "The dignity of the human person",
+      "paragraph_range": "§48–58",
+      "verdict": "tension",
+      "verdict_summary": "Engaged as a secondary concern throughout — persons modeled as bundles of predicted engagement — but no standalone primary violation was isolated.",
+      "findings": []
+    },
+    {
+      "key": "common_good",
+      "name": "The common good",
+      "paragraph_range": "§59–64",
+      "verdict": "tension",
+      "verdict_summary": "The feed shapes public discourse with no defense of the truth-commons (no misinformation axis).",
+      "findings": [
+        {
+          "id": "F2",
+          "title": "The safety taxonomy has no misinformation, disinformation, or synthetic-media category",
+          "confidence": 86,
+          "primary_principle": "common_good",
+          "code_evidence": [
+            {
+              "location": "grox/classifiers/content/safety_ptos.py:217-225",
+              "language": "python",
+              "snippet": "SUPPORTED_POLICY_CATEGORIES = {\n    SafetyPolicyCategory.ViolentMedia,\n    SafetyPolicyCategory.AdultContent,\n    SafetyPolicyCategory.Spam,\n    SafetyPolicyCategory.HateOrAbuse,\n    SafetyPolicyCategory.SuicideOrSelfHarm,\n}  # no misinformation / synthetic-media axis"
+            }
+          ],
+          "behavior": "The enforced safety taxonomy is seven harmful-content categories; a repo-wide search finds no misinformation, manipulated-media, or false-claim axis in the content-judgment pipeline. The one truth-adjacent signal feeds only the ads brand-safety verdict.",
+          "citations": [
+            {
+              "paragraph": "§80",
+              "quote": "social groups penalized by opaque algorithms that perpetuate prejudice and discrimination",
+              "gloss": "§80 names combating misinformation as a co-equal social-justice requirement, absent here."
+            },
+            {
+              "paragraph": "§132",
+              "quote": "the ability to manipulate content, images and videos exposes people to biased or misleading perspectives",
+              "gloss": "A pipeline blind to fabrication leaves the truth-commons unguarded."
+            }
+          ],
+          "violation": "This violates the common good and the duty under §80 to combat misinformation. The pipeline screens gore, nudity and spam but is structurally blind to fabricated narratives; per §132 truth is a common good the platform's design leaves undefended.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "\"safety\" is operationalized as enumerable harmful-content classes; truth/falsity is not modeled, so it is neither measured nor acted on."
+          },
+          "remediation": [
+            "Add a synthetic-media / false-claim SafetyPolicyCategory",
+            "Promote an integrity signal into organic ranking as a downrank, not only ads gating",
+            "Decouple the truth axis from the advertiser brand-safety pathway"
+          ],
+          "structural_note": "Defining falsity at platform scale is contested; but the code shows the truth axis is absent from the content pipeline entirely, not deliberately restrained within it.",
+          "principle_relations": [
+            {
+              "principle": "common_good",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "universal_destination",
+      "name": "The universal destination of goods",
+      "paragraph_range": "§65–67",
+      "verdict": "tension",
+      "verdict_summary": "Behavioral data, a good owed to its contributors, is held and exported as private training capital.",
+      "findings": [
+        {
+          "id": "F4",
+          "title": "Identifiable telemetry (raw IP, persistent device_id, served history) is exported to private training topics, keyed to the user",
+          "confidence": 85,
+          "primary_principle": "universal_destination",
+          "code_evidence": [
+            {
+              "location": "home-mixer/side_effects/served_candidates_kafka_side_effect.rs:79-80",
+              "language": "rust",
+              "snippet": "ip_address: Some(query.ip_address.clone()),\nuser_agent: Some(query.user_agent.clone()),\n// shipped with the full served stream to KafkaCluster::Phoenix"
+            }
+          ],
+          "behavior": "Served-feed side effects ship per-user telemetry — raw IP, a persistent device_id, the full served stream, and per-post prediction vectors — to continuously-trained training topics keyed to the real user_id, with no retention limit or deletion path. The team's own sibling code omits IP/user-agent, showing they are unnecessary.",
+          "citations": [
+            {
+              "paragraph": "§108",
+              "quote": "Data is the product of many contributors and should not be treated as something to be sold off",
+              "gloss": "A user's served history is piped into a private corpus with no control or deletion."
+            },
+            {
+              "paragraph": "§171",
+              "quote": "the power to profile, predict and influence behavior, often without individuals being fully aware of it",
+              "gloss": "Raw IP plus persistent device_id enables re-identification on payloads that don't need it."
+            }
+          ],
+          "violation": "This violates the universal destination of goods. Per §108 data is the product of many contributors and must be managed as a common good, not absorbed into a private training corpus keyed to the user with identity over-provisioned beyond what the payloads require.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "a user's served history, IP and prediction vector become private training capital for the model-improvement flywheel."
+          },
+          "remediation": [
+            "Strip IP and user-agent from the training export (the sibling code proves they're unneeded)",
+            "Pseudonymize the viewer key and segregate re-identification keys",
+            "Wire deletion propagation and a retention limit"
+          ],
+          "structural_note": "Treating the served stream as a private training asset is the core of the continuously-trained flywheel; managing it as a shared good with control for contributors is a business-model change.",
+          "principle_relations": [
+            {
+              "principle": "universal_destination",
+              "relation": "tension"
+            },
+            {
+              "principle": "solidarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "subsidiarity",
+      "name": "Subsidiarity",
+      "paragraph_range": "§68–72",
+      "verdict": "tension",
+      "verdict_summary": "Consequential automated decisions are enacted with no transparency, recourse, or accountable owner.",
+      "findings": [
+        {
+          "id": "F5",
+          "title": "Consequential automated judgments are enacted with no notification, appeal, or accountable owner in code",
+          "confidence": 84,
+          "primary_principle": "subsidiarity",
+          "code_evidence": [
+            {
+              "location": "grox/tasks/task_write_safety_post_annotations_result_sink.py:210-217",
+              "language": "python",
+              "snippet": "self._strato_grok_ptos_action_with_labels.execute(new_annotation)\nlogger.info(f\"grokPtosActionWithLabels applied labels: {labels} for post {post_id}\")\n# no appeal, no human-review branch, no author notification, no owner field"
+            }
+          ],
+          "behavior": "A Grok model is the sole judge of policy violations across the gravest categories, and the result sink applies enforcement labels automatically, recording the outcome only to logs and metric counters. No recourse hook, human-in-the-loop branch, author notification, or accountable-owner field appears in the pipeline.",
+          "citations": [
+            {
+              "paragraph": "§71",
+              "quote": "transparency regarding algorithms, equitable access to data and avenues for recourse",
+              "gloss": "Subsidiarity binds platform power to recourse the pipeline does not provide."
+            },
+            {
+              "paragraph": "§105",
+              "quote": "who must “account” for decisions, justify them, monitor them, and, when necessary, challenge them and remedy",
+              "gloss": "Only logs exist; no locatable party can account for a suppression."
+            }
+          ],
+          "violation": "This violates subsidiarity and dignity. §71 requires avenues for recourse and §105 requires a locatable accountability; here a consequential label — including for self-harm and hate content — is applied by a model with no appeal and no one answerable, contrary to §104's no-exclusion-without-appeal.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "content fate is decided by model output and enacted as a label, with no human answerable for the judgment."
+          },
+          "remediation": [
+            "Add a time-bounded human-reachable appeal step before consequential labels",
+            "Deliver a per-decision rationale to the affected author",
+            "Record an accountable owner per enforcement-label type"
+          ],
+          "structural_note": "Real recourse at scale requires staffing human review; the enforcement and any appeal layer live in an out-of-tree service, so the absence is verifiable only as an in-code/opaque gap — itself the §71 transparency concern.",
+          "principle_relations": [
+            {
+              "principle": "subsidiarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "solidarity",
+      "name": "Solidarity",
+      "paragraph_range": "§73–76",
+      "verdict": "tension",
+      "verdict_summary": "The hidden labor sustaining the classifiers is undocumented.",
+      "findings": [
+        {
+          "id": "F7",
+          "title": "Fully automated moderation discloses nothing about the human-labeled examples it depends on",
+          "confidence": 84,
+          "primary_principle": "solidarity",
+          "code_evidence": [
+            {
+              "location": "grox/classifiers/content/safety_ptos.py:166-185",
+              "language": "python",
+              "snippet": "# Grok VLM classifies ViolentMedia / HateOrAbuse / SuicideOrSelfHarm ...\n# repo contains no model card, data card, or annotation-labor provenance"
+            }
+          ],
+          "behavior": "A Grok model classifies posts against gore, self-harm, and abuse policies. A learned safety classifier necessarily rests on upstream human-labeled examples of this disturbing material, yet the repository documents neither the provenance of those examples nor the labelers' conditions.",
+          "citations": [
+            {
+              "paragraph": "§173",
+              "quote": "the silent work of millions of people engaged in essential yet largely unseen activities, such as data labeling",
+              "gloss": "The classifier depends on exactly this hidden, undocumented labor."
+            },
+            {
+              "paragraph": "§109",
+              "quote": "social justice is not only a goal to be safeguarded after technologies are deployed, but a condition that must shape their very design",
+              "gloss": "The labor question must shape design, not be addressed after the fact."
+            }
+          ],
+          "violation": "This engages solidarity and social justice. §173 names the hidden labor of data labeling and moderation — often young women for minimal wages — and §109 requires that justice shape design from the outset; the dependency exists and is wholly undocumented.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "the disturbing-content review the classifier depends on is abstracted into a model problem, the labelers rendered invisible."
+          },
+          "remediation": [
+            "Publish a model/data card naming the source and labor conditions of the labeled examples",
+            "Apply ethical due-diligence to the annotation vendors (§179)",
+            "Retain a supported human-in-the-loop audit for the highest-severity categories"
+          ],
+          "structural_note": "Whether the labeling labor is exploitative is not visible in the code; the finding flags that the dependency exists and is undocumented, not that exploitation is proven.",
+          "principle_relations": [
+            {
+              "principle": "solidarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "social_justice",
+      "name": "Social justice",
+      "paragraph_range": "§77–81",
+      "verdict": "violates",
+      "verdict_summary": "Protected-attribute inference and an age-blind feed expose the youngest and weakest to opaque, surveillant classification.",
+      "findings": [
+        {
+          "id": "F3",
+          "title": "The system infers protected attributes (gender) — predicting them for new accounts — and force-enables this on shadow traffic",
+          "confidence": 86,
+          "primary_principle": "social_justice",
+          "code_evidence": [
+            {
+              "location": "home-mixer/query_hydrators/user_inferred_gender_query_hydrator.rs:31,37",
+              "language": "rust",
+              "snippet": "fn enable(&self, query: &ScoredPostsQuery) -> bool {\n    query.params.get(EnableInferredGenderHydration) || query.is_shadow_traffic\n}\n// None if is_new_user(query.user_id) => self.grpc_client.predict(query.user_id)"
+            }
+          ],
+          "behavior": "The pipeline infers a user's gender via a prediction client and, for brand-new accounts, actively predicts it. The only gate is OR-ed away for shadow traffic, a deterministic ~50% sample of live requests; no consent, view, or delete path exists.",
+          "citations": [
+            {
+              "paragraph": "§171",
+              "quote": "the power to profile, predict and influence behavior, often without individuals being fully aware of it",
+              "gloss": "Inferring a protected attribute the user never declared is exactly this power."
+            },
+            {
+              "paragraph": "§80",
+              "quote": "communities exposed to invasive surveillance and social groups penalized by opaque algorithms",
+              "gloss": "Classifying by gender under a veneer of objectivity is the §80 risk."
+            }
+          ],
+          "violation": "This violates social justice. Inferring and scoring on a protected attribute the user never declared — predicting it even for zero-history accounts — is the §80 risk of opaque algorithmic classification and the §171 power to profile without awareness; the shadow-traffic override defeats the only gate.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "persons are classified and profiled as a default substrate of model experimentation rather than through a consented act."
+          },
+          "remediation": [
+            "Remove the '|| is_shadow_traffic' override so shadow traffic respects the gate",
+            "Default inferred-gender hydration off; require revocable opt-in",
+            "Let users view, correct, and delete the inferred label and score"
+          ],
+          "structural_note": "Inferring protected attributes to improve engagement-optimized ranking is intrinsic to a behavioral-targeting business model; removing it is a business-model decision.",
+          "principle_relations": [
+            {
+              "principle": "social_justice",
+              "relation": "violates"
+            },
+            {
+              "principle": "subsidiarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            }
+          ]
+        },
+        {
+          "id": "F6",
+          "title": "The viewer's age is fetched, then discarded — no minor protection in the feed path",
+          "confidence": 83,
+          "primary_principle": "social_justice",
+          "code_evidence": [
+            {
+              "location": "home-mixer/models/query.rs:74 / server.rs:119",
+              "language": "rust",
+              "snippet": "pub user_age_in_years: Option<i32>,  // populated from viewer_data.age_in_years\n// ...but no downstream read: never threaded into the VF viewer context or the ranking"
+            }
+          ],
+          "behavior": "The viewer's age is fetched and stored but read by no downstream code; the visibility-filter viewer context omits it and the engagement ranking branches on no recipient-age signal. The same adult-tuned feed reaches a minor and an adult identically.",
+          "citations": [
+            {
+              "paragraph": "§141",
+              "quote": "early and unsupervised exposure to digital devices and social media can negatively impact sleep, attention span, control of emotions",
+              "gloss": "The age-blind feed exposes minors to exactly these harms."
+            },
+            {
+              "paragraph": "§142",
+              "quote": "Far-sighted public policies are needed to oppose the immediate interests of platforms",
+              "gloss": "§142 requires age limits and minor-specific protection the pipeline does not apply."
+            }
+          ],
+          "violation": "This violates social justice and integral development. §141 warns of the harms of unsupervised exposure and §142 requires opposing platform interests for minors; the system holds the viewer's age yet never derives minor status or escalates safety — §104's measured-then-ignored, exactly.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "every viewer is reduced to the same engagement-optimization target; the one signal that would protect the vulnerable is collected but never used."
+          },
+          "remediation": [
+            "Derive an is_minor predicate from user_age_in_years and thread it into the viewer context",
+            "Request a stricter safety level for minors; default to stricter when age is unknown",
+            "Down-weight engagement-amplifying signals for minor viewers"
+          ],
+          "structural_note": "A feed that does not maximize engagement for minors is less profitable; §142 holds that the wellbeing of minors must prevail over the platform's immediate interests.",
+          "principle_relations": [
+            {
+              "principle": "social_justice",
+              "relation": "violates"
+            },
+            {
+              "principle": "integral_development",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "integral_development",
+      "name": "Integral human development",
+      "paragraph_range": "§82–85",
+      "verdict": "violates",
+      "verdict_summary": "The objective optimizes attention and engagement and asks nothing about whether it makes the person more humane.",
+      "findings": [
+        {
+          "id": "F1",
+          "title": "The ranking objective is pure predicted engagement — including dwell — with no truth or value term",
+          "confidence": 88,
+          "primary_principle": "integral_development",
+          "code_evidence": [
+            {
+              "location": "home-mixer/scorers/ranking_scorer.rs:146-170",
+              "language": "rust",
+              "snippet": "let combined_score = Self::apply(scores.favorite_score, weights.favorite)\n    + Self::apply(scores.dwell_score, weights.dwell)\n    + Self::apply(scores.dwell_time, weights.cont_dwell_time)\n    + Self::apply(scores.not_dwelled_score, weights.not_dwelled);"
+            }
+          ],
+          "behavior": "The final feed score is a weighted sum of predicted engagement probabilities, including dwell and continuous dwell-time, with a not_dwelled penalty. No term represents truth, accuracy, or whether the user valued the time spent.",
+          "citations": [
+            {
+              "paragraph": "§104",
+              "quote": "every technical tool embodies choices and priorities through what it measures, ignores and optimizes, and how it classifies people",
+              "gloss": "The objective measures engagement and dwell and ignores truth and user value."
+            },
+            {
+              "paragraph": "§170",
+              "quote": "When business models thrive on human weakness, the person is treated as a means rather than as an end",
+              "gloss": "Rewarding attention-duration optimizes session length, not any good the user sought."
+            }
+          ],
+          "violation": "This violates integral human development. Per §104 the objective measures and optimizes only engagement and dwell while ignoring whether content is true or wanted; per §170 the dwell reward is the attention-economy mechanism that treats the person as a means.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "discourse and attention reduced to predicted engagement probabilities; the operative standard of worth becomes capacity-to-engage."
+          },
+          "remediation": [
+            "Introduce a non-engagement objective term sourced from periodic user surveys and weight it materially in the score",
+            "Wire the already-computed quality/slop signal into ranking to downrank likely-false-but-engaging content",
+            "Cap dwell at a short did-the-user-look threshold rather than a monotonic longer-is-better reward"
+          ],
+          "structural_note": "An objective composed only of engagement proxies is the rational design under an attention/advertising business model; weighting in a truth or well-being term that can lower engagement is a telos change, not a code change.",
+          "principle_relations": [
+            {
+              "principle": "integral_development",
+              "relation": "violates"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            },
+            {
+              "principle": "common_good",
+              "relation": "tension"
+            }
+          ]
+        },
+        {
+          "id": "F8",
+          "title": "Continuous dwell-time reward and a not_dwelled penalty make attention duration a direct ranking signal",
+          "confidence": 80,
+          "primary_principle": "integral_development",
+          "code_evidence": [
+            {
+              "location": "home-mixer/scorers/ranking_scorer.rs:83,163",
+              "language": "rust",
+              "snippet": "let negative_sum = -(not_interested + block_author + mute_author + report + not_dwelled);"
+            }
+          ],
+          "behavior": "Content the user would scroll past without lingering is penalized via the not_dwelled term; continuous dwell_time is modeled as a regression target, i.e. longer attention is rewarded monotonically rather than as a capped did-the-user-look flag.",
+          "citations": [
+            {
+              "paragraph": "§171",
+              "quote": "control is exercised not only through explicit prohibitions, but also through the architecture of visibility",
+              "gloss": "What is rewarded or penalized shapes choices; dwell-maximization is that architecture."
+            }
+          ],
+          "violation": "Rewarding attention-duration as a ranking objective is the §170/§171 mechanism of the attention economy: the system optimizes for time-on-feed, treating the user's attention as a resource to be extracted.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "the user's attention-duration is an input optimized for a system metric rather than a good to be served."
+          },
+          "remediation": [
+            "Cap or remove the continuous dwell reward",
+            "Weight explicit-intent signals above passive duration",
+            "Offer a low-optimization chronological feed mode"
+          ],
+          "structural_note": null,
+          "principle_relations": [
+            {
+              "principle": "integral_development",
+              "relation": "violates"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitigations": [
+    {
+      "title": "Author-diversity attenuation",
+      "principle_key": "common_good",
+      "note": "the AuthorDiversityScorer attenuates repeated-author scores, a genuine diversity mitigation"
+    },
+    {
+      "title": "Listens to explicit aversion",
+      "principle_key": "dignity",
+      "note": "block, mute, report and not-interested carry negative weight — the system does not optimize engagement alone"
+    },
+    {
+      "title": "Mandatory per-recipient safety filter",
+      "principle_key": "social_justice",
+      "note": "a platform-side visibility filter runs before brand-safety and irrespective of opt-in, so harm avoidance is not offloaded to muting"
+    },
+    {
+      "title": "Deletion honored in-network",
+      "principle_key": "universal_destination",
+      "note": "Thunder propagates post-delete events in its serving store"
+    }
+  ],
+  "dropped": [
+    {
+      "title": "Spam scrutiny 'polices the small and shields the prominent'",
+      "confidence": 35,
+      "reason": "charitable_reading"
+    },
+    {
+      "title": "Brand safety protects advertisers but not viewers",
+      "confidence": 55,
+      "reason": "charitable_reading"
+    },
+    {
+      "title": "Thunder deletion is theatrical / resurrectable",
+      "confidence": 42,
+      "reason": "below_threshold"
+    },
+    {
+      "title": "Continuous dwell-time is a ranking signal",
+      "confidence": 80,
+      "reason": "merged_into:F1"
+    }
+  ],
+  "scope_limits": [
+    "Decisive consumers are referenced but not vendored: util::phoenix_request::build_prediction_request (whether inferred gender materially changes ranking), the external visibility-filtering service (whether it age-gates), and the served-history storage client (whether a deletion path exists).",
+    "Model weights distributed via Git LFS were not analyzed.",
+    "Where a finding depends on out-of-repo behavior, the confidence and language reflect the in-code/opaque boundary — itself, per §71, part of the transparency concern."
+  ]
+}

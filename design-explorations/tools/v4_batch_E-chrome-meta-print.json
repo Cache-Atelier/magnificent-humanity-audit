@@ -1,0 +1,330 @@
+[
+ {
+  "id": "C35",
+  "title": "Mobile masthead meta loses label\u2013value pairing: gap within a pair equals gap between pairs",
+  "severity": "medium",
+  "area": "masthead",
+  "priority": "should",
+  "problem": "At \u2264680px .mast-meta{grid-template-columns:1fr; gap:.15rem 0} (line 427) stacks labels and values with one uniform ~2.4px gap \u2014 'evidence' sits as close to the preceding scope text as to its own value 'Source code'. The block reads as one undifferentiated list; Gestalt pairing needs more space between pairs than within them.",
+  "recommendation": "Zero the uniform gap and give each label (except the first) a top margin so pairs cluster.",
+  "css_js_sketch": "@media(max-width:680px){\n  .mast-meta{grid-template-columns:1fr; gap:0}\n  .mast-meta .mm-label{margin-top:.55rem}\n  .mast-meta .mm-label:first-child{margin-top:0}\n  .mast-meta .mm-value{margin-top:.1rem}\n}",
+  "evidence": "/tmp/mh-mobile/mob-meta.png; measured label\u2192own-value 2.4px and prior-value\u2192label 2.4px; final-rail-stars-v3.html line 427",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Gestalt pairing \u2014 more space between pairs than within them \u2014 is exactly the felt-not-noticed polish standard; the current uniform 2.4px gap dissolves the label-value structure.",
+   "risk: Y \u2014 Scoped to the existing mobile query and :first-child correctly targets the first label in the alternating grid.",
+   "value: Y \u2014 With identical 2.4px gaps within and between pairs, mobile readers cannot tell which value belongs to which label in the first screen they see."
+  ]
+ },
+ {
+  "id": "C42",
+  "title": "Format the masthead date for reading inside a <time> element",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The date row prints the raw ISO string '2026-06-02' (line 679) in serif with global oldstyle figures (onum, line 94) \u2014 the 6s ascend while 0/2 sit at x-height, a bouncy machine-format string in an otherwise literary masthead, and it carries no <time datetime> semantics. (Lining figures were proposed as the minimal fix, but a prose date is where oldstyle figures are actually correct.)",
+  "recommendation": "Render 'June 2, 2026' inside <time datetime=\"2026-06-02\">, falling back to the raw string when it does not parse \u2014 fixes the figure style and the semantics in one move.",
+  "css_js_sketch": "function fmtDate(s){\n  var m=/^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s)); if(!m) return null;\n  var MO=[\"January\",\"February\",\"March\",\"April\",\"May\",\"June\",\"July\",\"August\",\"September\",\"October\",\"November\",\"December\"];\n  return MO[+m[2]-1]+\" \"+(+m[3])+\", \"+m[1];\n}\n/* rows loop, when r[0]===\"date\": */\nvar tEl=document.createElement(\"time\"); tEl.dateTime=String(r[1]);\ntEl.textContent=fmtDate(r[1])||String(r[1]); v.appendChild(tEl);",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html lines 94, 679, 699\u2013701",
+  "lenses": [
+   "masthead",
+   "micro-typography"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A raw ISO string in an otherwise literary masthead is the first thing a careful reader notices; 'June 2, 2026' in a <time> element is more itself in both register and semantics \u2014 and C51's colophon should reuse the same formatter.",
+   "risk: Y \u2014 Regex-based formatting avoids Date timezone pitfalls entirely and falls back to the raw string; purely additive in the rows loop.",
+   "value: Y \u2014 '2026-06-02' raw in a literary masthead is slightly machine-flavored, but ISO dates don't actively hurt a technical reader; the <time> semantics are a bonus."
+  ]
+ },
+ {
+  "id": "C43",
+  "title": "Keep hyphenated identifiers like 'home-mixer' from fracturing in the scope row",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The scope value wraps mid-identifier in both theme shots \u2014 '(home-' ends one line and 'mixer, phoenix, grok\u2026' opens the next \u2014 momentarily reading as the word 'home'. The value is a plain text node (line 700) and .mm-value's overflow-wrap:anywhere + word-break:break-word (line 213) makes it maximally willing to break.",
+  "recommendation": "When rendering meta values, wrap any token containing an intra-word hyphen in a nowrap span so system identifiers stay whole; ordinary prose is untouched (safer than U+2011, which risks a fallback-glyph mismatch in EB Garamond).",
+  "css_js_sketch": "function protectNames(s){\n  var frag=document.createDocumentFragment();\n  String(s).split(/(\\s+)/).forEach(function(tok){\n    if(/\\w-\\w/.test(tok)){var sp=el(\"span\",\"nb\");sp.textContent=tok;frag.appendChild(sp);}\n    else frag.appendChild(document.createTextNode(tok));\n  });\n  return frag;\n}\n/* CSS */ .mm-value .nb{white-space:nowrap}\n/* line 700: */ v.appendChild(protectNames(curl(String(r[1]))));",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png ('home-' / 'mixer' break); final-rail-stars-v3.html lines 207\u2013213, 699\u2013701",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 'home-' / 'mixer' momentarily reading as the word 'home' is a real comprehension stutter; protecting hyphenated identifiers with nowrap spans is safer than U+2011 and invisible elsewhere.",
+   "risk: Y \u2014 Safer than U+2011 as argued; only residual edge is a pathologically long hyphenated token refusing to break, which mm-value's anywhere fallback no longer catches inside the span \u2014 acceptable for identifier-length tokens.",
+   "value: Y \u2014 Verified in the masthead: 'home-' / 'mixer' fractures a system identifier in the first viewport, momentarily misreading as the word 'home' for the audience that knows these repos."
+  ]
+ },
+ {
+  "id": "C44",
+  "title": "Display the repository URL without its scheme; let print append the full address",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The repository row prints the raw 'https://github.com/\u2026' verbatim, underlined end to end (renderHeader lines 689\u2013698). The scheme is noise in an editorial masthead; Stripe-grade documents display 'github.com/\u2026' and keep the full URL in href. The print machinery already handles text-vs-href divergence via data-href-shown (line 450), so dropping that attribute makes print correctly append the full URL.",
+  "recommendation": "Strip the scheme from the displayed text (href stays complete), keep the existing <wbr> insertion after slashes, and remove data-href-shown on this anchor.",
+  "css_js_sketch": "var url=String(r[1]);\nvar a=el(\"a\"); a.href=url; a.rel=\"noopener\"; /* no data-href-shown */\nvar shown=url.replace(/^https?:\\/\\//i,\"\");\nshown.split(\"/\").forEach(function(seg,i,arr){\n  a.appendChild(document.createTextNode(seg+(i<arr.length-1?\"/\":\"\")));\n  if(i<arr.length-1) a.appendChild(document.createElement(\"wbr\"));\n});",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html lines 450, 689\u2013698",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Dropping the scheme is the established editorial convention for displayed URLs, and it correctly uses the print machinery C29 repairs \u2014 display loses noise, print gains the full address.",
+   "risk: Y \u2014 href stays complete, the <wbr> pattern is preserved, and dropping data-href-shown correctly re-engages the existing print URL rule.",
+   "value: Y \u2014 Scheme-stripping is an editorial nicety, and it correctly reuses the existing print machinery \u2014 note it interacts benignly with C29's attribute cleanup."
+  ]
+ },
+ {
+  "id": "C37",
+  "title": "Give 'Dropped' and 'Limits' the one-line leads the first closing has, and use the full 'Limits of this audit' caption",
+  "severity": "medium",
+  "area": "closings",
+  "priority": "should",
+  "problem": "The coda is asymmetric: 'What the system does well' opens with a considered lead sentence (lines 1092\u20131093), but 'Dropped and consolidated' and 'Limits' pass null leads (lines 1101, 1116) and drop straight into terse bullets \u2014 the 'appendix dump' feel. The third caption is just 'Limits' while its own section aria-label is 'Limits of this audit' (line 481), breaking parallelism with the two full-phrase captions above it.",
+  "recommendation": "Pass a one-sentence lead to both remaining movements in the same voice as the first, and title the third 'Limits of this audit' to match its landmark label.",
+  "css_js_sketch": "renderList(\"dropped\",\"Dropped and consolidated\",\n  \"Candidate findings set aside in triage, with the confidence they carried and the reason they were dropped.\",\n  data.dropped, ...);\nrenderList(\"scope\",\"Limits of this audit\",\n  \"What the audit could not see, named so the reader can weigh its claims.\",\n  data.scope_limits, ...);",
+  "evidence": "before-closings-dark.png; final-rail-stars-v3.html lines 481, 1092\u20131093, 1101, 1116",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Keep each lead to the single sentence proposed \u2014 no longer \u2014 so the closings stay terse end-matter."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The asymmetric coda \u2014 one considered lead then two bare dumps \u2014 and the caption that breaks parallelism with its own aria-label are real register failures; the proposed copy stays in voice.",
+   "risk: Y \u2014 Copy-only change through the existing renderList lead parameter, and it restores parallelism with the aria-label at line 481.",
+   "value: Y \u2014 The asymmetric coda and the caption/aria-label mismatch are real but editorial \u2014 leads improve finish without being load-bearing for trust."
+  ]
+ },
+ {
+  "id": "C38",
+  "title": "Dropped-list mono metadata wraps mid-pair ('conf 35 \u00b7 reason / charitable reading')",
+  "severity": "medium",
+  "area": "closings",
+  "priority": "should",
+  "problem": "The renderer emits label and value as separate inline nodes with no wrap control (lines 1105\u20131113), so lines break between a label and its value: before-closings-dark.png shows 'conf 35 \u00b7 reason' ending a line with 'charitable reading' orphaned below, '\u00b7 reason' / 'below threshold', and 'reason merged' / 'into F1' \u2014 three of four items break awkwardly.",
+  "recommendation": "Wrap each label+value pair in a white-space:nowrap span so wrapping happens only at the ' \u2014 ' and ' \u00b7 ' separators; the pairs are short, so nowrap cannot overflow the column. (The merged-into pair becomes a link per C08.)",
+  "css_js_sketch": "/* CSS */ .dc .dc-pair{white-space:nowrap}\n/* JS in the dropped builder */\nfunction dcPair(label,value){var s=el(\"span\",\"dc-pair\");s.appendChild(el(\"span\",\"dc-label\",label+\" \"));s.appendChild(document.createTextNode(value));return s;}\nif(d.confidence!=null){dc.appendChild(dcPair(\"conf\",String(d.confidence)));dc.appendChild(document.createTextNode(\" \u00b7 \"));}\ndc.appendChild(dcPair(\"reason\",fmtReason(d.reason)));",
+  "evidence": "before-closings-dark.png (items 1, 3, 4 of Dropped); final-rail-stars-v3.html lines 392\u2013393, 1105\u20131113",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Build on C08's linked merged-into pair so the dropped-list builder is rewritten once."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Three of four dropped items breaking between a label and its value reads as carelessness in the section about editorial discipline; nowrap pairs is the same fix grammar as C02 (coordinate the merged-into pair with C08's link).",
+   "risk: Y \u2014 Short nowrap pairs cannot overflow the column, but this rewrites the same dropped-builder nodes as C08's merged-into link \u2014 apply both as one coordinated edit with the anchor inside the reason pair.",
+   "value: Y \u2014 Verified in before-closings-dark.png: three of four dropped items break between label and value, making the metadata genuinely harder to parse."
+  ]
+ },
+ {
+  "id": "C50",
+  "title": "Support inline code in closing bullets so Rust paths stop rendering in serif",
+  "severity": "low",
+  "area": "closings",
+  "priority": "could",
+  "problem": "The first Limits bullet sets util::phoenix_request::build_prediction_request in EB Garamond (before-footer-dark.png) because setProse is text-only (line 560). Everywhere else the report is scrupulous about code-in-Fira-Code; a long Rust path in serif with serif underscores is the one place that discipline lapses.",
+  "recommendation": "Teach setProse to split on backtick spans and emit <code> for them (data then carries the identifier in backticks), with a small inline-code size so mono sits on the serif line.",
+  "css_js_sketch": "/* CSS */ ul.plain code,.f-explain code{font-size:.82em; overflow-wrap:anywhere}\n/* JS */\nfunction setProse(e,txt){ String(curl(txt)).split(/(`[^`]+`)/).forEach(function(t){\n  if(t.charAt(0)===\"`\"){var c=document.createElement(\"code\");c.textContent=t.slice(1,-1);e.appendChild(c);}\n  else if(t) e.appendChild(document.createTextNode(t)); }); return e; }",
+  "evidence": "before-footer-dark.png / before-closings-dark.png (Limits, first bullet); final-rail-stars-v3.html line 560",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Document the backtick convention in the data schema so authors know the contract, and confirm no existing prose fields carry literal backticks.",
+   "Split on backticks BEFORE applying curl() \u2014 the sketch curls the whole string first, so apostrophes and quotes inside code spans would be typographically mangled; curl only the non-code segments.",
+   "Requires the data/template side to emit backticks around identifiers \u2014 confirm the skill's findings schema can carry them."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A Rust path in serif with serif underscores is the one lapse in the page's code-in-mono discipline; the backtick mini-syntax is acceptable because the skill controls the data contract.",
+   "risk: Y \u2014 setProse is used on every prose path so the ordering bug in the sketch would corrupt code identifiers; with the amendment it is safe and unmatched backticks already pass through literally.",
+   "value: Y \u2014 A long Rust path in serif with serif underscores, verified in the footer shot, is the one visible lapse in the report's otherwise scrupulous code discipline."
+  ]
+ },
+ {
+  "id": "C29",
+  "title": "Footer links wrongly carry data-href-shown, so print drops the tool's provenance URLs",
+  "severity": "medium",
+  "area": "footer",
+  "priority": "should",
+  "problem": "The print rule appends hrefs only for links NOT marked data-href-shown (line 450) \u2014 the marker means 'the link text already shows the URL'. The masthead repo link is correctly marked (line 691; its text IS the URL), but both footer anchors also set it (lines 1042, 1046) despite their text being 'Magnificent Humanity Audit agent skill' and 'Cache Atelier' \u2014 inverting the attribute's documented meaning. A printed page loses the GitHub releases URL and cacheatelier.work entirely, exactly the links a paper reader cannot click.",
+  "recommendation": "Delete the two setAttribute(\"data-href-shown\",\"\") calls on the footer anchors so the existing print rule appends their URLs.",
+  "css_js_sketch": "// renderFooter(): remove\n// a1.setAttribute(\"data-href-shown\",\"\");  (line 1042)\n// a2.setAttribute(\"data-href-shown\",\"\");  (line 1046)",
+  "evidence": "final-rail-stars-v3.html lines 449\u2013450 (rule + comment), 691 (correct usage), 1042, 1046 (inverted usage); before-footer-dark.png",
+  "lenses": [
+   "product-polish",
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The attribute's documented meaning is inverted on exactly the links a paper reader cannot click; deleting two lines restores the print machinery's intent (complementary with C44's correct use of the same mechanism).",
+   "risk: Y \u2014 Deleting two setAttribute calls restores the print rule's documented semantics with zero side effects; complementary with C44, not conflicting.",
+   "value: Y \u2014 Verified at lines 1042/1046: the attribute's meaning is inverted, so printed copies lose the only provenance URLs a paper reader cannot click \u2014 a two-line deletion."
+  ]
+ },
+ {
+  "id": "C09",
+  "title": "Printing from the default dark theme is broken \u2014 only 4 of ~30 tokens reset, code panels print near-black with #111 text",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "@media print (lines 439\u2013452) overrides only --bg/--bg-2/--tx/--tx-2. Because dark is the default, [data-theme=\"dark\"] still supplies everything else at print time: --code-bg stays base-950 so code panels print as near-black slabs holding forced #111 text (illegible); accents and verdict colors stay pale 400-level on white; chip tints stay color-mix'd with --black (dark pills on paper); --ui-3 hairlines (base-800) vanish. Print/PDF is a first-class path for a report artifact. The few values that ARE reset are also non-Flexoki grays (#111/#444 line 440, #666 line 450) \u2014 the only colors in the file that bypass the ramp.",
+  "recommendation": "Inside @media print, re-declare the full LIGHT semantic token set under ':root,[data-theme=\"dark\"]' (equal specificity, later in cascade \u2014 wins), using Flexoki inks instead of the generic grays: --tx:var(--black), --tx-2:var(--base-700), URL suffix var(--base-600). ~15 lines of pure CSS, no markup change.",
+  "css_js_sketch": "@media print{\n  :root,[data-theme=\"dark\"]{\n    --bg:#fff; --bg-2:#fff; --tx:var(--black); --tx-2:var(--base-700); --tx-3:var(--base-300);\n    --ui:var(--base-100); --ui-2:var(--base-150); --ui-3:var(--base-200);\n    --accent:var(--blue-600);\n    --honors:var(--green-600); --tension:var(--yellow-600); --violates:var(--red-600);\n    --code-bg:var(--base-50);\n    --hl-comment:var(--base-700); --hl-string:var(--cyan-700); --hl-number:var(--purple-700);\n    --hl-keyword:var(--green-700); --hl-constant:#7A5C01; --hl-function:var(--orange-700); --hl-builtin:var(--blue-700);\n    --honors-tint:#fff; --tension-tint:#fff; --violates-tint:#fff;\n    --honors-ink:#3C4D08; --tension-ink:#6F5401; --violates-ink:#871F1A;\n    --rel-violates:var(--violates-ink); --rel-tension:var(--tension-ink);\n    --rule:1px solid var(--black); --hair:1px solid var(--base-200); --hair-strong:1px solid var(--base-300);\n  }\n  a[href^=\"http\"]:not([data-href-shown])::after{color:var(--base-600)}\n}",
+  "evidence": "final-rail-stars-v3.html lines 439\u2013452 (print block) vs 66\u201388 (dark tokens that survive); line 71 --code-bg:base-950 + line 331 figure.code uses it with color:var(--tx)",
+  "lenses": [
+   "product-polish",
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Also reset --rk-honors-ink/--rk-tension-ink/--rk-violates-ink to the light values (sketch omits them, leaving pale 400-level key words on white in print), and consider the light color-mix tints instead of #fff so chips keep their wash."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Print/PDF is a first-class path for a report artifact and it currently ships near-black code slabs from the default theme; re-declaring the light tokens in Flexoki inks also purges the only non-ramp grays in the file.",
+   "risk: Y \u2014 Pure CSS at equal specificity later in cascade, all referenced ramp vars exist at :root, and it fixes a genuinely broken default-theme print path.",
+   "value: Y \u2014 Verified the print block resets only 4 of ~30 tokens while dark is default \u2014 print/PDF is how a CTO circulates this report, and near-black code slabs with #111 text are illegible."
+  ]
+ },
+ {
+  "id": "C10",
+  "title": "UA chrome ignores the active theme: bind the color-scheme property and a theme-color meta to data-theme",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "The only color-scheme declaration is the meta on line 6 ('light dark'), which resolves UA surfaces from the OS preference \u2014 but the page forces dark via data-theme regardless of OS. A light-OS machine (Windows, Linux, macOS with always-visible scrollbars) renders the default dark page with bright light root scrollbars, plus light UA scrollbars inside every one of the 8 overflowing code panes; a dark-OS user gets the inverse on the light theme. No CSS color-scheme property exists in either token block (grep confirms), and there is no theme-color meta, so mobile browser chrome stays white above the #100F0F page.",
+  "recommendation": "Declare color-scheme on the theme roots so all UA-rendered surfaces follow the toggle, add a theme-color meta, and sync it in wireTheme()'s set() alongside localStorage.",
+  "css_js_sketch": "/* CSS */\n:root{color-scheme:light}\n[data-theme=\"dark\"]{color-scheme:dark}\n<!-- head -->\n<meta name=\"theme-color\" content=\"#100F0F\">\n/* in wireTheme set(t) */\nvar tc=document.querySelector('meta[name=\"theme-color\"]');\nif(tc) tc.setAttribute('content', t===\"dark\" ? \"#100F0F\" : \"#FFFCF0\");",
+  "evidence": "final-rail-stars-v3.html line 6 (meta only); grep: no color-scheme property in lines 33\u201388, no theme-color meta; lines 455\u2013466, 1055\u20131060 (theme bootstrap/toggle)",
+  "lenses": [
+   "color-theme-parity",
+   "product-polish",
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Light UA scrollbars on the default dark page (and white mobile chrome over #100F0F) is visibly wrong machinery the reader never asked to see; color-scheme plus theme-color is invisible correctness.",
+   "risk: Y \u2014 Two declarations plus a meta sync inside the existing set(); the pre-paint script already sets data-theme before first paint so color-scheme resolves correctly with no flash.",
+   "value: Y \u2014 Light UA scrollbars on the default dark page (root plus all 8 code panes) and white mobile chrome are visible on common configurations, and the fix is three declarations."
+  ]
+ },
+ {
+  "id": "C06",
+  "title": "Theme toggle is unanchored at every breakpoint: orphaned at wide widths, overlapping content at 681\u2013940px, flush against the screen edge on mobile",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "Three provable failures of one element. (1) At 1100px+ the fixed toggle (top/right 1.1rem, line 180) floats ~140px beyond the report's right text edge, an off-grid inset that matches no token (layout padding is 1.5rem, line 116). (2) The static fallback only kicks in at \u2264680px (line 434), but the layout needs ~872px, so between 681 and ~940px (iPad portrait included) the opaque z-index:15 button sits ON the content track \u2014 measured at 760px it covers the scorecard's right-aligned '3 findings' count. (3) At \u2264680px the static button is a direct child of <body> outside .layout's padding: measured at 375px it renders at x=0, border clipped by the screen edge, the first thing a mobile reader sees. Its tap target is also ~61x28px, well under touch minimums.",
+  "recommendation": "Pin the toggle's right edge to the layout's right padding edge so it tracks the measure at any wide viewport; make it position:absolute below 940px so it sits in the masthead band and scrolls away instead of floating over data; give the \u2264680px static fallback the layout's 1.5rem left margin; and bump padding toward a usable tap target. One element, on the same grid music as everything else.",
+  "css_js_sketch": "#theme-toggle{\n  top:1.5rem;\n  right:max(1.5rem, calc((100vw - var(--measure)) / 2 + 1.5rem));\n  padding:.65rem .8rem;\n}\n@media(max-width:940px){ #theme-toggle{position:absolute} }  /* before the 680px block */\n@media(max-width:680px){ #theme-toggle{position:static; display:inline-block; margin:1rem 0 0 1.5rem; padding:.7rem .85rem} }",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png (toggle ~140px past content edge); /tmp/mh-mobile/mid-760-scorecard.png (button over '3 findings'); /tmp/mh-mobile/mob-pagetop.png (button at x=0, border clipped); final-rail-stars-v3.html lines 60, 116, 179\u2013184, 414, 433\u2013434",
+  "lenses": [
+   "masthead",
+   "responsive-mobile",
+   "spacing-rhythm"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A control that floats off-grid at wide widths, covers data at tablet widths, and clips at the screen edge on mobile is embarrassing in a release; pinning it to the layout's grid is restraint, not chrome.",
+   "risk: Y \u2014 The right:max(...) calc correctly tracks the layout's padding edge, the 940px absolute block is ordered before the existing 680px static rule so the cascade resolves correctly, and the measured 681\u2013940px content overlap is a real release-blocker; only residual nit is ~7px scrollbar skew in 100vw, acceptable.",
+   "value: Y \u2014 Verified failures at three breakpoints including the toggle overlapping scorecard data at tablet widths and rendering clipped at x=0 as a mobile reader's first impression \u2014 functional breakage, not polish."
+  ]
+ },
+ {
+  "id": "C30",
+  "title": "Theme toggle semantics are self-contradicting: aria-pressed fights the action label; dead under noscript; D shortcut undocumented",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "The visible label names the ACTION ('Light' while dark) but aria-pressed tracks the CURRENT theme (lines 464, 471, 1058), so a screen reader announces 'Light, toggle button, pressed' in dark mode \u2014 asserting light is on when it is off. With JS off, the hardcoded toggle still renders but does nothing. And the global D keyboard shortcut (lines 1061\u20131066) is documented nowhere \u2014 no title, no aria-keyshortcuts (grep confirms) \u2014 undiscoverable for those who'd want it and startling for anyone who brushes the keyboard.",
+  "recommendation": "Treat it as an action button: drop aria-pressed, set a self-describing aria-label that updates with the text, attach title + aria-keyshortcuts to document the shortcut where the action lives, and hide the control under noscript. Visuals unchanged (the tap-target bump rides with C06).",
+  "css_js_sketch": "<noscript><style>#theme-toggle{display:none}</style></noscript>\n/* in set(t) (line 1058) and the pre-paint script (line 464): */\nbtn.removeAttribute(\"aria-pressed\");\nvar next = t===\"dark\" ? \"light\" : \"dark\";\nbtn.textContent = next===\"light\" ? \"Light\" : \"Dark\";\nbtn.setAttribute(\"aria-label\",\"Switch to \"+next+\" theme\");\n/* once, in wireTheme(): */\nbtn.title=\"Toggle theme \u2014 or press D\";\nbtn.setAttribute(\"aria-keyshortcuts\",\"d\");\n<!-- markup (line 471): <button id=\"theme-toggle\" type=\"button\" aria-label=\"Switch to light theme\">Light</button> -->",
+  "evidence": "final-rail-stars-v3.html lines 455\u2013466, 471, 1054\u20131066; grep 'aria-keyshortcuts' returns nothing",
+  "lenses": [
+   "masthead",
+   "product-polish",
+   "navigation-wayfinding",
+   "product-features"
+  ],
+  "amendments": [
+   "Place the noscript style block in <head> (spec-clean location for noscript>style) rather than body, and add a .catch-free guard is not needed; rest as sketched."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A toggle announcing 'pressed' for the theme that is off is a genuine semantic contradiction; action-button semantics, noscript hiding, and documenting the D shortcut are all invisible correctness (layout side rides C06).",
+   "risk: Y \u2014 Action-button semantics are correct and both write sites (pre-paint script and set()) are covered; only the noscript placement needs the tidier variant.",
+   "value: Y \u2014 A screen reader announcing 'Light, pressed' while dark is active is factually wrong state communication, and a visible-but-dead control under noscript erodes trust; visuals ride with C06."
+  ]
+ },
+ {
+  "id": "C31",
+  "title": "Put the system name first in document.title, guard the dangling dash, and drop lang=\"la\" from the <title>",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "init() sets document.title=\"Magnifica Humanitas Audit \u2014 \"+(meta.system_name||\"\") (line 1086): every report shares the same long prefix so crowded tabs all truncate to the identical 'Magnifica Hum\u2026' with the one distinguishing fact cut off, and a missing system_name leaves a dangling ' \u2014 '. The static <title> also carries lang=\"la\" (line 8), which after the JS rewrite mislabels the English system name as Latin for screen readers.",
+  "recommendation": "Order most-specific-first (system \u2014 brand), guard the empty case, and remove lang from the title element (the in-page <em lang=\"la\"> elements are correctly scoped and stay).",
+  "css_js_sketch": "// line 1086\ndocument.title = (meta.system_name ? meta.system_name + \" \u2014 \" : \"\") + \"Magnifica Humanitas Audit\";\n<!-- line 8 -->\n<title>Magnifica Humanitas Audit</title>",
+  "evidence": "final-rail-stars-v3.html lines 8, 672, 967, 1086",
+  "lenses": [
+   "product-polish"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Most-specific-first titles, a guarded dash, and removing the now-wrong lang='la' are the kind of detail a Stripe-grade page gets right without anyone noticing.",
+   "risk: Y \u2014 Single-call-site title rewrite with an empty-name guard, and removing lang='la' from <title> fixes a real screen-reader mislabel after the JS rewrite.",
+   "value: Y \u2014 Developers live in crowded tab bars \u2014 every report truncating to the identical 'Magnifica Hum\u2026' hides the one distinguishing fact, and the lang=la mislabel is a real a11y wrinkle."
+  ]
+ },
+ {
+  "id": "C32",
+  "title": "No meta description or Open Graph tags \u2014 shared links unfurl bare",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "The head (lines 3\u201311) has no <meta name=\"description\">, no og:*, no twitter:card (grep confirms). Pasting the report URL into Slack, iMessage, X or LinkedIn \u2014 the natural way an audit circulates \u2014 yields no summary and no card; search snippets fall back to arbitrary body text. Crawlers don't run the JS, so the static copy must stand alone \u2014 which it can, since the framing is constant across reports.",
+  "recommendation": "Add static description/og/twitter tags reusing the dek's own sentence so the card speaks in the report's voice; optionally have init() sync og:title alongside document.title for the rare JS-executing scraper.",
+  "css_js_sketch": "<meta name=\"description\" content=\"An anthropological audit reading a software system against the seven principles of Catholic social doctrine set out in the encyclical Magnifica Humanitas.\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:title\" content=\"Magnifica Humanitas Audit\">\n<meta property=\"og:description\" content=\"This reads the system against the seven principles of Catholic social doctrine, asking what its workings imply about the human person.\">\n<meta name=\"twitter:card\" content=\"summary\">\n/* in init(): */\nvar ogt=document.querySelector('meta[property=\"og:title\"]');\nif(ogt) ogt.setAttribute('content', document.title);",
+  "evidence": "final-rail-stars-v3.html lines 3\u201311; grep 'description'/'og:' returns nothing",
+  "lenses": [
+   "product-polish",
+   "product-features"
+  ],
+  "amendments": [
+   "Static tags only \u2014 drop the init() og:title sync, since scrapers don't run JS and the extra machinery buys nothing."
+  ],
+  "reasons": [
+   "taste: Y \u2014 An audit circulates by being pasted into Slack and issues, and the static framing copy genuinely stands alone; the card should speak in the dek's own voice.",
+   "risk: Y \u2014 Static head tags with constant framing copy survive the no-JS crawler path by design; zero interaction with the data contract.",
+   "value: Y \u2014 Slack/iMessage/X unfurls are precisely how an audit circulates, and a bare card at share time is a first-impression failure the static dek text can fix for free."
+  ]
+ },
+ {
+  "id": "C33",
+  "title": "Add a data-URI \u2734 SVG favicon",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "No <link rel=\"icon\"> exists (grep confirms), so every tab shows the generic document glyph and file:// or hosted copies 404 on /favicon.ico. For a flagship artifact whose identity is built on the \u2734 glyph set, the tab is the one place the brand never appears \u2014 and developers keep many tabs open.",
+  "recommendation": "One self-contained data-URI SVG: a Flexoki black rounded tile with the \u2734 glyph in paper #FFFCF0 (reads on both light and dark tab bars; system serif renders the glyph, no font dependency). Percent-encode the glyph and append U+FE0E so text presentation applies. Zero external requests; keeps the single-file constraint.",
+  "css_js_sketch": "<link rel=\"icon\" href='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"16\" fill=\"%23100F0F\"/><text x=\"50\" y=\"74\" font-size=\"66\" text-anchor=\"middle\" fill=\"%23FFFCF0\">%E2%9C%B4%EF%B8%8E</text></svg>'>",
+  "evidence": "final-rail-stars-v3.html lines 3\u201311; grep 'rel=\"icon' returns nothing",
+  "lenses": [
+   "product-polish",
+   "product-features"
+  ],
+  "amendments": [
+   "Percent-encode the spaces in the SVG data URI for strict URL validity; Safari ignoring SVG favicons degrades gracefully to the current state."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The \u2734 is the brand and the tab is the one place it never appears; a data-URI SVG keeps the single-file constraint and adds zero requests.",
+   "risk: Y \u2014 Explicitly within the data-URI favicon allowance, zero external requests, and the quoting (single-quoted href, %23, U+FE0E) is correct.",
+   "value: Y \u2014 The tab is the one surface where the \u2734 identity never appears, and the data-URI keeps the single-file constraint at zero cost."
+  ]
+ }
+]

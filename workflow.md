@@ -85,9 +85,12 @@ Maintain an evidence log throughout reading. The format is a markdown file in th
 Location: [file:line / feature / flow]
 Behavior: [what the system does]
 Principle(s) potentially engaged: [list]
+Code/quote candidates: [snippet(s) worth quoting + the paragraph number(s) whose verbatim text fits]
 Evidence strength: [strong / moderate / partial]
 Notes: [anything that affects interpretation]
 ```
+
+The `Code/quote candidates` line pre-stages the structured finding: capturing the snippet and the paragraph number at observation time makes the later `code_evidence[]` and `citations[]` fields cheap to fill, and a reminder to pull the **verbatim** quote from that paragraph's note in `paragraphs/`.
 
 The evidence log is not the report. It is a scratchpad. Many entries in the log will not become findings — some because the evidence is too partial, some because on reflection the principle doesn't quite apply, some because the behavior is more defensible than first appeared. The discipline is: record observations as they appear, weigh them later.
 
@@ -103,7 +106,7 @@ From the evidence log, identify the entries that meet the bar for inclusion. The
 - **Remediation is concrete.** What can be changed? Tactical first; structural note where applicable.
 - **The finding survives a charitable reading.** Could a reasonable defender of the system explain this away? If yes, drop the confidence score or drop the finding entirely.
 
-Each finding follows the template in `templates/report.md`. The format is precise; do not improvise.
+Each finding is authored as a structured `Finding` object — its fields are defined in `templates/findings-schema.md`. Code evidence and encyclical citations are **discrete fields** (`code_evidence[]`, `citations[]`), not sentences buried in prose; `templates/report.md` shows the layout they render into. Pull each citation's verbatim quote (≤25 words) from the cited paragraph's note in `paragraphs/`. The format is precise; do not improvise.
 
 ### What to filter out
 
@@ -126,67 +129,82 @@ Consider a hypothetical finding from an evidence log entry:
 > Evidence strength: strong — the model and the timing logic are both clearly present in code
 > Notes: This is widespread industry practice. The fact that it's common does not change whether it violates the principle.
 
-Moving this to a finding:
+Moving this to a structured `Finding` (per `templates/findings-schema.md`):
 
 ```
-1. Notifications are timed by a model that predicts user re-engagement, with variable-reward windows
-   
-   Location: services/notifications/scheduler.ts:142-180
-   Confidence: 90
-   
-   Behavior: Notification dispatch timing is partially randomized within configurable windows.
-   Timing weights are derived from a model that predicts the user's likelihood of returning to 
-   the platform given that a notification is sent at a given time. The pattern is recognizable 
-   as variable-reward conditioning — the same mechanism that grounds slot-machine retention 
-   architecture.
-   
-   Violation: This violates the principle of integral human development. Per Magnifica Humanitas 
-   §170, "platforms and services are often designed to capture users' time and attention, 
-   exploiting their vulnerabilities and weakening their inner freedom. When business models 
-   thrive on human weakness, the person is treated as a means rather than as an end." The 
-   notification model here functions exactly as the encyclical describes: it operates on the 
-   user's attentional vulnerability to maximize the system's metric of return. The user's stated 
-   reasons for being on the platform play no role in the scheduling.
-   
-   Resembles: technocratic-paradigm — the user's attention is treated as a resource to be 
-   optimally extracted; the user as the object of optimization rather than its beneficiary.
-   
-   Remediation:
-   — Replace the re-engagement-prediction model with a notification scheduler that respects 
-     user-stated preferences for timing and content
-   — Provide a default that opts the user out of all non-essential notifications; require 
-     explicit opt-in per category
-   — Remove variable-window randomization; deliver notifications at predictable times the 
-     user has chosen
-   — Add a measurement to the analytics that tracks user-reported satisfaction with notifications, 
-     and treat decreases as failures even when re-engagement increases
-   
-   Structural note: This finding is likely non-local in the same way attention-economy mechanics 
-   typically are. If platform revenue scales with attention extracted, the engineering fix is 
-   incomplete without a revenue model that does not depend on attention extraction (cf. 
-   Magnifica Humanitas §95-96 on platform-power concentration). Document this dependency 
-   honestly in the response.
+{
+  id: "F1",
+  title: "Notifications are timed by a model that predicts user re-engagement, with variable-reward windows",
+  confidence: 90,
+  primary_principle: "integral_development",
+  principle_relations: [
+    { principle: "integral_development", relation: "violates" },
+    { principle: "solidarity",           relation: "tension" },
+    { principle: "dignity",              relation: "tension" }
+  ],
+  code_evidence: [
+    { location: "services/notifications/scheduler.ts:142-180", language: "typescript",
+      snippet: "const weights = reengagementModel.predict(user, candidateTimes);\nconst dispatchAt = sample(candidateTimes, weights); // randomized within window" }
+  ],
+  behavior: "Notification dispatch timing is partially randomized within configurable windows; the
+    weights are derived from a model that predicts the user's likelihood of returning to the
+    platform given a send time. The pattern is recognizable as variable-reward conditioning.",
+  citations: [
+    { paragraph: "§170",
+      quote: "When business models thrive on human weakness, the person is treated as a means rather than as an end",
+      gloss: "The scheduler operates on the user's attentional vulnerability to maximize the system's metric of return." }
+  ],
+  violation: "This violates integral human development. The notification model functions exactly as
+    §170 describes: it optimizes the user's likelihood of return, not any good the user sought.
+    The user's stated reasons for being on the platform play no role in the scheduling.",
+  resembles: { label: "technocratic-paradigm",
+    gloss: "the user's attention is treated as a resource to be optimally extracted; the user is the object of optimization, not its beneficiary." },
+  remediation: [
+    "Replace the re-engagement-prediction model with a scheduler that respects user-stated timing preferences",
+    "Default users out of non-essential notifications; require explicit opt-in per category",
+    "Remove variable-window randomization; deliver at predictable, user-chosen times",
+    "Track user-reported satisfaction with notifications and treat decreases as failures even when re-engagement rises"
+  ],
+  structural_note: "Likely non-local: if platform revenue scales with attention extracted, the
+    engineering fix is incomplete without a revenue model that does not depend on attention
+    extraction (cf. §95 on platform-power concentration)."
+}
 ```
 
-This finding cites a specific code location, cites a specific paragraph of the encyclical, has clear tactical remediation, names the diagnostic label, and includes a structural note. Confidence is 90 because the mechanism is unambiguously present in code and the encyclical's text on this point is direct.
+Note what the structure buys: the §170 quote is **verbatim and ≤25 words**, taken from that paragraph's note in `paragraphs/`; `code_evidence` and `citations` are discrete fields, so both the HTML and Markdown renderers show a real code block and a blockquote rather than a wall of prose. The `principle_relations` carry the judgment per principle — the behavior *violates* integral human development and *strains* solidarity and dignity (the finding has no standalone verdict; relations are what the matrix and the rail render). Confidence is 90 because the mechanism is unambiguously present and §170 is direct.
+
+## Phase 3b — Consolidate
+
+Because the loci are organized by area, the same underlying behavior surfaces under several reading passes — the notification scheduler above would also be caught under telemetry and under engagement design. Pre-consolidation overlap is expected; leaving it unmerged is the defect. After verifying findings:
+
+1. **Merge** findings describing the same underlying behavior-and-violation into one — combine their code locations, keep the strongest and most accurate citations — and record each merged-away finding in `dropped[]` with `reason: merged_into:<id>`.
+2. **Assign** each survivor its `principle_relations` — the principle it most centrally engages first (this becomes `primary_principle`), then every other principle it engages, judging each relation: `violates` (the behavior contradicts the principle) or `tension` (it strains it — displayed as "strains").
+3. **Name the breadth.** 4–12 consolidated findings is typical; more than ~12 is a signal of system-wide tension to state in the synthesis, not a filtering failure to hide.
+
+A locus-organized reading routinely produces roughly twice the findings that survive consolidation — for example, a recent audit yielded 21 verified findings that consolidated to 10. That ratio is the process working.
 
 ## Phase 4 — Synthesize
 
 After all findings are written, produce a synthesis at the top of the report. The synthesis:
 
 - Is no more than 250–400 words for a typical audit
-- Names the principles most centrally honored and violated
+- Names the principles most centrally violated and strained
 - Answers the encyclical's litmus question from §85 in evidence-grounded form
-- Frames the answer through the encyclical's central image (§7–10, §90): toward Babel or toward the rebuilt Jerusalem?
+- Frames the answer through the encyclical's central image (§7–10, §90): toward Babel or toward the rebuilt Jerusalem? — and sets `synthesis.verdict_image` accordingly
 - Does not introduce new findings — only weighs what is already in the report
 
-A synthesis is not a summary; it is a judgment. The audit has built the case in the findings. The synthesis says what the case adds up to.
+A synthesis is not a summary; it is a judgment. The audit has built the case in the findings. The synthesis says what the case adds up to. (The renderers place a data-computed stat line beside the verdict — findings counted, principles by aggregate verdict — so the synthesis prose never needs to recite counts.)
+
+Then derive the **per-principle verdicts**: for each of the seven principles, set `verdict` (`violates` / `tension` / `honors`) from the findings' `principle_relations` and write a one-line `verdict_summary`, using the derivation rule in `templates/findings-schema.md`. The synthesis is the overarching judgment; the findings × principles matrix makes it concrete principle by principle.
 
 ## Phase 5 — Output
 
-Use `templates/report.md` for the final report. Default output is the full structured report. If the user has requested a shorter format, condense the findings while retaining: principle cited, paragraph reference, confidence score, remediation. Never report findings below confidence 80.
+Assemble the structured `report` object (per `templates/findings-schema.md`), then render it two ways:
 
-If the audit is being delivered as a file (markdown), save it. If it is being delivered inline, render it cleanly. The audit's authority depends on the precision of its presentation.
+- **Default — the HTML artifact.** Take `templates/report.html`, replace its `@@REPORT_DATA@@` sentinel with the `report` object serialized as JSON, and write the result as a self-contained `.html` file. Escape any `</` sequence in the embedded JSON (so a code snippet containing `</script>` cannot break the page). Write no presentation markup — only the data; the template's own CSS and JS render everything (the synthesis verdict row and stat line, the findings × principles matrix, the reading-order ordinals, the finding cards with their marginalia rails, code highlighting, the themes, navigation, and print styles) from the object at load time.
+- **Secondary — the Markdown copy.** Render the same object into the `templates/report.md` layout and save it alongside, for sharing or LLM upload — same content, same vocabulary (violates/strains), same ordinals.
+
+If the user requests a shorter format, condense `behavior` and `remediation` while keeping each finding's principle relations, paragraph citations, confidence, and remediation, plus the findings × principles matrix. Never report findings below confidence 80. The audit's authority depends on the precision of its presentation.
 
 ## A note on humility
 

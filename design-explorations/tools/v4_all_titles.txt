@@ -1,0 +1,57 @@
+C01 [must] (scorecard) Scorecard rows 03/07 drop their chip + count to an orphan second line
+C02 [must] (scorecard) Ratings key wraps mid-definition with a widowed 'it.' and a stranded '·' at line start
+C03 [must] (code) Code-caption file paths break mid-extension ('…hydrator.r / s:31,37')
+C04 [must] (code) Code figure's right-edge fade is always on — it washes out real terminal glyphs and never releases at scroll-end
+C05 [must] (global) The 'ONE prose measure' resolves to four+ different widths — footer rule 22% short, summary rule 18px long, code figure ~80px wide
+C06 [must] (global) Theme toggle is unanchored at every breakpoint: orphaned at wide widths, overlapping content at 681–940px, flush against the screen edge on mobile
+C07 [must] (global) Dark theme's muted-text tier is collapsed: --tx-2 should be base-500, not base-300
+C08 [must] (finding) Finding IDs are displayed nowhere, leaving 'reason merged into F1' a dangling, unlinked cross-reference
+C09 [must] (global) Printing from the default dark theme is broken — only 4 of ~30 tokens reset, code panels print near-black with #111 text
+C10 [must] (global) UA chrome ignores the active theme: bind the color-scheme property and a theme-color meta to data-theme
+C28 [must] (code) Print clips long code lines: the code child's white-space:pre defeats the print pre-wrap rule
+C12 [should] (synthesis) Polish the hero verdict pill: baseline-align the OVERALL eyebrow, let it recede, and bind the pill to its caption
+C13 [should] (scorecard) Move the ratings key below 'The findings, by principle' caption
+C14 [should] (scorecard) Scorecard finding rows — the report's primary navigation — have no resting link affordance and snap on hover
+C15 [should] (scorecard) Pin the scorecard relation marker to the right rail — its column alignment is an accident of this dataset
+C16 [should] (scorecard) Scorecard's closing rule collides with its own full-measure hairlines
+C17 [should] (finding) 'confidence' and 'ENGAGES' speak in different voices 1.5rem apart in the same rail
+C18 [should] (finding) The em-dash in the rail ENGAGES list wraps inconsistently — bind it to the relation word
+C19 [should] (global) Collapse the eight near-identical body sizes (and the remedy > explanation inversion) to a three-step scale
+C20 [should] (citations) Citation quote marks: make them real characters and hang the opening mark outside the text edge
+C21 [should] (citations) Remedy text and the structural note sit on their own indented left edges — hang their marks in the gutter instead
+C22 [should] (citations) Remedies visually attach to the citation above them — give the block real separation
+C23 [should] (code) Dark code panel is one ramp step off black and visually disappears — use base-900 for surface parity with light
+C24 [should] (finding) Make the rail ✴ a permalink and style :target so jumps visibly land
+C25 [should] (global) Deep links land off-target: re-scroll to the URL fragment after render and after fonts load
+C26 [should] (footer) The page dead-ends: add a quiet wayfinding line (back to top · findings index) above the footer credit
+C27 [should] (code) Scrollable code regions are unreachable by keyboard — add tabindex/role when a pre overflows
+C29 [should] (footer) Footer links wrongly carry data-href-shown, so print drops the tool's provenance URLs
+C30 [should] (global) Theme toggle semantics are self-contradicting: aria-pressed fights the action label; dead under noscript; D shortcut undocumented
+C31 [should] (meta) Put the system name first in document.title, guard the dangling dash, and drop lang="la" from the <title>
+C32 [should] (meta) No meta description or Open Graph tags — shared links unfurl bare
+C33 [should] (meta) Add a data-URI ✴ SVG favicon
+C34 [should] (finding) Mobile rail: the confidence number stacks on its own line inside the inline meta strip
+C35 [should] (masthead) Mobile masthead meta loses label–value pairing: gap within a pair equals gap between pairs
+C36 [should] (scorecard) Mobile scorecard strands '01 ●' on its own line above the principle name
+C37 [should] (closings) Give 'Dropped' and 'Limits' the one-line leads the first closing has, and use the full 'Limits of this audit' caption
+C38 [should] (closings) Dropped-list mono metadata wraps mid-pair ('conf 35 · reason / charitable reading')
+C39 [could] (global) Define an on-brand ::selection instead of the OS default blue
+C40 [could] (global) Masthead and footer links have no hover state; existing hovers snap instead of easing
+C41 [could] (scorecard) Apply dedash() to scorecard titles so the same title reads identically in both places
+C42 [could] (masthead) Format the masthead date for reading inside a <time> element
+C43 [could] (masthead) Keep hyphenated identifiers like 'home-mixer' from fracturing in the scope row
+C44 [could] (masthead) Display the repository URL without its scheme; let print append the full address
+C45 [could] (citations) Fix the collapsed margin under 'From Magnifica Humanitas' so the cap binds to its quotes
+C46 [could] (citations) Add .cite-quote to the text-wrap:pretty list
+C47 [could] (global) Tokenize the drifting caption gaps, intra-finding block margins, and asterism margins
+C48 [could] (closings) Set the closing captions in the running caption voice, not the masthead overline's loud tracking
+C49 [could] (masthead) Give the masthead more air above the overline
+C50 [could] (closings) Support inline code in closing bullets so Rust paths stop rendering in serif
+C52 [could] (code) Add a bare 'copy' text-button to the code figure caption
+C53 [could] (code) Disable Fira Code ligatures inside code evidence so snippets are verbatim
+C54 [could] (code) Theme the Firefox scrollbar with scrollbar-color to match the WebKit thumb
+C55 [could] (code) Unify the three near-identical mono micro-sizes on one token
+C56 [could] (scorecard) Empty-principle state: accessible count and a non-list note
+C57 [could] (global) Hide the empty-rail ghost rows at the 680px collapse
+C58 [could] (finding) Mobile rail: let the ✴ share the ENGAGES line instead of sitting alone
+C59 [could] (global) Add text-size-adjust to prevent iOS landscape font inflation

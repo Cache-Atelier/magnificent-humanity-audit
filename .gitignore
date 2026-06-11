@@ -6,3 +6,5 @@ release.sh
 __pycache__/
 *.pyc
 .claude/settings.local.json
+design-explorations/archive/
+.obsidian/

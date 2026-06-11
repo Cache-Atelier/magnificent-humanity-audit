@@ -97,8 +97,12 @@ magnificent-humanity-audit/        # repo root = AgentSkills payload
 ├── principles/                    # the seven principles
 ├── loci/                          # nine areas of evidence (+ warfare appendix)
 ├── diagnostic-labels/             # technocratic-paradigm, transhumanism, posthumanism
+├── paragraphs/                    # per-paragraph verbatim notes (loaded on demand for quotes)
+├── examples/                      # a finished example report
 └── templates/
-    └── report.md                  # output template
+    ├── findings-schema.md         # the structured report object — single source of truth
+    ├── report.html                # DEFAULT output: self-contained styled artifact (data injected at a sentinel)
+    └── report.md                  # secondary Markdown rendering of the same object
 ```
 
 ## Contributing

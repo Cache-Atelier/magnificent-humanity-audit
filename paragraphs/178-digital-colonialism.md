@@ -1,0 +1,9 @@
+# §178 — Digital colonialism
+
+> Even today, colonialism assumes new forms. It no longer dominates only bodies, but appropriates data, transforming personal lives into exploitable information. Entire regions, especially those marked by structural fragility and limited geopolitical relevance, are currently subjected to a new mindset of extraction: that of health data, epidemiological profiles, genetic maps and demographic information. These have become the new “rare earths” of power: vital data which, once aggregated and analyzed, can be used to train predictive models, guide investment strategies, anticipate crises and, above all, determine who and what is deemed to matter. Those who control the health data of entire peoples — often collected under the pretext of aid, research or innovation — possess a structural leverage over the future, for they can shape needs and markets. They can also decide, before others, to whom medicines, investments and protections will be allocated. Here lies one of the most urgent moral challenges of our time: to ensure that shared knowledge becomes a true common good rather than an instrument of dominance. This requires restoring to individuals not only the data that describes them, but also the ability to decide how it is used, by whom and for whose benefit. Otherwise, the digital age will not be post-colonial, but colonial in another form.
+
+**Gloss:** Colonialism assumes new forms, appropriating data and transforming personal lives into exploitable information; individuals must be restored both the data that describes them and control over its use.
+
+**Serves:** principles: universal_destination, social_justice · loci: 2, 9
+
+*Verbatim from* Magnifica Humanitas *§178 (Leo XIV, 15 May 2026; vatican.va). Footnote markers removed; text otherwise unaltered.*

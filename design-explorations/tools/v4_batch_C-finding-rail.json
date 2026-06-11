@@ -1,0 +1,175 @@
+[
+ {
+  "id": "C17",
+  "title": "'confidence' and 'ENGAGES' speak in different voices 1.5rem apart in the same rail",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "The same Fira Code labelling voice is set five ways: .fe-label is uppercase with .1em tracking (lines 307\u2013310) while .f-conf directly beneath it in the same rail stack is lowercase with no tracking (line 314); masthead labels are lowercase .08em (line 210), the pill eyebrow and toggle uppercase .12em (lines 174, 182), and .dc-label .04em (line 393). The rail clash ('ENGAGES \u2026 confidence 88') is unmistakable once seen, on every card in both themes. The stylesheet defines tracking tokens for small-caps (lines 29\u201330) but none for the mono voice.",
+  "recommendation": "Add a --track-mono token (.1em) and give .f-conf the .fe-label treatment (uppercase, .68rem, .1em) so the rail speaks with one voice \u2014 pure CSS, since the bold number re-declares its own size/tracking (line 315) and digits are unaffected by text-transform. Align .dc-label and .mm-label to the same token (the lowercase-keys vs uppercase-headings case split is fine if consistent).",
+  "css_js_sketch": ":root{--track-mono:.1em}\n.f-rail .f-conf{font-family:\"Fira Code\",monospace; font-size:.68rem; letter-spacing:var(--track-mono); text-transform:uppercase; color:var(--tx-2); line-height:1.5}\n.f-engages .fe-label{letter-spacing:var(--track-mono)}\nul.plain.dropped .dc-label{letter-spacing:var(--track-mono)}\n.mast-meta .mm-label{letter-spacing:var(--track-mono)}",
+  "evidence": "before-finding-card-dark.png / before-finding-card-light.png ('ENGAGES' tracked vs 'confidence' untracked); final-rail-stars-v3.html lines 174, 182, 209\u2013212, 307\u2013315, 392\u2013393",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 'ENGAGES' and 'confidence' speaking in different voices 1.5rem apart in the same rail is unmistakable once seen; one --track-mono token is exactly how this stylesheet already thinks.",
+   "risk: Y \u2014 Pure CSS; the bold value re-declares size/tracking at line 315 and digits are immune to text-transform, so only the label's voice changes as intended.",
+   "value: Y \u2014 Verified: 'ENGAGES' and 'confidence' speak in two voices 1.5rem apart on every single card, and the fix is pure CSS with a reusable token."
+  ]
+ },
+ {
+  "id": "C18",
+  "title": "The em-dash in the rail ENGAGES list wraps inconsistently \u2014 bind it to the relation word",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "The dash lives in the breakable principle text node ('shortName + \" \u2014 \"', lines 916\u2013917) while only the relation span is nowrap (line 312), so line breaks fall on either side of it. Both failure modes appear in the shipped screenshots: 'Integral development / \u2014 violates' (dash opens line 2) and 'Social justice \u2014 / violates' (dash dangles at line end, before-boundary-dark.png). One list, two wrap grammars.",
+  "recommendation": "Move the dash into the no-wrap relation group so a wrap always reads 'Principle / \u2014 relation', never 'Principle \u2014 / relation'. Optionally add a small hanging indent so wrapped relation lines read as subordinate.",
+  "css_js_sketch": "/* renderFinding, lines 916\u2013917 */\nitem.appendChild(document.createTextNode(shortName(r.principle)+\" \"));\nvar grp=el(\"span\",\"fe-relgrp\");\ngrp.appendChild(document.createTextNode(\"\u2014 \"));\ngrp.appendChild(el(\"span\",\"fe-rel \"+rm.cls, rm.label));\nitem.appendChild(grp);\n/* CSS */\n.fe-relgrp{white-space:nowrap}\n.f-engages .fe-item{display:block; padding-left:.65rem; text-indent:-.65rem}",
+  "evidence": "before-finding-card-dark.png, before-finding-card-light.png, before-boundary-dark.png (both wrap patterns); final-rail-stars-v3.html lines 311\u2013313, 916\u2013917",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Two wrap grammars in one list \u2014 dash opening one line, dangling at another \u2014 is micro-typographic noise; binding the dash to the relation word makes every wrap read identically.",
+   "risk: Y \u2014 Safe textContent-only restructure, but scope the optional .65rem hanging indent to desktop \u2014 it conflicts with C58's mobile display:contents row where the negative text-indent reads as a stray left shift.",
+   "value: Y \u2014 Both wrap failures ('\u2014 violates' opening a line, dash dangling) are visible in shipped screenshots on the element repeated beside every finding."
+  ]
+ },
+ {
+  "id": "C34",
+  "title": "Mobile rail: the confidence number stacks on its own line inside the inline meta strip",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "Desktop sets .f-rail .f-conf b{display:block} (line 315) so the number sits under its label in the vertical rail; the \u2264680px block (lines 431\u2013432) flips the rail to a horizontal wrapped row but never overrides the block display, so the inline strip fractures \u2014 measured at 375px the conf box is 37px tall with 'confidence' and '88' stacked, inside what should be one quiet inline run before the title.",
+  "recommendation": "In the mobile media query, render the value inline after its label.",
+  "css_js_sketch": "@media(max-width:680px){\n  .f-rail .f-conf b{display:inline; margin-left:.3rem}\n}",
+  "evidence": "/tmp/mh-mobile/mob-frail.png; measured conf box h=37 with b at y+17; final-rail-stars-v3.html lines 314\u2013315 vs 414\u2013436",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A 37px-tall stacked fragment inside what should be one quiet inline strip is visibly unfinished on mobile; one declaration fixes it.",
+   "risk: Y \u2014 One declaration inside the existing 680px block; no desktop or print exposure.",
+   "value: Y \u2014 A 37px-tall stacked fragment inside what should be one quiet inline strip is visible breakage on every mobile finding, fixed by one declaration."
+  ]
+ },
+ {
+  "id": "C58",
+  "title": "Mobile rail: let the \u2734 share the ENGAGES line instead of sitting alone",
+  "severity": "low",
+  "area": "finding",
+  "priority": "could",
+  "problem": "In the \u2264680px rail row, .f-engages is a single flex item whose max-content width forces it to wrap below the star, so the \u2734 opens the finding as a stray lone glyph line above a 2\u20133 line meta strip (measured star at y=4522 alone, ENGAGES label at y=4549.8) \u2014 four lines of marginalia before the title.",
+  "recommendation": "Use display:contents on .f-engages in the mobile query so the label and items become flex items of .f-rail and flow inline after the star.",
+  "css_js_sketch": "@media(max-width:680px){\n  .f-rail{gap:.3rem .8rem}\n  .f-engages{display:contents}\n}",
+  "evidence": "/tmp/mh-mobile/mob-frail.png (lone \u2734 line above ENGAGES); final-rail-stars-v3.html lines 304\u2013306, 431\u2013432",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A stray lone glyph line above the mobile meta strip is visible debris; display:contents on a div of styled spans is safe here since the element carries no semantics to flatten.",
+   "risk: Y \u2014 display:contents on semantics-free spans is safe in all current engines, but flag the interaction with C18: its hanging text-indent on fe-items must be reset (or desktop-scoped) in this mobile row or first lines shift left oddly.",
+   "value: Y \u2014 The lone \u2734 line on mobile is mildly awkward rather than broken; display:contents is fine on these plain divs and costs one rule."
+  ]
+ },
+ {
+  "id": "C08",
+  "title": "Finding IDs are displayed nowhere, leaving 'reason merged into F1' a dangling, unlinked cross-reference",
+  "severity": "high",
+  "area": "finding",
+  "priority": "must",
+  "problem": "Findings carry stable ids (anchors #f-F1\u2026, line 902) but the ID is never rendered \u2014 the rail shows only star/engages/confidence (lines 904\u2013928). Yet the 'Dropped and consolidated' closing prints 'reason merged into F1' as plain text (fmtReason, lines 1025\u20131028; visible in before-footer-dark.png), a reference to a label that does not exist anywhere on the page and is not a link. A reader cannot resolve which finding 'F1' is, and the flat list of near-identical cards gives no citable identity or positional sense.",
+  "recommendation": "Render the finding's ID as a small Fira Code label beside the rail \u2734 \u2014 same quiet mono voice as the confidence number \u2014 so every card has a visible, citable identity. Then make 'merged into F1' a real anchor to #f-F1 (only when the target exists). Pairs with C24's permalink/:target work.",
+  "css_js_sketch": "/* renderFinding rail (line ~905) */\nvar rh=el(\"div\",\"f-railhead\"); rh.appendChild(star);\nrh.appendChild(el(\"span\",\"f-id\",String(f.id||\"\")));\nrail.appendChild(rh);\n/* CSS */\n.f-railhead{display:flex; align-items:center; gap:.5rem}\n.f-id{font:500 .66rem/1 \"Fira Code\",monospace; letter-spacing:.14em; color:var(--tx-2); text-transform:uppercase}\n/* dropped builder (lines 1111\u20131112) */\nvar m=/^merged_into:(.+)$/.exec(String(d.reason||\"\"));\nif(m && document.getElementById(\"f-\"+m[1])){\n  dc.appendChild(el(\"span\",\"dc-label\",\"reason \"));\n  var a=el(\"a\",null,\"merged into \"+m[1]); a.href=\"#f-\"+m[1]; dc.appendChild(a);\n}else{ /* existing text path */ }\n/* CSS */ .dc a{color:inherit; text-decoration:underline; text-underline-offset:2px}\n.dc a:hover{color:var(--accent)}",
+  "evidence": "before-footer-dark.png / before-closings-dark.png ('reason merged / into F1'); final-rail-stars-v3.html lines 902, 904\u2013928, 1025\u20131028, 1111\u20131112",
+  "lenses": [
+   "navigation-wayfinding",
+   "closings-footer",
+   "finding-card"
+  ],
+  "amendments": [
+   "Coordinate with C24 \u2014 the railhead wrapper and the star-as-link must be built in one pass.",
+   "Coordinate the rail-head markup with C24's permalink star so the two changes share one structure."
+  ],
+  "reasons": [
+   "taste: Y \u2014 'Merged into F1' referencing a label that exists nowhere is a broken promise to the reader; a quiet mono ID in the rail is information, not decoration, for an artifact meant to be cited.",
+   "risk: Y \u2014 Renders via el()/textContent with a getElementById existence guard, findings render before the dropped list so the anchor check is sound; coordinate with C24 (star becomes an <a>) and C38 (both rewrite the dropped reason nodes) in one pass.",
+   "value: Y \u2014 Verified: 'reason merged into F1' references a label rendered nowhere \u2014 an unresolvable cross-reference in a rigor-themed audit is a direct trust break, and visible IDs make findings citable in issues."
+  ]
+ },
+ {
+  "id": "C24",
+  "title": "Make the rail \u2734 a permalink and style :target so jumps visibly land",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "Findings have stable anchors and the scorecard deep-links to them (line 822), but the star is an inert aria-hidden span (line 906) and grep confirms no :target rule exists \u2014 a reader who wants to cite one finding has to open devtools, and after a smooth-scroll jump the landed card looks identical to every neighbor (with scroll-margin-top:5rem the previous finding's tail is visible above, so there is no confirmation of which card answered the click). For a report meant to be cited in issues and PRs, deep-linking is core product behavior.",
+  "recommendation": "Render the \u2734 as a self-link (<a href=\"#f-{id}\">) with an aria-label \u2014 the finding's sigil becomes its permalink, zero new decoration \u2014 and add a quiet persistent :target state in the existing vocabulary (title takes accent while the hash matches), plus an optional one-shot wash already neutralized by the reduced-motion block (line 410). Clicking the star also puts the copyable URL in the address bar.",
+  "css_js_sketch": "/* renderFinding (line 906) */\nvar star=el(\"a\",\"f-star\",\"\u2734\"); star.href=\"#f-\"+f.id;\nstar.setAttribute(\"aria-label\",\"Link to this finding (\"+f.id+\")\");\n/* CSS */\na.f-star{text-decoration:none}\na.f-star:hover,a.f-star:focus-visible{color:var(--tx)}\n.finding:target .f-title{color:var(--accent)}\n@media(prefers-reduced-motion:no-preference){\n  .finding:target{animation:f-land 1.4s ease-out 1}\n  @keyframes f-land{from{background:color-mix(in srgb,var(--accent) 7%,transparent)}to{background:transparent}}\n}",
+  "evidence": "final-rail-stars-v3.html lines 90, 291, 822, 905\u2013907, 935; grep ':target' returns nothing",
+  "lenses": [
+   "navigation-wayfinding",
+   "finding-card",
+   "product-features"
+  ],
+  "amendments": [
+   "Keep the persistent :target title accent; omit the one-shot background wash animation \u2014 the quiet state is confirmation enough.",
+   "Build the star-anchor alongside C08's rail-head ID so the rail is touched once."
+  ],
+  "reasons": [
+   "taste: Y \u2014 For an artifact cited in issues and PRs, the sigil-as-permalink is function disguised as the existing glyph, and a quiet :target state confirms the jump; coordinate the star markup with C08.",
+   "risk: Y \u2014 The anchor keeps the .f-star class so existing rail styles apply, :target plus the motion-gated wash uses only existing tokens (accent verifies 4.83:1 dark / 6.39:1 light on the title), and it must merge with C08's railhead wrapper in one edit.",
+   "value: Y \u2014 Citing individual findings in issues and PRs is core product behavior for this artifact, and landing a jump with zero confirmation of which card answered is a real wayfinding failure."
+  ]
+ },
+ {
+  "id": "C25",
+  "title": "Deep links land off-target: re-scroll to the URL fragment after render and after fonts load",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "Content is built at DOMContentLoaded (lines 1124\u20131125), so when someone opens report.html#f-F4 the target does not exist at parse time; and even after the browser's fragment retry, EB Garamond arrives from the CDN and reflows the entire serif page \u2014 on a document this long the anchor shifts substantially, parking the reader mid-way through the wrong finding.",
+  "recommendation": "After init() finishes, and again when document.fonts.ready resolves, re-scroll to location.hash if present. Three lines of vanilla JS, fully self-contained.",
+  "css_js_sketch": "function gotoHash(){\n  if(!location.hash) return;\n  var t=document.getElementById(decodeURIComponent(location.hash.slice(1)));\n  if(t) t.scrollIntoView();\n}\n/* end of init(): */ gotoHash();\nif(document.fonts && document.fonts.ready) document.fonts.ready.then(gotoHash);",
+  "evidence": "final-rail-stars-v3.html lines 1124\u20131125 (render at DOMContentLoaded), Google Fonts link line 11, line 90 (smooth scroll)",
+  "lenses": [
+   "navigation-wayfinding"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Deep links that park the reader mid-way through the wrong finding break the product behavior C24 establishes; three invisible lines of vanilla JS, fully in-budget.",
+   "risk: Y \u2014 Three lines, guarded on location.hash, self-contained; the only edge (a late fonts.ready re-scroll) targets the same fragment the reader navigated to, which is harmless.",
+   "value: Y \u2014 Deep links that park readers mid-wrong-finding after the Garamond reflow break the share moment entirely \u2014 and C24's permalinks are only as good as where they land."
+  ]
+ },
+ {
+  "id": "C26",
+  "title": "The page dead-ends: add a quiet wayfinding line (back to top \u00b7 findings index) above the footer credit",
+  "severity": "medium",
+  "area": "footer",
+  "priority": "should",
+  "problem": "This is one very long flat flow and there is NO route back up from anywhere: grep finds no '#top', no back-to-top, and no link to #scorecard-sec (line 477) anywhere. A reader who jumps from the scorecard to finding 7 has only a long manual scroll back; the footer ends on a single attribution sentence (renderFooter, lines 1032\u20131052).",
+  "recommendation": "End the page with a quiet mono wayfinding row above the colophon: '\u2191 Back to top \u00b7 Findings, by principle' \u2014 Fira Code, uppercase, tx-2, accent on hover. '#top' is a spec-defined fragment that scrolls to document top with no matching id needed; #scorecard-sec already exists. Preferred over a floating \u2191 button (extra fixed chrome, off-brand) \u2014 the footer pair is the restrained shippable fix.",
+  "css_js_sketch": "/* renderFooter, before the credit <p> */\nvar nav=el(\"p\",\"foot-nav\");\nvar a1=el(\"a\",null,\"\u2191 Back to top\"); a1.href=\"#top\"; nav.appendChild(a1);\nnav.appendChild(el(\"span\",\"fn-sep\",\"\u00b7\"));\nvar a2=el(\"a\",null,\"Findings, by principle\"); a2.href=\"#scorecard-sec\"; nav.appendChild(a2);\ncol.appendChild(nav);\n/* CSS */\n.foot-nav{margin:0 0 1.4rem}\n.foot-nav a{font:500 .68rem/1 \"Fira Code\",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--tx-2); text-decoration:none}\n.foot-nav a:hover,.foot-nav a:focus-visible{color:var(--accent)}\n.foot-nav .fn-sep{color:var(--ui-3); padding:0 .6rem}",
+  "evidence": "before-footer-dark.png; final-rail-stars-v3.html lines 477, 1032\u20131052; grep for '#top'/'scrollTo' returns nothing",
+  "lenses": [
+   "navigation-wayfinding",
+   "product-features"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A very long flat flow with no route back up is a real dead-end, and the footer pair is the restrained answer \u2014 correctly rejecting the floating button that would have been off-brand; coordinate placement with C51 (nav above credit, colophon below).",
+   "risk: Y \u2014 '#top' is spec-defined with no id required, #scorecard-sec exists at line 477, and the additive footer row touches no invariant.",
+   "value: Y \u2014 A 12,000px document with provably no route back up is a genuine wayfinding gap, and the footer pair is the restrained fix versus floating chrome."
+  ]
+ }
+]

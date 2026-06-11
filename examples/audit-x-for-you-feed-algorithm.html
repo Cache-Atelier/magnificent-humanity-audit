@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#100F0F">
+<meta name="generator" content="Magnificent Humanity Audit">
+<meta name="description" content="An anthropological audit reading a software system against the seven principles of Catholic social doctrine set out in the encyclical Magnifica Humanitas.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Magnifica Humanitas Audit">
+<meta property="og:description" content="This reads the system against the seven principles of Catholic social doctrine, asking what its workings imply about the human person.">
+<meta name="twitter:card" content="summary">
+<title>Magnifica Humanitas Audit</title>
+<link rel="icon" href='data:image/svg+xml,<svg%20xmlns="http://www.w3.org/2000/svg"%20viewBox="0%200%20100%20100"><rect%20width="100"%20height="100"%20rx="16"%20fill="%23100F0F"/><text%20x="50"%20y="74"%20font-size="66"%20text-anchor="middle"%20fill="%23FEFEFC">%E2%9C%B4%EF%B8%8E</text></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Fira+Code:wght@400;500&display=swap">
+<style>
+/* ---------- Flexoki raw ramp (https://stephango.com/flexoki) ---------- */
+:root{
+  --paper:#FEFEFC; /* one approved deviation from stock Flexoki (#FFFCF0):
+                      a whiter page, A/B-picked; the warm base ramp stays */
+  --base-50:#F2F0E5; --base-100:#E6E4D9; --base-150:#DAD8CE;
+  --base-200:#CECDC3; --base-300:#B7B5AC; --base-500:#878580; --base-600:#6F6E69;
+  --base-700:#575653; --base-800:#403E3C; --base-850:#343331; --base-900:#282726;
+  --base-950:#1C1B1A; --black:#100F0F;
+  --red-600:#AF3029;  --red-400:#D14D41;  --red-700:#942822;
+  --orange-600:#BC5215; --orange-400:#DA702C; --orange-700:#9D4310;
+  --yellow-600:#AD8301; --yellow-400:#D0A215; --yellow-700:#8E6B01;
+  --green-600:#66800B;  --green-400:#879A39; --green-700:#536907;
+  --cyan-600:#24837B;   --cyan-400:#3AA99F;  --cyan-700:#1C6C66;
+  --blue-600:#205EA6;   --blue-400:#4385BE;  --blue-700:#1A4F8C;
+  --purple-600:#5E409D; --purple-400:#8B7EC8; --purple-700:#4F3685;
+  --magenta-600:#A02F6F;--magenta-400:#CE5D97;
+
+  /* ---- tracking tokens: consistent small-caps + mono labelling values ---- */
+  --track-cap:.06em;     /* section captions, small-caps labels, names */
+  --track-label:.13em;   /* the loud masthead overline — reserved for it alone */
+  --track-mono:.1em;     /* the one mono labelling voice: rail labels, IDs, meta keys */
+}
+/* ---------- Semantic roles: LIGHT (600-level accents) ---------- */
+:root{
+  color-scheme:light; /* UA surfaces (scrollbars, form controls) follow the active theme */
+  --bg:var(--paper); --bg-2:var(--base-50); --ui:var(--base-100); --ui-2:var(--base-150);
+  --ui-3:var(--base-200); --tx:var(--black); --tx-2:var(--base-600);
+  --accent:var(--blue-600);
+  --honors:var(--green-600); --tension:var(--yellow-600); --violates:var(--red-600);
+  --code-bg:var(--base-100);
+  /* code tokens darkened to >=4.5:1 on the light code panel (base-100) */
+  --hl-comment:var(--base-700); --hl-string:var(--cyan-700); --hl-number:var(--purple-700);
+  --hl-keyword:var(--green-700); --hl-constant:#7A5C01; --hl-function:var(--orange-700);
+  --hl-builtin:var(--blue-700);
+  /* verdict inks darkened to a >=4.5:1 floor on paper — the synthesis pill
+     and the relation markers below draw from these */
+  --honors-ink:#3C4D08;   --tension-ink:#6F5401;   --violates-ink:#871F1A;
+  /* relation markers reuse verdict ink */
+  --rel-violates:var(--violates-ink); --rel-tension:var(--tension-ink);
+  /* structural divider hairline (stronger than decorative) */
+  --hair-strong:1px solid var(--base-300);
+  /* Grid system: a slim left rail for marginalia + a content column for prose */
+  --rail-col:9.5rem;        /* width of the left rail (engages list, confidence, §-refs) */
+  --gutter:2.25rem;         /* space between rail and content */
+  --prose:35.3rem;          /* the ONE prose measure — 62ch at the 19px body (564.8px), set in rem
+                               so every max-width:var(--prose) lands on one identical right edge
+                               regardless of the consumer's own font-size */
+  --measure:824px;          /* total grid width: rail + gutter + prose, no dead right gutter */
+  --rule:1px solid var(--tx);     /* structural baseline rule, ink */
+  --hair:1px solid var(--ui-3);   /* faint internal hairline */
+  --baseline:1.5;
+  /* three-step prose scale — every running-text block maps onto one of these */
+  --fs-body:1rem;   --lh-body:1.55;   /* primary: explanations, remedies, lists */
+  --fs-2nd:.96rem;  --lh-2nd:1.5;     /* secondary: glosses, notes, structural asides */
+  --fs-small:.92rem;                  /* small: footer, dropped list */
+  --mono-micro:.72rem;                /* the one mono micro-size: figcaption, pre, §-refs, counts */
+  /* spacing rhythm tokens */
+  --gap-cap:1.6rem;                   /* caption bottom gap (v7: +air under section heads) */
+  --gap-blk:1.2rem;                   /* intra-finding block top gap */
+}
+/* ---------- Semantic roles: DARK (400-level accents) ---------- */
+[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:var(--black); --bg-2:var(--base-950); --ui:var(--base-900); --ui-2:var(--base-850);
+  --ui-3:var(--base-800); --tx:var(--base-200); --tx-2:var(--base-500); /* Flexoki-spec tx-2:
+     base-500 = 5.19:1 on --black — a real muted tier, parity with light's base-600 (4.97:1) */
+  --accent:var(--blue-400);
+  --honors:var(--green-400); --tension:var(--yellow-400); --violates:var(--red-400);
+  --code-bg:var(--base-900); /* 1.28:1 vs bg — surface parity with light's base-100 (1.24:1) */
+  /* code tokens nudged off the 400 ramp where needed to keep >=4.5:1 on base-900 */
+  --hl-comment:#94928B; --hl-string:var(--cyan-400); --hl-number:#9A8FD0;
+  --hl-keyword:var(--green-400); --hl-constant:var(--yellow-400); --hl-function:#DE7A38;
+  --hl-builtin:#5E9ACB; /* a touch lighter than blue-400 to clear 4.5:1 on base-900 */
+  /* green/yellow 400 clear >=4.5:1 on ink; red needs a lighter step (still on
+     the red ramp) to clear the >=4.5:1 floor for the pill + relation markers */
+  --honors-ink:var(--green-400);   --tension-ink:var(--yellow-400);   --violates-ink:#E06A5E;
+  --rel-violates:var(--violates-ink); --rel-tension:var(--yellow-400);
+  --hair-strong:1px solid var(--base-700);
+  --rule:1px solid var(--tx);
+  --hair:1px solid var(--ui-3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--tx);
+  font-family:"EB Garamond",Georgia,"Times New Roman",serif;
+  font-size:19px; line-height:var(--baseline); font-feature-settings:"liga" 1,"onum" 1,"kern" 1;
+  -webkit-font-smoothing:antialiased; transition:background .2s ease,color .2s ease;
+  text-rendering:optimizeLegibility;
+}
+code,pre,.mono{font-family:"Fira Code",ui-monospace,Menlo,Consolas,monospace}
+a{color:inherit; text-decoration:none; transition:color .15s ease, text-decoration-color .15s ease}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* on-brand selection — a wash of the theme's own accent, flips with data-theme */
+::selection{background:color-mix(in oklab, var(--accent) 28%, var(--bg)); color:var(--tx)}
+.skip-link{position:absolute; left:-999px; top:0; background:var(--bg-2); padding:.5rem .9rem; z-index:20; font-family:"Fira Code",monospace; font-size:.74rem}
+.skip-link:focus{left:.5rem; top:.5rem}
+.visually-hidden{position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
+
+/* small-caps Garamond — the quiet labelling voice, never mono unless systemic */
+.sc{font-variant:small-caps; letter-spacing:var(--track-cap)}
+
+/* ===================================================================
+   GRID PRIMITIVE — two zones, ONE left edge.
+   A slim LEFT RAIL carries only marginalia: the finding's labeled
+   engages-list, the small confidence number, and the hanging §-refs.
+   The CONTENT COLUMN carries everything read. EVERYTHING — masthead,
+   summary, scorecard, findings, closings, footer — sits on this same
+   left origin; the rail is simply empty where a section has no margin.
+   =================================================================== */
+.layout{max-width:var(--measure); margin:0 auto; padding:0 1.5rem}
+#content{padding:0 0 7rem}
+
+.grid{
+  display:grid;
+  grid-template-columns:var(--rail-col) minmax(0,1fr);
+  column-gap:var(--gutter);
+}
+.rail{min-width:0}
+.content-col{min-width:0; max-width:var(--prose)}
+.content-col p{margin:0 0 .85rem}
+.content-col p:last-child{margin-bottom:0}
+
+/* a full-width structural ink rule; a faint internal hairline — capped to the measure */
+.rule{border:0; border-top:var(--rule); margin:0; height:0}
+.hairline{border:0; border-top:var(--hair); margin:0; height:0}
+
+/* a single star marking the rail at a finding; an asterism between findings */
+.star{color:var(--accent); font-size:.95rem; line-height:1; user-select:none}
+
+/* defensive widow/orphan control */
+.f-explain p,.cite-quote,.cite-gloss,.dek,.summary p,.structural p,ul.remedy li,ul.plain li,.mxs-title{text-wrap:pretty}
+/* (the matrix row titles stay on greedy wrap — balance would fight the 2-line clamp) */
+.f-title{text-wrap:balance}
+
+/* the overall-image verdict reads as a DISTINCT TIER: an outlined/ink pill
+   with no dot — label only — leading the verdict row under the Synthesis rule */
+.verdict-image{
+  display:inline-flex; align-items:center;
+  padding:.2rem .8rem .26rem; border-radius:999px;
+  font-family:"EB Garamond",Georgia,serif; font-variant:small-caps;
+  letter-spacing:var(--track-cap); font-weight:600; font-size:1.02rem; line-height:1.1;
+  text-transform:lowercase; white-space:nowrap;
+  background:transparent; border:1.5px solid currentColor;
+}
+.vi-honors{color:var(--honors-ink)} .vi-tension{color:var(--tension-ink)} .vi-violates{color:var(--violates-ink)}
+/* v7: the VERDICT ROW — the pill plus a quiet stat line that justifies it,
+   every number computed from the loaded data at render time. The line reads
+   as evidence in the secondary serif voice, baseline-bound to the pill. */
+.verdict-row{
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:.45rem 1rem;
+  max-width:var(--prose); margin:0 0 1.5rem;
+}
+.verdict-row .vr-stats{font-size:var(--fs-2nd); line-height:var(--lh-2nd); color:var(--tx-2); margin:0; flex:1 1 16rem; min-width:0}
+
+/* theme toggle — a bare sun/moon icon (v7: boxless — no border, no fill)
+   parked OUTSIDE the measure's right edge (mirroring the page-nav hung in
+   the left margin), so it can never sit on the dek/meta the way the old
+   in-measure position could; the hit area stays the full 2.2rem square and
+   the focus-visible ring is the focus affordance */
+#theme-toggle{
+  position:fixed; top:1.5rem; z-index:15;
+  right:max(1rem, calc((100vw - var(--measure)) / 2 - 3.4rem));
+  width:2.2rem; height:2.2rem; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  border:0; background:transparent; color:var(--tx-2);
+  cursor:pointer;
+  transition:color .15s ease;
+}
+#theme-toggle:hover{color:var(--tx)}
+#theme-toggle svg{display:block; width:17px; height:17px}
+/* CSS swaps the glyph with the theme — the icon names the ACTION:
+   dark shows the sun (switch to light), light shows the moon */
+#theme-toggle .tt-sun{display:none}
+[data-theme="dark"] #theme-toggle .tt-sun{display:block}
+[data-theme="dark"] #theme-toggle .tt-moon{display:none}
+/* below ~940px the side margin can't hold the button clear of the text —
+   absolute keeps it in the masthead's empty opening band (the title's
+   5.5rem of air), scrolling away with the page
+   (must precede the 680px static rule so the cascade resolves narrow-first) */
+@media(max-width:940px){ #theme-toggle{position:absolute} }
+
+/* ============================ PAGE NAV — fixed mini-map (wide screens only) ============================
+   A single right-aligned mono column hung in the left margin: synth,
+   index, the finding ordinals, notes. Resting --tx-2 (AA in both themes);
+   the current item takes ink + a small accent dot on the shared right
+   edge. JS-built after render; hidden under 1080px and in print. The
+   column passes pointer events through — only the links are targets. */
+.pagenav{display:none}
+@media(min-width:1080px){
+  .pagenav{
+    display:block; position:fixed; top:50%; transform:translateY(-50%);
+    left:calc(50vw - (var(--measure)/2) - 7.2rem);
+    width:4.5rem; text-align:right;
+    z-index:10; /* below the theme toggle (15) */
+    pointer-events:none;
+  }
+  .pagenav a{
+    pointer-events:auto; position:relative; display:block;
+    padding:.4rem .55rem .4rem .4rem; /* >=24px targets via padding (WCAG 2.5.8), not size */
+    font:500 .64rem/1.2 "Fira Code",ui-monospace,Menlo,Consolas,monospace;
+    letter-spacing:var(--track-mono); color:var(--tx-2);
+  }
+  .pagenav a:hover,.pagenav a:focus-visible{color:var(--tx)}
+  .pagenav a[aria-current="true"]{color:var(--tx)}
+  /* the quiet accent cue: a small round dot riding the column's right edge */
+  .pagenav a[aria-current="true"]::after{
+    content:""; position:absolute; right:.06rem; top:50%; transform:translateY(-50%);
+    width:.32em; height:.32em; border-radius:50%; background:var(--accent);
+  }
+}
+/* the coda jump lands with its section's own 3.2rem of air */
+#coda{scroll-margin-top:3.2rem}
+
+/* ============================ MASTHEAD ============================ */
+/* opening air: the title page starts with deliberate white space (3.6rem under 680px) */
+header.report{padding:5.5rem 0 0}
+.mast-overline{
+  font-variant:small-caps; letter-spacing:var(--track-label); font-weight:500;
+  font-size:.86rem; color:var(--tx-2); margin:0 0 .7rem;
+}
+/* the title fills toward the prose edge — greedy wrap (no balance), so it
+   only breaks when it must */
+h1.system{
+  font-family:"EB Garamond",Georgia,serif; font-weight:500;
+  font-size:3rem; line-height:1.05; letter-spacing:-.012em;
+  margin:0; color:var(--tx); max-width:var(--prose);
+}
+/* the dek — the single concise intro, now the subtitle under the system name;
+   a touch smaller than before, with real separation from the title.
+   p.dek so the margin actually beats .content-col p (equal specificity,
+   later in the cascade) */
+p.dek{
+  font-size:1.04rem; line-height:1.55; color:var(--tx-2);
+  margin:1.5rem 0 .85rem;
+}
+/* "Magnifica Humanitas" reads in the surrounding color — italic only, no accent */
+.dek em{font-style:italic; color:inherit}
+
+/* labeled meta block — small Fira-Code small-caps labels beside their values */
+.mast-meta{margin:1.6rem 0 0; display:grid; grid-template-columns:auto 1fr; gap:.4rem 1.1rem; max-width:var(--prose); align-items:baseline}
+.mast-meta .mm-label{
+  font-family:"Fira Code",monospace; letter-spacing:var(--track-mono);
+  font-size:.7rem; text-transform:lowercase; color:var(--tx-2); line-height:1.7;
+  white-space:nowrap;
+}
+.mast-meta .mm-value{font-size:.98rem; color:var(--tx); line-height:1.55; min-width:0; overflow-wrap:anywhere; word-break:break-word}
+.mast-meta .mm-value a{color:var(--accent); text-decoration:underline; text-decoration-color:currentColor; text-underline-offset:2px; overflow-wrap:anywhere; word-break:break-word}
+/* the quiet shared hover: text to primary ink, the underline keeps the accent */
+.mast-meta .mm-value a:hover{color:var(--tx); text-decoration-color:var(--accent)}
+/* hyphenated system identifiers (home-mixer) stay whole; ordinary prose wraps as before */
+.mast-meta .mm-value .nb{white-space:nowrap}
+
+/* ============================ BLOCK SCAFFOLD ============================ */
+section.block{padding:3.2rem 0 0} /* v7: +air above section heads (was 2.4rem) */
+
+/* ============================ SECTION HEADER ============================
+   ONE component for every major section: an italic serif caption sitting
+   on an inline rule that runs out to the prose right edge, plus an
+   optional right slot (kept for future use — v7 moved the Synthesis pill
+   into the verdict row below the rule, so no header rides one today). The
+   inline rule ABSORBS the old standalone block-rules — exactly one line
+   marks each section boundary. */
+.sechead{
+  display:flex; align-items:center; flex-wrap:wrap; gap:.4rem .9rem;
+  max-width:var(--prose); margin:0 0 var(--gap-cap);
+}
+.sechead .sh-cap{
+  font-style:italic; font-weight:500; font-size:1.02rem; line-height:1.3;
+  color:var(--tx-2); margin:0; flex:0 0 auto; letter-spacing:0;
+}
+/* the rule rides the caption's optical middle and fills the remaining width —
+   v7: drawn in the CAPTION's own color (tx-2; >=3:1 non-text in both themes) */
+.sechead .sh-rule{flex:1 1 auto; min-width:2rem; border-top:1px solid var(--tx-2); height:0}
+/* the right slot holds the line's right end; if a tiny viewport ever wraps
+   it, the auto margin keeps it on the right edge */
+.sechead .sh-right{flex:0 0 auto; margin-left:auto}
+/* v7: every NON-Synthesis caption STARTS at the RAIL ORIGIN — the far-left
+   edge the scorecard's 01/02 markers and full-span hairlines share — so the
+   header row spans rail+gutter+prose; its rule still ENDS on the one prose
+   right edge. (Synthesis is exempt: its caption keeps the content edge.) */
+.sechead-full{max-width:calc(var(--rail-col) + var(--gutter) + var(--prose))}
+
+/* the ratings key — the grid's dot vocabulary on ONE centered line; each
+   dot+words clause is an unbreakable .rk-item, so lines can only break at
+   the separators. The key centers on the full container span (rail origin ->
+   prose right edge), like the matrix it explains */
+.ratings-key{
+  margin:1.6rem 0 0; font-size:var(--fs-2nd); line-height:1.6; color:var(--tx-2);
+  max-width:calc(var(--rail-col) + var(--gutter) + var(--prose)); text-align:center;
+}
+.ratings-key .rk-item{white-space:nowrap}
+.ratings-key .rk-sep{color:var(--tx-2); padding:0 .3rem}
+.ratings-key .rk-line{display:block}
+.ratings-key .rk-dot{display:inline-block; width:.5rem; height:.5rem; border-radius:50%; margin-right:.4rem; vertical-align:.02em}
+.ratings-key .rk-dot.rel-violates{background:var(--violates)}
+.ratings-key .rk-dot.rel-tension{background:var(--tension)}
+.ratings-key .rk-nil{display:inline-block; width:.28rem; height:.28rem; border-radius:50%; background:var(--ui-3); margin:0 .45rem 0 .1rem; vertical-align:.14em}
+
+/* ============================ SUMMARY (synthesis verdict + prose) ============================ */
+/* the verdict row (pill + data-computed stat line) sits directly below the
+   header rule; the prose follows as the argument under that evidence */
+/* the deliberate lead tier: a step above --fs-body, on the shared leading */
+.summary p{font-size:1.06rem; line-height:var(--lh-body); margin:0 0 1rem}
+.summary p:last-child{margin-bottom:0}
+
+/* ============================ CROSS-GRID — findings × principles ============================
+   THE scorecard ("The findings, by principle"): a real table on the FULL
+   container span (rail origin -> prose right edge, the .sechead-full width).
+   One row per finding in display order; one slim column per principle,
+   headed by the principle's own name, slanted. Fixed layout: the row-head
+   column takes whatever the slim columns leave. */
+.matrix-wrap{max-width:calc(var(--rail-col) + var(--gutter) + var(--prose)); margin:1rem 0 0}
+table.matrix{width:100%; border-collapse:collapse; table-layout:fixed}
+col.mxc-p{width:2.3rem}
+col.mxc-conf{width:2.9rem}
+table.matrix th,table.matrix td{padding:0; vertical-align:middle}
+/* column heads: the principle NAMES written out, slanted — each name's
+   baseline starts at its column's center and rises to the right (rotated
+   about its bottom-left corner). The th itself carries the headroom
+   (--mx-headroom) so the longest name stays inside the table box, clear of
+   the centered ratings key above; title= echoes the full name + §-range */
+table.matrix{--mx-slant:-50deg; --mx-headroom:7.8rem; --mx-dot:.55rem}
+/* scoped under table.matrix so these heads BEAT the th/td reset above
+   (its 2 type selectors outrank a lone class) */
+table.matrix .mx-p-h{position:relative; height:var(--mx-headroom); padding:0 0 .55rem; font-weight:500; vertical-align:bottom}
+.mxp-name{
+  position:absolute; left:50%; bottom:1.6rem; /* clears the enlarged aggregate dot below */
+  transform-origin:0 100%; transform:rotate(var(--mx-slant));
+  white-space:nowrap; line-height:1;
+  font-variant:small-caps; letter-spacing:var(--track-cap);
+  font-size:.82rem; font-weight:500; color:var(--tx);
+}
+/* the principle's AGGREGATE verdict dot at the column foot — the one quiet
+   aggregate signal (red = violates, yellow = strains); absent entirely when
+   no finding engages the principle */
+.mxp-agg{display:block; width:var(--mx-dot); height:var(--mx-dot); border-radius:50%; margin:0 auto}
+.d-tension{background:var(--tension)} .d-violates{background:var(--violates)}
+table.matrix .mx-conf-h{text-align:right; padding:0 0 .55rem; font-weight:500; vertical-align:bottom;
+  font-family:"Fira Code",monospace; font-size:.68rem; letter-spacing:var(--track-mono); color:var(--tx-2)}
+/* the bug column's title, bottom-aligned with the slanted names, left edge on
+   the row titles — the quiet mono labelling voice (the table's former caption) */
+table.matrix .mx-find-h{text-align:left; vertical-align:bottom; padding:0 .9rem .55rem 0}
+.mx-find-label{font-family:"Fira Code",monospace; font-size:.68rem; font-weight:500; letter-spacing:var(--track-mono);
+  text-transform:uppercase; color:var(--tx-2); line-height:1.2}
+/* full-span hairlines carry the row rhythm; the head row gets the strong tier */
+table.matrix thead tr{border-bottom:var(--hair-strong)}
+table.matrix tbody tr{border-bottom:var(--hair)}
+/* row head: ✴ + display ordinal + linked title (the scorecard link grammar) */
+table.matrix .mx-row-h{text-align:left; font-weight:400; padding:.95rem .9rem .95rem 0}
+.mx-row-h a{display:flex; align-items:baseline; gap:.55rem; color:var(--tx); min-width:0}
+.mxr-mark{color:var(--accent); font-size:.82rem; line-height:1.35; flex:0 0 auto; transition:color .15s ease}
+.mxr-ord{font-family:"Fira Code",monospace; font-size:.7rem; color:var(--tx-2); line-height:1.5; flex:0 0 1.45rem; transition:color .15s ease}
+/* the hairline resting underline marks the rows as links; long titles cap at 2 lines */
+.mxr-title{font-size:1rem; line-height:1.35; min-width:0; overflow-wrap:break-word;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+  text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:var(--ui-3);
+  text-underline-offset:3px; transition:color .15s ease, text-decoration-color .15s ease}
+/* intersection cells: a filled relation dot, or a faint neutral mote when the
+   finding does not engage that principle (never empty — the grid stays legible
+   as a grid; AT hears the sr-only "not engaged" instead) */
+table.matrix .mx-cell{text-align:center; padding:.95rem .15rem}
+.mx-dot{display:inline-block; width:var(--mx-dot); height:var(--mx-dot); border-radius:50%; vertical-align:middle}
+.mx-dot.rel-violates{background:var(--violates)} .mx-dot.rel-tension{background:var(--tension)}
+.mx-nil{display:inline-block; width:.28rem; height:.28rem; border-radius:50%; background:var(--ui-3); vertical-align:middle}
+table.matrix .mx-conf{text-align:right; font-family:"Fira Code",monospace; font-size:.7rem; color:var(--tx-2); padding:.95rem 0; white-space:nowrap; transition:color .15s ease}
+/* row hover/focus: a gentle accent wash + the title resolves to accent —
+   the same affordance the report's other links carry */
+table.matrix tbody tr:hover,table.matrix tbody tr:focus-within{background:color-mix(in oklab, var(--accent) 7%, transparent)}
+table.matrix tbody tr:hover .mxr-title,table.matrix tbody tr:focus-within .mxr-title{color:var(--accent); text-decoration-color:currentColor}
+table.matrix tbody tr:hover .mxr-ord,table.matrix tbody tr:focus-within .mxr-ord,
+table.matrix tbody tr:hover .mx-conf,table.matrix tbody tr:focus-within .mx-conf{color:var(--accent)}
+
+/* the MOBILE fallback — a stacked per-finding list, CSS-swapped with the
+   table at <=680px. display:none keeps whichever copy is inactive out of
+   the a11y tree AND the tab order, so nothing is ever announced twice. */
+.matrix-stack{display:none; list-style:none; margin:1.6rem 0 0; padding:0}
+.matrix-stack li{border-top:var(--hair); padding:.75rem 0}
+.mxs-link{display:flex; align-items:baseline; gap:.55rem; color:var(--tx); min-width:0}
+.mxs-ord{font-family:"Fira Code",monospace; font-size:.7rem; color:var(--tx-2); line-height:1.5; flex:0 0 1.45rem; transition:color .15s ease}
+.mxs-title{font-size:1rem; line-height:1.4; min-width:0; flex:1 1 auto; overflow-wrap:break-word;
+  text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:var(--ui-3);
+  text-underline-offset:3px; transition:color .15s ease, text-decoration-color .15s ease}
+.mxs-conf{font-family:"Fira Code",monospace; font-size:.7rem; color:var(--tx-2); flex:0 0 auto; padding-left:.6rem; transition:color .15s ease}
+.mxs-link:hover .mxs-title,.mxs-link:focus-visible .mxs-title{color:var(--accent); text-decoration-color:currentColor}
+.mxs-link:hover .mxs-ord,.mxs-link:focus-visible .mxs-ord,
+.mxs-link:hover .mxs-conf,.mxs-link:focus-visible .mxs-conf{color:var(--accent)}
+/* the dotted principle names under each title — the rail's fe-dot vocabulary */
+.mxs-rels{display:flex; flex-wrap:wrap; gap:.15rem .9rem; margin:.4rem 0 0; padding-left:1.3rem}
+.mxs-prin{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.86rem; color:var(--tx); line-height:1.34; white-space:nowrap}
+.mxs-dot{display:inline-block; width:.42em; height:.42em; border-radius:50%; margin-right:.45em; vertical-align:.1em}
+.mxs-dot.rel-violates{background:var(--violates)} .mxs-dot.rel-tension{background:var(--tension)}
+
+/* ============================ FINDING ============================ */
+/* one flat, severity-ordered list — no principle section headers */
+.finding{padding:0; margin:0; scroll-margin-top:5rem}
+.finding.grid{align-items:start}
+/* asterism divider between findings — centered on the CONTENT column */
+.f-aster{
+  display:grid; grid-template-columns:var(--rail-col) minmax(0,1fr); column-gap:var(--gutter);
+  margin:2.7rem 0; user-select:none;
+}
+.f-aster::after{
+  content:"\2042"; grid-column:2; max-width:var(--prose);
+  text-align:center; color:var(--accent); font-size:1.3rem; line-height:1;
+}
+
+/* rail: the permalink star + citable ID, the LABELED engages-list (every
+   principle + its relation), confidence */
+.f-rail{display:flex; flex-direction:column; gap:.7rem; padding-top:.2rem}
+/* the marginalia ride along while a long finding scrolls: sticky, pinned at
+   the page-nav's measured viewport top (--rail-stick-top, published by JS
+   once the nav exists and on debounced resize; the 7rem fallback covers the
+   <1080px widths where the nav is hidden). The grid AREA spans the full
+   finding row, so the rail releases at its finding's end and can never ride
+   into the next card. Desktop layout only — the mobile rail is inline. */
+@media(min-width:681px){
+  .finding > .f-rail{position:sticky; top:var(--rail-stick-top, 7rem); align-self:start}
+}
+.f-railhead{display:flex; align-items:baseline; gap:.5rem}
+.f-rail .f-star{color:var(--accent); font-size:.95rem; line-height:1; user-select:none}
+/* the finding's sigil IS its permalink — quiet, no underline, ink on hover */
+.f-rail a.f-star:hover,.f-rail a.f-star:focus-visible{color:var(--tx)}
+.f-id{font:500 .66rem/1 "Fira Code",monospace; letter-spacing:var(--track-mono); text-transform:uppercase; color:var(--tx-2)}
+/* the finding's OVERALL severity — its strongest relation, one quiet line bound
+   to the railhead (negative margin eats most of the rail's .7rem gap) */
+.f-engages{display:flex; flex-direction:column; gap:.3rem}
+.f-engages .fe-label{
+  font-family:"Fira Code",monospace; letter-spacing:var(--track-mono); text-transform:uppercase;
+  font-size:.68rem; color:var(--tx-2); line-height:1.4;
+}
+/* a small hanging indent so wrapped principle NAMES read as subordinate;
+   each item is a relation dot + the name only — the per-principle relation
+   text lives in the scorecard (and, for screen readers, in a hidden span) */
+.f-engages .fe-item{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.86rem; color:var(--tx); line-height:1.34; padding-left:.65rem; text-indent:-.65rem}
+/* the relation dot — centered on the small-caps x-height, colored by relation */
+.f-engages .fe-dot{display:inline-block; width:.42em; height:.42em; border-radius:50%; margin-right:.45em; vertical-align:.1em}
+.f-engages .fe-dot.rel-violates{background:var(--violates)} .f-engages .fe-dot.rel-tension{background:var(--tension)}
+.f-rail .f-conf{font-family:"Fira Code",monospace; font-size:.68rem; letter-spacing:var(--track-mono); text-transform:uppercase; color:var(--tx-2); line-height:1.5}
+.f-rail .f-conf b{display:block; color:var(--tx); font-weight:500; font-size:.84rem; letter-spacing:.02em}
+
+.f-body{min-width:0; max-width:var(--prose)}
+/* finding head: just the title now — the single finding verdict chip is REMOVED */
+.f-head{margin:0 0 .7rem}
+/* FINDING TITLE in Fira Code (mono) — legibility tweaks: ~1rem, lh 1.4, spaced en-dashes */
+.f-title{
+  font-family:"Fira Code",ui-monospace,Menlo,Consolas,monospace;
+  font-size:1rem; font-weight:500; line-height:1.4; letter-spacing:-.006em;
+  color:var(--tx); margin:0; overflow-wrap:break-word; min-width:0; max-width:var(--prose);
+}
+/* a quiet persistent landing state: while the hash matches, the title takes
+   the accent — confirmation of which card answered the jump */
+.finding:target .f-title{color:var(--accent)}
+/* the single, flowing explanation — behavior + violation merged, no labels */
+.f-explain{font-size:var(--fs-body); line-height:var(--lh-body); color:var(--tx); margin:0; max-width:var(--prose)}
+.f-explain p{margin:0 0 .85rem} .f-explain p:last-child{margin-bottom:0}
+
+/* code evidence — flat, hairline framed, quiet caption. The one element that may run wide. */
+figure.code{margin:var(--gap-blk) 0 0; border:var(--hair-strong); background:var(--code-bg); overflow:hidden; max-width:var(--prose); position:relative}
+figure.code figcaption{display:flex; justify-content:space-between; gap:1rem; align-items:baseline; font-family:"Fira Code",monospace; font-size:var(--mono-micro); color:var(--tx-2); background:transparent; padding:.45rem .9rem; border-bottom:var(--hair-strong)}
+/* light tx-2 (base-600) is only 4.01:1 on the base-100 panel — step down to base-700 (5.75:1) */
+figure.code figcaption{color:var(--base-700)}
+/* dark tx-2 (base-500) is only 4.04:1 on the base-900 panel — step up to base-300 */
+[data-theme="dark"] figure.code figcaption{color:var(--base-300)}
+/* JS supplies <wbr> after each "/", so paths break at segment boundaries;
+   overflow-wrap:anywhere stays only as a last-resort guard */
+figure.code figcaption .loc{min-width:0; overflow-wrap:anywhere}
+figure.code figcaption .lang{text-transform:lowercase; flex:0 0 auto}
+/* a bare mono copy action — caption voice, no border, pushed right beside lang
+   (margin-left:auto keeps it out of the space-between middle) */
+figure.code figcaption .code-copy{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; flex:0 0 auto; margin-left:auto}
+figure.code figcaption .code-copy:hover{color:var(--tx)}
+figure.code .pre-wrap{position:relative}
+/* right-edge fade affordance — JS toggles .has-more from real scroll state,
+   so the fade shows only while content actually remains to the right */
+figure.code .pre-wrap::after{
+  content:""; position:absolute; top:0; right:0; bottom:0; width:2rem; pointer-events:none;
+  background:linear-gradient(to right, transparent, var(--code-bg));
+  opacity:0; transition:opacity .12s linear;
+}
+figure.code .pre-wrap.has-more::after{opacity:1}
+/* right inset lives on the code child (block + max-content), so the final
+   glyph keeps the same .9rem inset at scroll-end — padding-right on a
+   horizontal scroll container is not reliably part of scrollable overflow */
+figure.code pre{margin:0; padding:.8rem 0 .8rem .9rem; overflow-x:auto; max-height:24rem; font-size:var(--mono-micro); line-height:1.55; tab-size:2; scrollbar-width:thin; scrollbar-color:var(--ui-3) var(--code-bg)}
+figure.code pre::-webkit-scrollbar{height:8px}
+figure.code pre::-webkit-scrollbar-thumb{background:var(--ui-3); border-radius:4px}
+/* ligatures off: evidence quoted at file:line stays character-faithful */
+figure.code code{display:block; width:max-content; padding-right:.9rem; white-space:pre; color:var(--tx); font-variant-ligatures:none; font-feature-settings:"liga" 0,"calt" 0}
+.t-cm{color:var(--hl-comment); font-style:italic} .t-st{color:var(--hl-string)}
+.t-nu{color:var(--hl-number)} .t-kw{color:var(--hl-keyword)} .t-ty{color:var(--hl-constant)}
+.t-fn{color:var(--hl-function)} .t-bi{color:var(--hl-builtin)}
+
+/* citations — a small quiet label naming the source of the quotes */
+/* explicit sibling margins (no collapse): the cap binds tight to its first
+   quote; successive citations keep their own larger gap */
+.cite-cap{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.8rem; color:var(--tx-2); margin:1.6rem 0 0; font-weight:500}
+.cite-cap em{font-style:italic}
+/* ===== citation: TIGHT hanging §-reference =====
+   A narrow 3.5rem ref column hangs the §-ref just left of the quote; the grid
+   origin is pulled left by exactly (ref col + gap = 4.3rem) so the QUOTE BODY
+   falls back on the content edge — .cite-body left == .f-explain left. */
+.cite{display:grid; grid-template-columns:3.5rem minmax(0,1fr); column-gap:.8rem; margin:0 0 0 -4.3rem; align-items:baseline}
+.cite-cap + .cite{margin-top:.4rem}
+.cite + .cite{margin-top:1.1rem}
+.cite-ref{font-family:"Fira Code",monospace; font-size:var(--mono-micro); color:var(--accent); text-align:right; line-height:1.5}
+.cite-body{min-width:0; max-width:var(--prose)}
+/* the quote marks are REAL characters (copy/search fidelity, set in JS);
+   the opening “ hangs left of the shared text edge — the -.5em indent is
+   tuned for EB Garamond italic, with hanging-punctuation where supported */
+.cite-quote{font-style:italic; font-size:1.08rem; line-height:1.5; color:var(--tx); margin:0; text-indent:-.5em}
+@supports(hanging-punctuation:first){ .cite-quote{text-indent:0; hanging-punctuation:first} }
+.cite-gloss{font-style:normal; font-size:var(--fs-2nd); color:var(--tx-2); margin:.4rem 0 0; line-height:var(--lh-2nd)}
+/* narrow: the ref becomes a left-flush attribution above the quote */
+@media(max-width:680px){
+  .cite{grid-template-columns:1fr; row-gap:.25rem; margin-left:0}
+  .cite-ref{text-align:left}
+  .cite-quote{text-indent:0}
+}
+
+/* remediation — celestial star bullets (✦) ; role=remedy, color=theme.
+   The 2rem top gap marks remedies as a new movement, not citation overflow;
+   the ✦ hangs in the gutter (like the §-refs) so the text keeps the shared
+   content edge */
+ul.remedy{list-style:none; padding:0; margin:2rem 0 0; max-width:var(--prose)}
+ul.remedy li{padding-left:0; position:relative; margin:.5rem 0; font-size:var(--fs-body); line-height:var(--lh-body)}
+ul.remedy li::before{content:"\2726"; position:absolute; left:-1.6rem; top:.1rem; color:var(--accent); font-size:.86rem}
+
+/* structural note — one quiet closing sentence, faint left rule, no loud label;
+   the rule hangs in the gutter so the note text sits on the shared content edge
+   (max-width grows by the hang so the right edge stays on the prose measure) */
+.structural{margin:var(--gap-blk) 0 0 calc(-1rem - 2px); max-width:calc(var(--prose) + 1rem + 2px); border-left:2px solid var(--ui-3); padding-left:1rem}
+.structural p{font-size:var(--fs-2nd); color:var(--tx-2); margin:0; line-height:var(--lh-2nd); font-style:italic}
+
+/* ============================ CLOSING SECTIONS (one left edge, not centered) ============================ */
+.movement{max-width:var(--prose)}
+.movement p.lead{color:var(--tx-2); font-size:var(--fs-body); margin:0 0 1.3rem; max-width:var(--prose); line-height:var(--lh-body)}
+ul.plain{list-style:none; padding:0; margin:0; max-width:var(--prose)}
+ul.plain li{margin:.75rem 0; padding-left:1.6rem; position:relative; line-height:var(--lh-body); font-size:var(--fs-body)}
+ul.plain b{font-weight:600}
+ul.plain .who{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.86rem; color:var(--tx-2)}
+/* inline `code` from prose (setProse) — the standard treatment: mono sized to
+   the serif's optical size, on the code-figure's surface tint so identifiers
+   read as quiet chips instead of breaking the serif line. Applies to EVERY
+   prose context (explanations, synthesis, glosses, remedies, notes, masthead
+   scope); the code FIGURE is excluded — pre>code keeps its own scale. */
+:not(pre)>code{
+  font-family:"Fira Code",monospace; font-size:.82em; letter-spacing:0;
+  background:var(--code-bg); border-radius:3px; padding:.06em .32em;
+  overflow-wrap:anywhere;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+}
+/* glyph bullets: ✓ check for credited (a distinct ROLE shape), – for dropped, family-coherent star for limits */
+ul.plain.mit li::before{content:"\2713"; position:absolute; left:0; top:.04rem; color:var(--honors); font-size:.86rem; font-weight:600}
+ul.plain.limits li::before{content:"\2726"; position:absolute; left:.1rem; top:.12rem; color:var(--tx-2); font-size:.7rem}
+ul.plain.dropped li{color:var(--tx-2); font-size:var(--fs-small)}
+ul.plain.dropped li::before{content:"\2013"; position:absolute; left:0; top:0; color:var(--tx-2)}
+ul.plain.dropped .dt{color:var(--tx)}
+ul.plain.dropped .dc{font-family:"Fira Code",monospace; font-size:var(--mono-micro); color:var(--tx-2)}
+ul.plain.dropped .dc-label{font-variant:normal; letter-spacing:var(--track-mono)}
+/* each label+value pair is unbreakable — lines break only at the " — " and " · "
+   separators, never between a label and its value */
+ul.plain.dropped .dc-pair{white-space:nowrap}
+/* "merged into F1" resolves to the finding it names */
+ul.plain.dropped .dc a{color:inherit; text-decoration:underline; text-underline-offset:2px}
+ul.plain.dropped .dc a:hover,ul.plain.dropped .dc a:focus-visible{color:var(--accent)}
+
+/* footer (one left edge) — the footer text + its top rule begin at the content
+   edge, so the rule is carried by the content-col, not the full-width element */
+footer.report{margin:4.5rem 0 0; color:var(--tx-2); font-size:var(--fs-small); line-height:var(--lh-body)}
+footer.report .content-col{padding-top:1.6rem; border-top:var(--hair-strong); max-width:var(--prose)}
+footer.report em{font-style:italic; color:var(--tx)}
+footer.report a{color:var(--accent); text-decoration:underline; text-decoration-color:currentColor; text-underline-offset:2px}
+footer.report a:hover{color:var(--tx); text-decoration-color:var(--accent)}
+/* quiet wayfinding row above the credit — the long flat flow's route back up */
+footer.report .foot-nav{margin:0 0 1.4rem}
+footer.report .foot-nav a{font:500 .68rem/1 "Fira Code",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--tx-2); text-decoration:none}
+footer.report .foot-nav a:hover,footer.report .foot-nav a:focus-visible{color:var(--accent)}
+footer.report .foot-nav .fn-sep{color:var(--ui-3); padding:0 .6rem}
+
+/* error box */
+.errbox{border:var(--rule); padding:1.4rem 1.5rem; margin:3rem 0; max-width:var(--prose)}
+.errbox h1{font-family:"Fira Code",monospace; font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; margin:0 0 .6rem; color:var(--violates)}
+.errbox p{margin:0}
+
+/* reduced motion — defensive global */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important; animation:none!important; scroll-behavior:auto!important}
+}
+
+/* ============================ RESPONSIVE: collapse to one column ============================ */
+@media(max-width:680px){
+  :root{--rail-col:1fr; --gutter:0}
+  .grid{grid-template-columns:1fr; row-gap:.5rem}
+  /* DOM-built marginalia cells are truly empty where a section has no margin —
+     hide them so collapsed grids carry no ghost first row */
+  .rail:empty,.cite-ref:empty{display:none}
+  /* the 7-column cross-grid cannot fit — swap it for the stacked list
+     (display:none removes the table from the a11y tree and tab order here,
+     and the stack everywhere else: exactly one copy is ever exposed) */
+  .matrix-wrap{display:none}
+  .matrix-stack{display:block}
+  .f-aster{grid-template-columns:1fr}
+  .f-aster::after{grid-column:1}
+  .cite{grid-template-columns:1fr}
+  /* the gutter is gone — remedy ✦ and the structural rule return inboard */
+  ul.remedy li{padding-left:1.6rem}
+  ul.remedy li::before{left:0}
+  .structural{margin-left:0; max-width:none}
+  /* labels and values stack: zero the uniform gap and cluster each pair —
+     more space between pairs than within them, so values bind to their labels */
+  .mast-meta{grid-template-columns:1fr; gap:0}
+  .mast-meta .mm-label{margin-top:.55rem}
+  .mast-meta .mm-label:first-child{margin-top:0}
+  .mast-meta .mm-value{margin-top:.1rem}
+  /* vertical economy: the opening air tightens back up on small screens */
+  header.report{padding:3.6rem 0 0}
+  h1.system{font-size:2.4rem}
+  .content-col,.f-body{max-width:none}
+  /* one column = one left edge: the full-span header simply fills it
+     (explicit — the desktop calc would be invalid with --rail-col:1fr) */
+  .sechead-full{max-width:none}
+  .ratings-key{max-width:none}
+  /* keep the finding rail readable as its own inline line: the engages-list
+     flattens (display:contents) so ✴+ID, label and items share one wrapped
+     row, and the confidence number rejoins its label inline */
+  .f-rail{flex-direction:row; flex-wrap:wrap; gap:.3rem .8rem; align-items:baseline}
+  /* the dotted items read inline after the ✴+ordinal on a wrapped row */
+  .f-engages{display:contents}
+  .f-engages .fe-item{padding-left:0; text-indent:0}
+  .f-rail .f-conf b{display:inline; margin-left:.3rem}
+  /* theme toggle inline so it never overlaps content on mobile — it takes the
+     layout's 1.5rem left margin and a real >=40px tap target */
+  #theme-toggle{position:static; display:inline-flex; margin:1rem 0 0 1.5rem; width:2.6rem; height:2.6rem}
+  .finding{scroll-margin-top:1rem}
+}
+
+/* ============================ PRINT ============================ */
+@media print{
+  /* dark is the default theme, so print re-declares the FULL light token set
+     under both roots (equal specificity, later in cascade — wins), in Flexoki
+     inks: no near-black code slabs, no pale 400-level accents on paper */
+  :root,[data-theme="dark"]{
+    --bg:#fff; --bg-2:#fff;
+    --tx:var(--black); --tx-2:var(--base-700);
+    --ui:var(--base-100); --ui-2:var(--base-150); --ui-3:var(--base-200);
+    --accent:var(--blue-600);
+    --honors:var(--green-600); --tension:var(--yellow-600); --violates:var(--red-600);
+    --code-bg:var(--base-50);
+    --hl-comment:var(--base-700); --hl-string:var(--cyan-700); --hl-number:var(--purple-700);
+    --hl-keyword:var(--green-700); --hl-constant:#7A5C01; --hl-function:var(--orange-700);
+    --hl-builtin:var(--blue-700);
+    --honors-ink:#3C4D08; --tension-ink:#6F5401; --violates-ink:#871F1A;
+    --rel-violates:var(--violates-ink); --rel-tension:var(--tension-ink);
+    --rule:1px solid var(--black); --hair:1px solid var(--base-200);
+    --hair-strong:1px solid var(--base-300);
+  }
+  /* the dark figcaption step-up (base-300) would print pale — back to the muted tier */
+  [data-theme="dark"] figure.code figcaption{color:var(--tx-2)}
+  #theme-toggle,.skip-link,.foot-nav,.code-copy,.pagenav{display:none!important}
+  .layout{display:block;max-width:none}
+  #content{max-width:none;padding:0}
+  /* collapse every rail grid to one column */
+  .grid,.cite,.f-aster{display:block!important}
+  /* paper is one column — full-span headers fall back to the one rule length */
+  .sechead-full{max-width:var(--prose)}
+  /* the cross-grid PRINTS as a table, capped to the print measure like the
+     headers; the stacked mobile duplicate stays off the page entirely.
+     The slanted heads keep their slant on paper, a step smaller and steeper
+     so the rightmost name clears the sheet's margin */
+  .matrix-wrap{max-width:var(--prose)}
+  .matrix-stack{display:none!important}
+  table.matrix{--mx-slant:-55deg; --mx-headroom:6.8rem}
+  .mxp-name{font-size:.74rem}
+  table.matrix thead{break-inside:avoid}
+  table.matrix tr{break-inside:avoid}
+  table.matrix tbody tr:hover,table.matrix tbody tr:focus-within{background:transparent}
+  /* paged media: the sticky rail returns to flow */
+  .f-rail{position:static!important}
+  .f-aster::after{display:block; text-align:center}
+  .finding,figure.code,.cite{break-inside:avoid}
+  figure.code .pre-wrap::after{display:none}
+  /* only print the URL when the link text isn't already the href */
+  a[href^="http"]:not([data-href-shown])::after{content:" (" attr(href) ")"; font-size:.7em; color:var(--base-600)}
+  /* long lines must WRAP on paper: pre-wrap on the code child too (its
+     screen white-space:pre would otherwise win), and the screen-only
+     max-content/padding-right inset is reset so wrapping can happen */
+  figure.code pre{max-height:none; overflow:visible}
+  figure.code pre,figure.code code{white-space:pre-wrap; overflow-wrap:break-word}
+  figure.code code{display:block; width:auto; padding-right:0}
+  /* print keeps .layout's slim padding — the gutter hangs return inboard */
+  .cite{margin-left:0}
+  .cite-quote{text-indent:0}
+  ul.remedy li{padding-left:1.6rem}
+  ul.remedy li::before{left:0}
+  .structural{margin-left:0; max-width:var(--prose)}
+}
+</style>
+<script>
+/* pre-paint theme to avoid flash — default to DARK when nothing is stored;
+   the toggle's sun/moon glyph is CSS-keyed to data-theme so it can never
+   flash a stale icon — only the aria-label needs syncing here (an ACTION
+   button: it names the theme it switches TO) */
+(function(){try{
+  var t=localStorage.getItem('mh-theme');
+  if(!t){t='dark';}
+  document.documentElement.setAttribute('data-theme',t);
+  document.addEventListener('DOMContentLoaded',function(){
+    var b=document.getElementById('theme-toggle');
+    if(b){ var next = t==='dark' ? 'light' : 'dark';
+      b.setAttribute('aria-label','Switch to '+next+' theme'); }
+  });
+}catch(e){}})();
+</script>
+<noscript><style>#theme-toggle{display:none}</style></noscript>
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<button id="theme-toggle" type="button" aria-label="Switch to light theme">
+  <!-- sun: shown in DARK (the action — switch to light) -->
+  <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4.4"/>
+    <path d="M12 2.6v2.5M12 18.9v2.5M21.4 12h-2.5M5.1 12H2.6M18.65 5.35l-1.77 1.77M7.12 16.88l-1.77 1.77M18.65 18.65l-1.77-1.77M7.12 7.12L5.35 5.35"/>
+  </svg>
+  <!-- moon: shown in LIGHT (the action — switch to dark) -->
+  <svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+  </svg>
+</button>
+
+<div class="layout">
+  <main id="content">
+    <header class="report" id="top"></header>
+    <section id="summary" class="block summary" aria-labelledby="summary-cap"></section>
+    <section id="scorecard-sec" class="block" aria-labelledby="scorecard-cap"></section>
+    <section id="findings" class="block" aria-labelledby="findings-cap"></section>
+    <section id="mitigations" class="block" aria-label="What the system does well"></section>
+    <section id="dropped" class="block" aria-label="Dropped and consolidated findings"></section>
+    <section id="scope" class="block" aria-label="Limits of this audit"></section>
+    <footer class="report" id="report-footer"></footer>
+  </main>
+</div>
+
+<noscript>
+  <div style="max-width:42rem;margin:3rem auto;padding:0 1.5rem;font-family:'Fira Code',monospace;font-size:.8rem">
+    This audit report renders with JavaScript. The full data is embedded below in the page source,
+    and a Markdown version of the same report is available separately.
+  </div>
+</noscript>
+
+<script type="application/json" id="report-data">
+{
+  "meta": {
+    "system_name": "X “For You” Feed Algorithm",
+    "date": "2026-06-02",
+    "scope": "The open-sourced X recommendation stack (home-mixer, phoenix, grox, thunder, candidate-pipeline)",
+    "evidence_base": "source_code",
+    "repo_url": "https://github.com/xai-org/x-algorithm",
+    "principles_in_scope": "all"
+  },
+  "synthesis": {
+    "verdict_image": "babel",
+    "text": "Read functionally, this system has one telos: to predict and maximize engagement. The final feed score is a weighted sum of predicted engagement probabilities — favorite, reply, repost, and crucially dwell time, with a not-dwelled penalty. No term represents truth, formation, well-being, or whether the user valued the time they spent.\n\nAround that objective the system builds the apparatus the encyclical names most precisely: it profiles users on inferred attributes — predicting gender even for accounts hours old — and force-enables that profiling on roughly half of live traffic; it exports identifiable telemetry to private training corpora with no consent or deletion; it enacts consequential automated judgments over speech with no appeal and no accountable owner; it has no misinformation category; and it fetches the viewer's age, then discards it.\n\nThe principles most centrally violated are subsidiarity, the attention-economy and profiling power, social justice, and the universal destination of goods. It is not pure Babel — the system attenuates for author diversity, listens to explicit aversion, runs a mandatory per-recipient safety filter, and honors deletion in-network. But against the §85 litmus — does it help the person become more humane? — the objective never asks; it optimizes session length. On the evidence of what it measures and ignores, this system is built toward Babel — structurally, not maliciously."
+  },
+  "principles": [
+    {
+      "key": "dignity",
+      "name": "The dignity of the human person",
+      "paragraph_range": "§48–58",
+      "verdict": "tension",
+      "verdict_summary": "Engaged as a secondary concern throughout — persons modeled as bundles of predicted engagement — but no standalone primary violation was isolated.",
+      "findings": []
+    },
+    {
+      "key": "common_good",
+      "name": "The common good",
+      "paragraph_range": "§59–64",
+      "verdict": "tension",
+      "verdict_summary": "The feed shapes public discourse with no defense of the truth-commons (no misinformation axis).",
+      "findings": [
+        {
+          "id": "F2",
+          "title": "The safety taxonomy has no misinformation, disinformation, or synthetic-media category",
+          "confidence": 86,
+          "primary_principle": "common_good",
+          "code_evidence": [
+            {
+              "location": "grox/classifiers/content/safety_ptos.py:217-225",
+              "language": "python",
+              "snippet": "SUPPORTED_POLICY_CATEGORIES = {\n    SafetyPolicyCategory.ViolentMedia,\n    SafetyPolicyCategory.AdultContent,\n    SafetyPolicyCategory.Spam,\n    SafetyPolicyCategory.HateOrAbuse,\n    SafetyPolicyCategory.SuicideOrSelfHarm,\n}  # no misinformation / synthetic-media axis"
+            }
+          ],
+          "behavior": "The enforced safety taxonomy is seven harmful-content categories; a repo-wide search finds no misinformation, manipulated-media, or false-claim axis in the content-judgment pipeline. The one truth-adjacent signal feeds only the ads brand-safety verdict.",
+          "citations": [
+            {
+              "paragraph": "§80",
+              "quote": "social groups penalized by opaque algorithms that perpetuate prejudice and discrimination",
+              "gloss": "§80 names combating misinformation as a co-equal social-justice requirement, absent here."
+            },
+            {
+              "paragraph": "§132",
+              "quote": "the ability to manipulate content, images and videos exposes people to biased or misleading perspectives",
+              "gloss": "A pipeline blind to fabrication leaves the truth-commons unguarded."
+            }
+          ],
+          "violation": "This violates the common good and the duty under §80 to combat misinformation. The pipeline screens gore, nudity and spam but is structurally blind to fabricated narratives; per §132 truth is a common good the platform's design leaves undefended.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "\"safety\" is operationalized as enumerable harmful-content classes; truth/falsity is not modeled, so it is neither measured nor acted on."
+          },
+          "remediation": [
+            "Add a synthetic-media / false-claim SafetyPolicyCategory",
+            "Promote an integrity signal into organic ranking as a downrank, not only ads gating",
+            "Decouple the truth axis from the advertiser brand-safety pathway"
+          ],
+          "structural_note": "Defining falsity at platform scale is contested; but the code shows the truth axis is absent from the content pipeline entirely, not deliberately restrained within it.",
+          "principle_relations": [
+            {
+              "principle": "common_good",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "universal_destination",
+      "name": "The universal destination of goods",
+      "paragraph_range": "§65–67",
+      "verdict": "tension",
+      "verdict_summary": "Behavioral data, a good owed to its contributors, is held and exported as private training capital.",
+      "findings": [
+        {
+          "id": "F4",
+          "title": "Identifiable telemetry (raw IP, persistent device_id, served history) is exported to private training topics, keyed to the user",
+          "confidence": 85,
+          "primary_principle": "universal_destination",
+          "code_evidence": [
+            {
+              "location": "home-mixer/side_effects/served_candidates_kafka_side_effect.rs:79-80",
+              "language": "rust",
+              "snippet": "ip_address: Some(query.ip_address.clone()),\nuser_agent: Some(query.user_agent.clone()),\n// shipped with the full served stream to KafkaCluster::Phoenix"
+            }
+          ],
+          "behavior": "Served-feed side effects ship per-user telemetry — raw IP, a persistent device_id, the full served stream, and per-post prediction vectors — to continuously-trained training topics keyed to the real user_id, with no retention limit or deletion path. The team's own sibling code omits IP/user-agent, showing they are unnecessary.",
+          "citations": [
+            {
+              "paragraph": "§108",
+              "quote": "Data is the product of many contributors and should not be treated as something to be sold off",
+              "gloss": "A user's served history is piped into a private corpus with no control or deletion."
+            },
+            {
+              "paragraph": "§171",
+              "quote": "the power to profile, predict and influence behavior, often without individuals being fully aware of it",
+              "gloss": "Raw IP plus persistent device_id enables re-identification on payloads that don't need it."
+            }
+          ],
+          "violation": "This violates the universal destination of goods. Per §108 data is the product of many contributors and must be managed as a common good, not absorbed into a private training corpus keyed to the user with identity over-provisioned beyond what the payloads require.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "a user's served history, IP and prediction vector become private training capital for the model-improvement flywheel."
+          },
+          "remediation": [
+            "Strip IP and user-agent from the training export (the sibling code proves they're unneeded)",
+            "Pseudonymize the viewer key and segregate re-identification keys",
+            "Wire deletion propagation and a retention limit"
+          ],
+          "structural_note": "Treating the served stream as a private training asset is the core of the continuously-trained flywheel; managing it as a shared good with control for contributors is a business-model change.",
+          "principle_relations": [
+            {
+              "principle": "universal_destination",
+              "relation": "tension"
+            },
+            {
+              "principle": "solidarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "subsidiarity",
+      "name": "Subsidiarity",
+      "paragraph_range": "§68–72",
+      "verdict": "tension",
+      "verdict_summary": "Consequential automated decisions are enacted with no transparency, recourse, or accountable owner.",
+      "findings": [
+        {
+          "id": "F5",
+          "title": "Consequential automated judgments are enacted with no notification, appeal, or accountable owner in code",
+          "confidence": 84,
+          "primary_principle": "subsidiarity",
+          "code_evidence": [
+            {
+              "location": "grox/tasks/task_write_safety_post_annotations_result_sink.py:210-217",
+              "language": "python",
+              "snippet": "self._strato_grok_ptos_action_with_labels.execute(new_annotation)\nlogger.info(f\"grokPtosActionWithLabels applied labels: {labels} for post {post_id}\")\n# no appeal, no human-review branch, no author notification, no owner field"
+            }
+          ],
+          "behavior": "A Grok model is the sole judge of policy violations across the gravest categories, and the result sink applies enforcement labels automatically, recording the outcome only to logs and metric counters. No recourse hook, human-in-the-loop branch, author notification, or accountable-owner field appears in the pipeline.",
+          "citations": [
+            {
+              "paragraph": "§71",
+              "quote": "transparency regarding algorithms, equitable access to data and avenues for recourse",
+              "gloss": "Subsidiarity binds platform power to recourse the pipeline does not provide."
+            },
+            {
+              "paragraph": "§105",
+              "quote": "who must “account” for decisions, justify them, monitor them, and, when necessary, challenge them and remedy",
+              "gloss": "Only logs exist; no locatable party can account for a suppression."
+            }
+          ],
+          "violation": "This violates subsidiarity and dignity. §71 requires avenues for recourse and §105 requires a locatable accountability; here a consequential label — including for self-harm and hate content — is applied by a model with no appeal and no one answerable, contrary to §104's no-exclusion-without-appeal.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "content fate is decided by model output and enacted as a label, with no human answerable for the judgment."
+          },
+          "remediation": [
+            "Add a time-bounded human-reachable appeal step before consequential labels",
+            "Deliver a per-decision rationale to the affected author",
+            "Record an accountable owner per enforcement-label type"
+          ],
+          "structural_note": "Real recourse at scale requires staffing human review; the enforcement and any appeal layer live in an out-of-tree service, so the absence is verifiable only as an in-code/opaque gap — itself the §71 transparency concern.",
+          "principle_relations": [
+            {
+              "principle": "subsidiarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "solidarity",
+      "name": "Solidarity",
+      "paragraph_range": "§73–76",
+      "verdict": "tension",
+      "verdict_summary": "The hidden labor sustaining the classifiers is undocumented.",
+      "findings": [
+        {
+          "id": "F7",
+          "title": "Fully automated moderation discloses nothing about the human-labeled examples it depends on",
+          "confidence": 84,
+          "primary_principle": "solidarity",
+          "code_evidence": [
+            {
+              "location": "grox/classifiers/content/safety_ptos.py:166-185",
+              "language": "python",
+              "snippet": "# Grok VLM classifies ViolentMedia / HateOrAbuse / SuicideOrSelfHarm ...\n# repo contains no model card, data card, or annotation-labor provenance"
+            }
+          ],
+          "behavior": "A Grok model classifies posts against gore, self-harm, and abuse policies. A learned safety classifier necessarily rests on upstream human-labeled examples of this disturbing material, yet the repository documents neither the provenance of those examples nor the labelers' conditions.",
+          "citations": [
+            {
+              "paragraph": "§173",
+              "quote": "the silent work of millions of people engaged in essential yet largely unseen activities, such as data labeling",
+              "gloss": "The classifier depends on exactly this hidden, undocumented labor."
+            },
+            {
+              "paragraph": "§109",
+              "quote": "social justice is not only a goal to be safeguarded after technologies are deployed, but a condition that must shape their very design",
+              "gloss": "The labor question must shape design, not be addressed after the fact."
+            }
+          ],
+          "violation": "This engages solidarity and social justice. §173 names the hidden labor of data labeling and moderation — often young women for minimal wages — and §109 requires that justice shape design from the outset; the dependency exists and is wholly undocumented.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "the disturbing-content review the classifier depends on is abstracted into a model problem, the labelers rendered invisible."
+          },
+          "remediation": [
+            "Publish a model/data card naming the source and labor conditions of the labeled examples",
+            "Apply ethical due-diligence to the annotation vendors (§179)",
+            "Retain a supported human-in-the-loop audit for the highest-severity categories"
+          ],
+          "structural_note": "Whether the labeling labor is exploitative is not visible in the code; the finding flags that the dependency exists and is undocumented, not that exploitation is proven.",
+          "principle_relations": [
+            {
+              "principle": "solidarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "social_justice",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "social_justice",
+      "name": "Social justice",
+      "paragraph_range": "§77–81",
+      "verdict": "violates",
+      "verdict_summary": "Protected-attribute inference and an age-blind feed expose the youngest and weakest to opaque, surveillant classification.",
+      "findings": [
+        {
+          "id": "F3",
+          "title": "The system infers protected attributes (gender) — predicting them for new accounts — and force-enables this on shadow traffic",
+          "confidence": 86,
+          "primary_principle": "social_justice",
+          "code_evidence": [
+            {
+              "location": "home-mixer/query_hydrators/user_inferred_gender_query_hydrator.rs:31,37",
+              "language": "rust",
+              "snippet": "fn enable(&self, query: &ScoredPostsQuery) -> bool {\n    query.params.get(EnableInferredGenderHydration) || query.is_shadow_traffic\n}\n// None if is_new_user(query.user_id) => self.grpc_client.predict(query.user_id)"
+            }
+          ],
+          "behavior": "The pipeline infers a user's gender via a prediction client and, for brand-new accounts, actively predicts it. The only gate is OR-ed away for shadow traffic, a deterministic ~50% sample of live requests; no consent, view, or delete path exists.",
+          "citations": [
+            {
+              "paragraph": "§171",
+              "quote": "the power to profile, predict and influence behavior, often without individuals being fully aware of it",
+              "gloss": "Inferring a protected attribute the user never declared is exactly this power."
+            },
+            {
+              "paragraph": "§80",
+              "quote": "communities exposed to invasive surveillance and social groups penalized by opaque algorithms",
+              "gloss": "Classifying by gender under a veneer of objectivity is the §80 risk."
+            }
+          ],
+          "violation": "This violates social justice. Inferring and scoring on a protected attribute the user never declared — predicting it even for zero-history accounts — is the §80 risk of opaque algorithmic classification and the §171 power to profile without awareness; the shadow-traffic override defeats the only gate.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "persons are classified and profiled as a default substrate of model experimentation rather than through a consented act."
+          },
+          "remediation": [
+            "Remove the '|| is_shadow_traffic' override so shadow traffic respects the gate",
+            "Default inferred-gender hydration off; require revocable opt-in",
+            "Let users view, correct, and delete the inferred label and score"
+          ],
+          "structural_note": "Inferring protected attributes to improve engagement-optimized ranking is intrinsic to a behavioral-targeting business model; removing it is a business-model decision.",
+          "principle_relations": [
+            {
+              "principle": "social_justice",
+              "relation": "violates"
+            },
+            {
+              "principle": "subsidiarity",
+              "relation": "tension"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            }
+          ]
+        },
+        {
+          "id": "F6",
+          "title": "The viewer's age is fetched, then discarded — no minor protection in the feed path",
+          "confidence": 83,
+          "primary_principle": "social_justice",
+          "code_evidence": [
+            {
+              "location": "home-mixer/models/query.rs:74 / server.rs:119",
+              "language": "rust",
+              "snippet": "pub user_age_in_years: Option<i32>,  // populated from viewer_data.age_in_years\n// ...but no downstream read: never threaded into the VF viewer context or the ranking"
+            }
+          ],
+          "behavior": "The viewer's age is fetched and stored but read by no downstream code; the visibility-filter viewer context omits it and the engagement ranking branches on no recipient-age signal. The same adult-tuned feed reaches a minor and an adult identically.",
+          "citations": [
+            {
+              "paragraph": "§141",
+              "quote": "early and unsupervised exposure to digital devices and social media can negatively impact sleep, attention span, control of emotions",
+              "gloss": "The age-blind feed exposes minors to exactly these harms."
+            },
+            {
+              "paragraph": "§142",
+              "quote": "Far-sighted public policies are needed to oppose the immediate interests of platforms",
+              "gloss": "§142 requires age limits and minor-specific protection the pipeline does not apply."
+            }
+          ],
+          "violation": "This violates social justice and integral development. §141 warns of the harms of unsupervised exposure and §142 requires opposing platform interests for minors; the system holds the viewer's age yet never derives minor status or escalates safety — §104's measured-then-ignored, exactly.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "every viewer is reduced to the same engagement-optimization target; the one signal that would protect the vulnerable is collected but never used."
+          },
+          "remediation": [
+            "Derive an is_minor predicate from user_age_in_years and thread it into the viewer context",
+            "Request a stricter safety level for minors; default to stricter when age is unknown",
+            "Down-weight engagement-amplifying signals for minor viewers"
+          ],
+          "structural_note": "A feed that does not maximize engagement for minors is less profitable; §142 holds that the wellbeing of minors must prevail over the platform's immediate interests.",
+          "principle_relations": [
+            {
+              "principle": "social_justice",
+              "relation": "violates"
+            },
+            {
+              "principle": "integral_development",
+              "relation": "tension"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "integral_development",
+      "name": "Integral human development",
+      "paragraph_range": "§82–85",
+      "verdict": "violates",
+      "verdict_summary": "The objective optimizes attention and engagement and asks nothing about whether it makes the person more humane.",
+      "findings": [
+        {
+          "id": "F1",
+          "title": "The ranking objective is pure predicted engagement — including dwell — with no truth or value term",
+          "confidence": 88,
+          "primary_principle": "integral_development",
+          "code_evidence": [
+            {
+              "location": "home-mixer/scorers/ranking_scorer.rs:146-170",
+              "language": "rust",
+              "snippet": "let combined_score = Self::apply(scores.favorite_score, weights.favorite)\n    + Self::apply(scores.dwell_score, weights.dwell)\n    + Self::apply(scores.dwell_time, weights.cont_dwell_time)\n    + Self::apply(scores.not_dwelled_score, weights.not_dwelled);"
+            }
+          ],
+          "behavior": "The final feed score is a weighted sum of predicted engagement probabilities, including dwell and continuous dwell-time, with a not_dwelled penalty. No term represents truth, accuracy, or whether the user valued the time spent.",
+          "citations": [
+            {
+              "paragraph": "§104",
+              "quote": "every technical tool embodies choices and priorities through what it measures, ignores and optimizes, and how it classifies people",
+              "gloss": "The objective measures engagement and dwell and ignores truth and user value."
+            },
+            {
+              "paragraph": "§170",
+              "quote": "When business models thrive on human weakness, the person is treated as a means rather than as an end",
+              "gloss": "Rewarding attention-duration optimizes session length, not any good the user sought."
+            }
+          ],
+          "violation": "This violates integral human development. Per §104 the objective measures and optimizes only engagement and dwell while ignoring whether content is true or wanted; per §170 the dwell reward is the attention-economy mechanism that treats the person as a means.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "discourse and attention reduced to predicted engagement probabilities; the operative standard of worth becomes capacity-to-engage."
+          },
+          "remediation": [
+            "Introduce a non-engagement objective term sourced from periodic user surveys and weight it materially in the score",
+            "Wire the already-computed quality/slop signal into ranking to downrank likely-false-but-engaging content",
+            "Cap dwell at a short did-the-user-look threshold rather than a monotonic longer-is-better reward"
+          ],
+          "structural_note": "An objective composed only of engagement proxies is the rational design under an attention/advertising business model; weighting in a truth or well-being term that can lower engagement is a telos change, not a code change.",
+          "principle_relations": [
+            {
+              "principle": "integral_development",
+              "relation": "violates"
+            },
+            {
+              "principle": "dignity",
+              "relation": "tension"
+            },
+            {
+              "principle": "common_good",
+              "relation": "tension"
+            }
+          ]
+        },
+        {
+          "id": "F8",
+          "title": "Continuous dwell-time reward and a not_dwelled penalty make attention duration a direct ranking signal",
+          "confidence": 80,
+          "primary_principle": "integral_development",
+          "code_evidence": [
+            {
+              "location": "home-mixer/scorers/ranking_scorer.rs:83,163",
+              "language": "rust",
+              "snippet": "let negative_sum = -(not_interested + block_author + mute_author + report + not_dwelled);"
+            }
+          ],
+          "behavior": "Content the user would scroll past without lingering is penalized via the not_dwelled term; continuous dwell_time is modeled as a regression target, i.e. longer attention is rewarded monotonically rather than as a capped did-the-user-look flag.",
+          "citations": [
+            {
+              "paragraph": "§171",
+              "quote": "control is exercised not only through explicit prohibitions, but also through the architecture of visibility",
+              "gloss": "What is rewarded or penalized shapes choices; dwell-maximization is that architecture."
+            }
+          ],
+          "violation": "Rewarding attention-duration as a ranking objective is the §170/§171 mechanism of the attention economy: the system optimizes for time-on-feed, treating the user's attention as a resource to be extracted.",
+          "resembles": {
+            "label": "technocratic-paradigm",
+            "gloss": "the user's attention-duration is an input optimized for a system metric rather than a good to be served."
+          },
+          "remediation": [
+            "Cap or remove the continuous dwell reward",
+            "Weight explicit-intent signals above passive duration",
+            "Offer a low-optimization chronological feed mode"
+          ],
+          "structural_note": null,
+          "principle_relations": [
+            {
+              "principle": "integral_development",
+              "relation": "violates"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mitigations": [
+    {
+      "title": "Author-diversity attenuation",
+      "principle_key": "common_good",
+      "note": "the AuthorDiversityScorer attenuates repeated-author scores, a genuine diversity mitigation"
+    },
+    {
+      "title": "Listens to explicit aversion",
+      "principle_key": "dignity",
+      "note": "block, mute, report and not-interested carry negative weight — the system does not optimize engagement alone"
+    },
+    {
+      "title": "Mandatory per-recipient safety filter",
+      "principle_key": "social_justice",
+      "note": "a platform-side visibility filter runs before brand-safety and irrespective of opt-in, so harm avoidance is not offloaded to muting"
+    },
+    {
+      "title": "Deletion honored in-network",
+      "principle_key": "universal_destination",
+      "note": "Thunder propagates post-delete events in its serving store"
+    }
+  ],
+  "dropped": [
+    {
+      "title": "Spam scrutiny 'polices the small and shields the prominent'",
+      "confidence": 35,
+      "reason": "charitable_reading"
+    },
+    {
+      "title": "Brand safety protects advertisers but not viewers",
+      "confidence": 55,
+      "reason": "charitable_reading"
+    },
+    {
+      "title": "Thunder deletion is theatrical / resurrectable",
+      "confidence": 42,
+      "reason": "below_threshold"
+    },
+    {
+      "title": "Continuous dwell-time is a ranking signal",
+      "confidence": 80,
+      "reason": "merged_into:F1"
+    }
+  ],
+  "scope_limits": [
+    "Decisive consumers are referenced but not vendored: util::phoenix_request::build_prediction_request (whether inferred gender materially changes ranking), the external visibility-filtering service (whether it age-gates), and the served-history storage client (whether a deletion path exists).",
+    "Model weights distributed via Git LFS were not analyzed.",
+    "Where a finding depends on out-of-repo behavior, the confidence and language reflect the in-code/opaque boundary — itself, per §71, part of the transparency concern."
+  ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var PRINCIPLE_ORDER = ["dignity","common_good","universal_destination","subsidiarity","solidarity","social_justice","integral_development"];
+  /* aggregate-verdict classes only — the schema keys are unchanged, but no
+     verdict WORD is displayed anymore: the matrix header dots (red/yellow)
+     and the synthesis stat line carry the aggregate signal */
+  var VERDICT = {
+    honors:{cls:"honors"},
+    tension:{cls:"tension"},
+    violates:{cls:"violates"}
+  };
+  var IMAGE = {
+    babel:{label:"Toward Babel", cls:"violates"},
+    rebuilt_jerusalem:{label:"Toward the rebuilt Jerusalem", cls:"honors"},
+    contested:{label:"Between Babel and Jerusalem", cls:"tension"}
+  };
+  /* severity rank for the flat finding order: violates first, then tension, then honors */
+  var SEVERITY = {violates:0, tension:1, honors:2};
+  /* relation labels for the per-principle marginalia + summary markers */
+  var RELATION = {
+    violates:{label:"violates", cls:"rel-violates", sev:0},
+    tension:{label:"strains", cls:"rel-tension", sev:1}
+  };
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function el(tag, cls, txt){var e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e;}
+  function vmeta(v){return VERDICT[v]||{cls:"tension"};}
+  function relmeta(r){return RELATION[r]||RELATION.tension;}
+
+  /* ---------- typography normalization ----------
+     Curl straight quotes/apostrophes in injected PROSE (never in code or §-locs).
+     Outer double-quotes on citations are real “ ” characters supplied at build
+     time, so cite quote text only carries inner single-curly emphasis. */
+  function curl(s){
+    s=String(s==null?"":s);
+    if(!s) return s;
+    // double quotes -> curly “ ”  (open if preceded by start/space/open-punct)
+    s=s.replace(/"([^"]*)"/g,function(_,inner){return "“"+inner+"”";});
+    // remaining lone double quotes
+    s=s.replace(/"/g,"”");
+    // apostrophes / single quotes
+    s=s.replace(/(\w)'(\w)/g,"$1’$2");                 // contractions: don't, user's
+    s=s.replace(/'([^']*)'/g,function(_,inner){return "‘"+inner+"’";}); // single-quoted spans
+    s=s.replace(/'/g,"’");                               // remaining -> right single
+    return s;
+  }
+  /* a curl variant for citation quote bodies: the outer “ ” are added as real
+     text around the result, so ANY inner double-quote (straight OR already-curly
+     in the source) becomes single curly emphasis instead — never a second pair
+     of doubles. */
+  function curlQuote(s){
+    s=String(s==null?"":s);
+    if(!s) return s;
+    // inner straight "x" -> ‘x’ ; inner curly “x” -> ‘x’
+    s=s.replace(/"([^"]*)"/g,function(_,inner){return "‘"+inner+"’";});
+    s=s.replace(/“([^”]*)”/g,function(_,inner){return "‘"+inner+"’";});
+    s=s.replace(/[“”"]/g,"’");                // any stray double -> right single
+    s=s.replace(/(\w)'(\w)/g,"$1’$2");
+    s=s.replace(/'([^']*)'/g,function(_,inner){return "‘"+inner+"’";});
+    s=s.replace(/'/g,"’");
+    return s;
+  }
+  /* convert em-dashes inside a mono title to spaced en-dashes so it reads as prose */
+  function dedash(s){return String(s==null?"":s).replace(/\s*—\s*/g," – ").replace(/\s*--\s*/g," – ");}
+  /* set prose text with curly quotes; `backtick` spans become inline <code>
+     (the data contract: authors backtick identifiers/paths in prose fields).
+     Split BEFORE curling so code spans are never typographically mangled;
+     unmatched backticks pass through as literal text. */
+  function setProse(e, txt){
+    e.textContent="";
+    String(txt==null?"":txt).split(/(`[^`]+`)/).forEach(function(t){
+      if(/^`[^`]+`$/.test(t)){
+        var c=document.createElement("code"); c.textContent=t.slice(1,-1); e.appendChild(c);
+      } else if(t){
+        e.appendChild(document.createTextNode(curl(t)));
+      }
+    });
+    return e;
+  }
+
+  /* ---------- syntax highlighter (self-contained) ---------- */
+  var KW = {
+    rust:{kw:set("fn let mut const static struct enum impl trait pub use mod match if else for while loop return break continue self Self where as in ref move dyn async await unsafe extern crate super type unsafe Box"),ty:set("u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize f32 f64 bool char str String Vec Option Result Box Arc Rc HashMap HashSet Duration"),c:"c"},
+    python:{kw:set("def class return if elif else for while in not and or is None True False import from as with try except finally raise lambda yield async await pass break continue global nonlocal del assert self"),ty:set("int str float bool list dict set tuple bytes object Exception"),c:"py"},
+    typescript:{kw:set("const let var function return if else for while do class extends implements new this super import from export default async await try catch finally throw typeof instanceof in of as interface type enum namespace public private protected readonly static get set null undefined true false void yield"),ty:set("string number boolean any never unknown void object Array Promise Record Map Set Partial Readonly"),c:"c"}
+  };
+  KW.rs=KW.rust; KW.py=KW.python; KW.ts=KW.typescript; KW.tsx=KW.typescript;
+  KW.js=KW.typescript; KW.javascript=KW.typescript; KW.jsx=KW.typescript;
+  function set(s){var o=Object.create(null); s.split(/\s+/).forEach(function(w){o[w]=1;}); return o;}
+  var RE_C  = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)|(\b\d[\d_]*(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+)/g;
+  var RE_PY = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(\b\d[\d_]*(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+)/g;
+  function highlight(code, lang){
+    var cfg = KW[(lang||"").toLowerCase()];
+    if(!cfg) return esc(code);
+    var re = cfg.c==="py" ? RE_PY : RE_C; re.lastIndex=0;
+    var out="", last=0, m;
+    while((m=re.exec(code))){
+      if(m.index>last) out+=esc(code.slice(last,m.index));
+      var cls=null, tok=m[0];
+      if(m[1]!=null) cls="t-cm";
+      else if(m[2]!=null) cls="t-st";
+      else if(m[3]!=null) cls="t-nu";
+      else if(m[4]!=null){
+        var id=m[4];
+        var rest=code.slice(re.lastIndex); var nextCh=(rest.match(/^\s*/)[0].length)<rest.length? rest.charAt(rest.match(/^\s*/)[0].length):"";
+        if(cfg.kw[id]) cls="t-kw";
+        else if(cfg.ty[id]) cls="t-ty";
+        else if(nextCh==="(") cls="t-fn";
+        else if(/^[A-Z]/.test(id)) cls="t-ty";
+      } else if(m[5]!=null) cls=null;
+      out += cls ? '<span class="'+cls+'">'+esc(tok)+'</span>' : esc(tok);
+      last = re.lastIndex;
+    }
+    out += esc(code.slice(last));
+    return out;
+  }
+
+  /* ---------- name helpers ---------- */
+  function principleName(p){return p.name||pname(p.key);}
+  function pname(k){return ({dignity:"The dignity of the human person",common_good:"The common good",universal_destination:"The universal destination of goods",subsidiarity:"Subsidiarity",solidarity:"Solidarity",social_justice:"Social justice",integral_development:"Integral human development"})[k]||k;}
+  function shortName(k){return ({dignity:"Dignity",common_good:"Common good",universal_destination:"Universal destination",subsidiarity:"Subsidiarity",solidarity:"Solidarity",social_justice:"Social justice",integral_development:"Integral development"})[k]||k;}
+  function prange(k){return ({dignity:"§48–58",common_good:"§59–64",universal_destination:"§65–67",subsidiarity:"§68–72",solidarity:"§73–76",social_justice:"§77–81",integral_development:"§82–85"})[k]||"";}
+
+  function orderedPrinciples(list){
+    var byKey={}; (list||[]).forEach(function(p){byKey[p.key]=p;});
+    var out=[]; PRINCIPLE_ORDER.forEach(function(k){ if(byKey[k]){out.push(byKey[k]); delete byKey[k];} });
+    Object.keys(byKey).forEach(function(k){out.push(byKey[k]);}); // any extras, as given
+    return out;
+  }
+  function pad2(n){return (n<10?"0":"")+n;}
+
+  /* derive a finding's normalized relations list: every engaged principle + relation,
+     ordered violates-first. Falls back from principle_relations to the old shape. */
+  function findingRelations(f, fallbackKey){
+    var rels = Array.isArray(f.principle_relations) ? f.principle_relations.slice() : null;
+    if(!rels){
+      // legacy fallback: primary + any secondary as tension
+      rels=[];
+      var pk=f.primary_principle||fallbackKey;
+      if(pk) rels.push({principle:pk, relation:"violates"});
+      (f.secondary_principles||[]).forEach(function(k){ if(k&&k!==pk) rels.push({principle:k, relation:"tension"}); });
+    }
+    rels=rels.filter(function(r){return r && r.principle;});
+    // stable order: violates first, then tension, primary anchored first within its tier
+    var pk=f.primary_principle||fallbackKey;
+    rels.sort(function(a,b){
+      var sa=relmeta(a.relation).sev, sb=relmeta(b.relation).sev;
+      if(sa!==sb) return sa-sb;
+      if(a.principle===pk) return -1;
+      if(b.principle===pk) return 1;
+      return 0;
+    });
+    return rels;
+  }
+  /* a finding's overall severity = its strongest relation */
+  function findingSeverity(f, fallbackKey){
+    var rels=findingRelations(f, fallbackKey);
+    return rels.some(function(r){return r.relation==="violates";}) ? "violates" : "tension";
+  }
+  /* this finding's relation to a SPECIFIC principle key */
+  function relationTo(f, key, fallbackKey){
+    var rels=findingRelations(f, fallbackKey);
+    for(var i=0;i<rels.length;i++){ if(rels[i].principle===key) return rels[i].relation; }
+    return null;
+  }
+
+  /* the shared SECTION HEADER component — an italic caption on an inline rule
+     that runs to the prose right edge, with an optional right slot (retained
+     for future use; v7 moved the Synthesis pill into the verdict row). The h2
+     keeps the caller's id so the sections' aria-labelledby wiring is
+     untouched. `full` spans the row from the RAIL ORIGIN (the scorecard
+     hairlines' left edge) while the rule still ends on the prose right edge —
+     every header except Synthesis passes it. */
+  function sectionHead(text, id, right, full){
+    var row=el("div", full ? "sechead sechead-full" : "sechead");
+    var cap=el("h2","sh-cap",text); if(id) cap.id=id;
+    row.appendChild(cap);
+    var ln=el("span","sh-rule"); ln.setAttribute("aria-hidden","true");
+    row.appendChild(ln);
+    if(right){ right.classList.add("sh-right"); row.appendChild(right); }
+    return row;
+  }
+  /* v7: the quiet evidence line beside the verdict pill — every figure derived
+     at render time from the SAME structures the other renderers read
+     (principles[].findings via findingSeverity, the aggregate verdicts);
+     nothing is ever hardcoded. Zero-count tiers are simply not spoken, and
+     principles no finding presses on are simply not counted. */
+  function verdictStats(principles){
+    /* findings are simply COUNTED — a bug carries no standalone verdict; the
+       verdict signal is the per-principle aggregate below */
+    var total=0, agg={violates:0, tension:0, honors:0};
+    (principles||[]).forEach(function(p){
+      agg[vmeta(p.verdict).cls]++;
+      (p.findings||[]).forEach(function(){ total++; });
+    });
+    if(!total) return null;
+    var txt=total+(total===1?" finding":" findings");
+    var pbits=[];
+    if(agg.violates) pbits.push(agg.violates+" violated");
+    if(agg.tension) pbits.push(agg.tension+" strained");
+    var pn=(principles||[]).length;
+    if(pn && pbits.length) txt+=" · of "+pn+" principles: "+pbits.join(", ");
+    return el("p","vr-stats",txt);
+  }
+  /* ---------- masthead ---------- */
+  function renderHeader(meta){
+    var h=$("top"); /* the masthead host doubles as the #top anchor */
+    /* ONE LEFT EDGE: the masthead content sits in the content column (col 2),
+       the rail empty to its left, exactly like the body sections */
+    var g=el("div","grid");
+    g.appendChild(el("div","rail"));
+    var col=el("div","content-col");
+    col.appendChild(el("p","mast-overline","An anthropological audit of"));
+    col.appendChild(el("h1","system", curl(meta.system_name||"Untitled system")));
+
+    /* the concise intro, now the dek (subtitle under the system name) */
+    var dek=el("p","dek");
+    dek.appendChild(document.createTextNode("This reads the system against the seven principles of Catholic social doctrine set out in the encyclical "));
+    var em=el("em",null,"Magnifica Humanitas"); em.setAttribute("lang","la");
+    dek.appendChild(em);
+    dek.appendChild(document.createTextNode(", asking what its workings imply about the human person."));
+    col.appendChild(dek);
+
+    /* labeled meta block — small-caps mono labels beside aligned values; omit null rows */
+    var rows=[
+      ["date", meta.date],
+      ["scope", meta.scope],
+      ["evidence", fmtEvidence(meta.evidence_base)],
+      ["repository", meta.repo_url]
+    ];
+    var mm=el("div","mast-meta");
+    rows.forEach(function(r){
+      if(r[1]==null||r[1]==="") return;
+      mm.appendChild(el("span","mm-label", r[0]));
+      var v=el("span","mm-value");
+      if(r[0]==="repository" && /^https?:/i.test(String(r[1]))){
+        var url=String(r[1]);
+        var a=el("a"); a.href=url; a.rel="noopener";
+        // the displayed text drops the scheme (editorial convention; href stays
+        // complete) — and with no data-href-shown, print appends the full address
+        var shown=url.replace(/^https?:\/\//i,"");
+        // insert zero-width break opportunities after slashes so the URL wraps cleanly
+        var parts=shown.split("/");
+        parts.forEach(function(seg, i){
+          a.appendChild(document.createTextNode(seg + (i<parts.length-1?"/":"")));
+          if(i<parts.length-1){ a.appendChild(document.createElement("wbr")); }
+        });
+        v.appendChild(a);
+      } else if(r[0]==="date"){
+        // a literary date inside <time> — oldstyle figures are correct in prose;
+        // the raw string is the fallback when it isn't YYYY-MM-DD
+        var tEl=document.createElement("time"); tEl.dateTime=String(r[1]);
+        tEl.textContent=fmtDate(r[1])||String(r[1]);
+        v.appendChild(tEl);
+      } else {
+        // scope may carry `code` identifiers — set them as inline code; the
+        // prose segments keep hyphenated system names unbreakable
+        String(r[1]==null?"":r[1]).split(/(`[^`]+`)/).forEach(function(t){
+          if(/^`[^`]+`$/.test(t)){ var c=document.createElement("code"); c.textContent=t.slice(1,-1); v.appendChild(c); }
+          else if(t){ v.appendChild(protectNames(curl(t))); }
+        });
+      }
+      mm.appendChild(v);
+    });
+    if(mm.childNodes.length) col.appendChild(mm);
+
+    /* no closing rule: the Synthesis section header's inline rule is the
+       title page's boundary line */
+    g.appendChild(col);
+    h.appendChild(g);
+  }
+  function fmtEvidence(e){return ({source_code:"Source code",partial_code:"Partial code",product_docs:"Product documentation",behavioral_account:"Behavioral account",mixed:"Mixed evidence"})[e]||e;}
+  /* "June 2, 2026" from "2026-06-02" — regex, not Date, so no timezone drift */
+  function fmtDate(s){
+    var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s)); if(!m) return null;
+    var MO=["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return MO[+m[2]-1] ? MO[+m[2]-1]+" "+(+m[3])+", "+m[1] : null;
+  }
+  /* wrap tokens with intra-word hyphens (home-mixer) in nowrap spans so system
+     identifiers never fracture across lines; ordinary prose is untouched */
+  function protectNames(s){
+    var frag=document.createDocumentFragment();
+    String(s).split(/(\s+)/).forEach(function(tok){
+      if(/\w-\w/.test(tok)){ var sp=el("span","nb"); sp.textContent=tok; frag.appendChild(sp); }
+      else if(tok){ frag.appendChild(document.createTextNode(tok)); }
+    });
+    return frag;
+  }
+
+  /* the ratings key — the grid's dot vocabulary on ONE centered line.
+     Decorative to AT (aria-hidden) — every cell speaks its own relation
+     text — with one hidden sentence in its place */
+  function ratingsKey(){
+    var key=el("p","ratings-key");
+    var l=el("span","rk-line"); l.setAttribute("aria-hidden","true");
+    function dotClause(cls, words){
+      var s=el("span","rk-item");
+      s.appendChild(el("span","rk-dot "+cls));
+      s.appendChild(document.createTextNode(words));
+      return s;
+    }
+    l.appendChild(dotClause("rel-violates","violates that principle"));
+    l.appendChild(document.createTextNode(" "));
+    l.appendChild(el("span","rk-sep","·"));
+    l.appendChild(document.createTextNode(" "));
+    l.appendChild(dotClause("rel-tension","strains it"));
+    l.appendChild(document.createTextNode(" "));
+    l.appendChild(el("span","rk-sep","·"));
+    l.appendChild(document.createTextNode(" "));
+    var nil=el("span","rk-item");
+    nil.appendChild(el("span","rk-nil"));
+    nil.appendChild(document.createTextNode("not engaged"));
+    l.appendChild(nil);
+    key.appendChild(l);
+    key.appendChild(el("span","visually-hidden","In the grid below, each cell names the finding’s relation to that principle: violates it, strains it, or does not engage it."));
+    return key;
+  }
+
+  /* ---------- summary (synthesis verdict row + prose) ---------- */
+  function renderSummary(syn, principles){
+    var sec=$("summary");
+    var g=el("div","grid");
+    g.appendChild(el("div","rail"));
+    var col=el("div","content-col");
+
+    /* the Synthesis header is the one CONTENT-EDGE caption (v7) — plain
+       caption + rule, no right slot */
+    col.appendChild(sectionHead("Synthesis","summary-cap"));
+
+    /* v7: the VERDICT ROW directly below the rule — the outlined ink pill
+       (a hidden "Overall:" keeps its context for screen readers) beside the
+       data-computed stat line that justifies it */
+    if(syn){
+      var img=IMAGE[syn.verdict_image]||{label:String(syn.verdict_image||""),cls:"tension"};
+      var row=el("div","verdict-row");
+      var pill=el("span","verdict-image vi-"+img.cls);
+      pill.appendChild(el("span","visually-hidden","Overall: "));
+      pill.appendChild(document.createTextNode(img.label));
+      row.appendChild(pill);
+      var stats=verdictStats(principles);
+      if(stats) row.appendChild(stats);
+      col.appendChild(row);
+      String(syn.text||"").split(/\n{2,}/).forEach(function(t){ if(t.trim()){ var p=el("p"); setProse(p, t.trim()); col.appendChild(p); } });
+    }
+    g.appendChild(col);
+    sec.appendChild(g);
+  }
+
+  /* ---------- "The findings, by principle" — the cross-grid IS the section ----------
+     Header -> centered ratings key -> the matrix: a real table, one row per
+     finding in display order, one slim column per principle headed by the
+     principle's own NAME, slanted; the relations read at the intersections,
+     confidence trails on the right. Each column foot carries the principle's
+     aggregate-verdict dot (red = violates, yellow = strains) — omitted when
+     no finding engages the principle.
+     A stacked per-finding list renders alongside as the <=680px fallback;
+     CSS display:none swaps them, keeping the inactive copy out of the
+     a11y tree and tab order at every viewport. */
+  function renderScorecard(principles, ordered){
+    var sec=$("scorecard-sec");
+
+    /* the header spans from the RAIL ORIGIN (the matrix hairlines' left
+       edge); the legend centers on that same full span */
+    sec.appendChild(sectionHead("The findings, by principle","scorecard-cap",null,true));
+
+    /* ---- the cross-grid ---- */
+    var wrap=el("div","matrix-wrap");
+    var table=el("table","matrix");
+    /* the section heading names the table (no visible caption — it would just
+       repeat the heading) */
+    table.setAttribute("aria-labelledby","scorecard-cap");
+
+    // fixed layout: slim principle + confidence columns; the row-head column
+    // takes the remainder
+    var colg=el("colgroup");
+    colg.appendChild(el("col","mxc-find"));
+    principles.forEach(function(){ colg.appendChild(el("col","mxc-p")); });
+    colg.appendChild(el("col","mxc-conf"));
+    table.appendChild(colg);
+
+    var thead=el("thead");
+    var hrow=el("tr");
+    var h0=el("th","mx-find-h"); h0.scope="col";
+    // the bug column's title, in the quiet mono labelling voice (the table's
+    // former caption, now anchored over the column it names)
+    var h0v=el("span","mx-find-label","Anthropological Bugs"); h0v.setAttribute("aria-hidden","true");
+    h0.appendChild(h0v);
+    h0.appendChild(el("span","visually-hidden","Finding"));
+    hrow.appendChild(h0);
+    principles.forEach(function(p){
+      var th=el("th","mx-p-h"); th.scope="col";
+      // the tooltip carries the full name + §-range; the visible head is the
+      // short name, slanted (aria-hidden — AT hears the full name instead)
+      var range=p.paragraph_range||prange(p.key);
+      th.title=principleName(p)+(range?" "+range:"");
+      var nm=el("span","mxp-name",shortName(p.key)); nm.setAttribute("aria-hidden","true");
+      th.appendChild(nm);
+      th.appendChild(el("span","visually-hidden", principleName(p)));
+      // the AGGREGATE verdict dot at the column foot — the one aggregate
+      // signal; no dot when no finding engages this principle
+      var engaged=ordered.some(function(it){ return relationTo(it.f, p.key, it.pk)!=null; });
+      var vc=vmeta(p.verdict).cls;
+      if(engaged && (vc==="violates"||vc==="tension")){
+        var agg=el("span","mxp-agg d-"+vc); agg.setAttribute("aria-hidden","true");
+        th.appendChild(agg);
+      }
+      hrow.appendChild(th);
+    });
+    var hc=el("th","mx-conf-h"); hc.scope="col";
+    var hcv=el("span",null,"conf"); hcv.setAttribute("aria-hidden","true");
+    hc.appendChild(hcv);
+    hc.appendChild(el("span","visually-hidden","confidence"));
+    hrow.appendChild(hc);
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+
+    var tbody=el("tbody");
+    ordered.forEach(function(item){
+      var f=item.f, ord=ORDINALS[f.id]||String(f.id||"");
+      var title=dedash(curl(f.title||"Untitled finding"));
+      var tr=el("tr");
+      // row head: ✴ + ordinal + linked title (jumps to the finding card)
+      var th=el("th","mx-row-h"); th.scope="row";
+      var a=el("a"); a.href="#f-"+f.id;
+      var mark=el("span","mxr-mark","✴"); mark.setAttribute("aria-hidden","true");
+      a.appendChild(mark);
+      a.appendChild(el("span","visually-hidden","Finding "));
+      a.appendChild(el("span","mxr-ord",ord));
+      a.appendChild(el("span","mxr-title",title));
+      th.appendChild(a);
+      tr.appendChild(th);
+      // one cell per principle: the relation at this intersection
+      principles.forEach(function(p){
+        var td=el("td","mx-cell");
+        var rel=relationTo(f, p.key, item.pk);
+        if(rel){
+          var d=el("span","mx-dot "+relmeta(rel).cls); d.setAttribute("aria-hidden","true");
+          td.appendChild(d);
+          td.appendChild(el("span","visually-hidden",
+            rel==="violates" ? "violates "+shortName(p.key) : "strains "+shortName(p.key)));
+        } else {
+          var nil=el("span","mx-nil"); nil.setAttribute("aria-hidden","true");
+          td.appendChild(nil);
+          td.appendChild(el("span","visually-hidden","not engaged"));
+        }
+        tr.appendChild(td);
+      });
+      // trailing confidence
+      var tdc=el("td","mx-conf");
+      if(f.confidence!=null){
+        tdc.appendChild(el("span","visually-hidden","confidence "));
+        tdc.appendChild(document.createTextNode(String(f.confidence)));
+      } else {
+        tdc.appendChild(document.createTextNode("—"));
+      }
+      tr.appendChild(tdc);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    sec.appendChild(wrap);
+
+    /* ---- the stacked mobile fallback (shown only <=680px) ---- */
+    var stack=el("ul","matrix-stack");
+    ordered.forEach(function(item){
+      var f=item.f, ord=ORDINALS[f.id]||String(f.id||"");
+      var li=el("li");
+      var a=el("a","mxs-link"); a.href="#f-"+f.id;
+      var mark=el("span","mxr-mark","✴"); mark.setAttribute("aria-hidden","true");
+      a.appendChild(mark);
+      a.appendChild(el("span","visually-hidden","Finding "));
+      a.appendChild(el("span","mxs-ord",ord));
+      a.appendChild(el("span","mxs-title", dedash(curl(f.title||"Untitled finding"))));
+      if(f.confidence!=null){
+        var conf=el("span","mxs-conf");
+        conf.appendChild(el("span","visually-hidden","confidence "));
+        conf.appendChild(document.createTextNode(String(f.confidence)));
+        a.appendChild(conf);
+      }
+      li.appendChild(a);
+      var rels=findingRelations(f, item.pk);
+      if(rels.length){
+        var rl=el("span","mxs-rels");
+        rels.forEach(function(r){
+          var rm=relmeta(r.relation);
+          var it=el("span","mxs-prin");
+          var d=el("span","mxs-dot "+rm.cls); d.setAttribute("aria-hidden","true");
+          it.appendChild(d);
+          it.appendChild(document.createTextNode(shortName(r.principle)));
+          it.appendChild(el("span","visually-hidden"," — "+rm.label));
+          rl.appendChild(it);
+        });
+        li.appendChild(rl);
+      }
+      stack.appendChild(li);
+    });
+    sec.appendChild(stack);
+
+    /* the legend sits BELOW the matrix it explains */
+    sec.appendChild(ratingsKey());
+    /* no closing rule: the findings section header's inline rule is the boundary */
+  }
+
+  /* ---------- the ONE display order: severity-first, computed ONCE ----------
+     ORDINALS maps data id ("F1") -> display ordinal ("01".."NN") in that order.
+     It is module-scoped and read by the rail .f-id, the scorecard bullet
+     prefixes, the closing-section cross-references, and the page-nav. */
+  var ORDINALS = {};
+  function orderFindings(principles){
+    // flatten all findings across principles
+    var all=[];
+    principles.forEach(function(p){
+      (p.findings||[]).forEach(function(f){
+        var pk=f.primary_principle||p.key;
+        all.push({f:f, pk:pk, severity:findingSeverity(f, pk)});
+      });
+    });
+    // order: severity-first (violates, then tension); within a tier, DESC confidence
+    all.sort(function(a,b){
+      var sa=SEVERITY[a.severity]; if(sa==null) sa=1;
+      var sb=SEVERITY[b.severity]; if(sb==null) sb=1;
+      if(sa!==sb) return sa-sb;
+      var ca=a.f.confidence==null?-1:a.f.confidence;
+      var cb=b.f.confidence==null?-1:b.f.confidence;
+      return cb-ca;
+    });
+    all.forEach(function(item, i){ if(item.f.id!=null) ORDINALS[item.f.id]=pad2(i+1); });
+    return all;
+  }
+  /* rewrite finding cross-references in rendered prose: a bare F<digits> token
+     whose id is in ORDINALS reads as "finding NN"; unknown tokens — and
+     `backtick` code spans — pass through untouched */
+  function ordinalize(s){
+    return String(s==null?"":s).split(/(`[^`]+`)/).map(function(t){
+      if(/^`[^`]+`$/.test(t)) return t;
+      return t.replace(/\bF(\d+)\b/g,function(tok,d){
+        return ORDINALS["F"+d] ? "finding "+ORDINALS["F"+d] : tok;
+      });
+    }).join("");
+  }
+
+  /* ---------- findings: ONE flat list, severity-first, no principle headers ---------- */
+  function renderFindings(ordered){
+    var root=$("findings");
+
+    // the VISIBLE section header — the h2 keeps id=findings-cap for the
+    // section's aria-labelledby; its inline rule is the scorecard boundary,
+    // and the h3 finding titles still nest under this h2 landmark.
+    // v7: the caption starts at the rail origin (full-span header)
+    root.appendChild(sectionHead("The findings, in detail","findings-cap",null,true));
+
+    ordered.forEach(function(item, i){
+      if(i>0) root.appendChild(asterism());
+      root.appendChild(renderFinding(item.f, item.pk));
+    });
+    /* no closing rule: the first closing movement's header rule (or the
+       footer's own hairline) is the next boundary */
+  }
+  function asterism(){var d=el("div","f-aster"); d.setAttribute("aria-hidden","true"); return d;}
+
+  /* ---------- finding card — the per-principle relation marginalia, NO single chip ---------- */
+  function renderFinding(f, primaryKey){
+    var wrap=el("div","finding grid"); wrap.id="f-"+f.id;
+
+    /* RAIL: the railhead (permalink star + citable ID), the LABELED
+       engages-list, the confidence */
+    var rail=el("div","f-rail");
+    var ord=ORDINALS[f.id]||String(f.id||"");
+    var rh=el("div","f-railhead");
+    var star=el("a","f-star","✴"); // ✴ — the finding's sigil is its permalink
+    star.href="#f-"+f.id; // anchors keep the STABLE data id; only the display is ordinal
+    star.setAttribute("aria-label","Link to finding "+ord);
+    rh.appendChild(star);
+    rh.appendChild(el("span","f-id",ord));
+    rail.appendChild(rh);
+
+    /* no overall severity word: a bug has no standalone verdict — it only
+       violates/strains in relation to a principle (shown per-principle below
+       and in the matrix). */
+    var rels=findingRelations(f, primaryKey);
+    if(rels.length){
+      var eng=el("div","f-engages");
+      eng.appendChild(el("span","fe-label","Engages"));
+      rels.forEach(function(r){
+        var rm=relmeta(r.relation);
+        // a relation DOT + the principle name only — the per-principle relation
+        // stays in the scorecard; here it survives as title + hidden text
+        var item=el("span","fe-item");
+        item.title=shortName(r.principle)+" — "+rm.label;
+        var dot=el("span","fe-dot "+rm.cls); dot.setAttribute("aria-hidden","true");
+        item.appendChild(dot);
+        item.appendChild(document.createTextNode(shortName(r.principle)));
+        item.appendChild(el("span","visually-hidden"," — "+rm.label));
+        eng.appendChild(item);
+      });
+      rail.appendChild(eng);
+    }
+    if(f.confidence!=null){
+      var conf=el("span","f-conf");
+      conf.appendChild(document.createTextNode("confidence"));
+      conf.appendChild(el("b",null,String(f.confidence)));
+      rail.appendChild(conf);
+    }
+    wrap.appendChild(rail);
+
+    /* CONTENT */
+    var body=el("div","f-body");
+
+    /* head: the mono title only — the single finding verdict chip is REMOVED */
+    var head=el("div","f-head");
+    var title=el("h3","f-title", dedash(curl(f.title||"")));
+    head.appendChild(title);
+    body.appendChild(head);
+
+    /* ONE flowing explanation — behavior and violation merged, unlabeled */
+    var parts=[];
+    if(f.behavior && String(f.behavior).trim()) parts.push(String(f.behavior).trim());
+    if(f.violation && String(f.violation).trim()) parts.push(String(f.violation).trim());
+    if(parts.length){
+      var ex=el("div","f-explain");
+      parts.join("\n\n").split(/\n{2,}/).forEach(function(t){ if(t.trim()){ var p=el("p"); setProse(p, t.trim()); ex.appendChild(p); } });
+      body.appendChild(ex);
+    }
+
+    /* CODE evidence — caption + highlighted snippet, no label */
+    (f.code_evidence||[]).forEach(function(ce){
+      var fig=el("figure","code");
+      var cap=el("figcaption");
+      // <wbr> after each "/" (the masthead repo-URL treatment) so the path
+      // wraps at segment boundaries, never inside a filename
+      var loc=el("span","loc");
+      String(ce.location||"").split("/").forEach(function(seg, j, arr){
+        loc.appendChild(document.createTextNode(seg + (j<arr.length-1?"/":"")));
+        if(j<arr.length-1){ loc.appendChild(document.createElement("wbr")); }
+      });
+      cap.appendChild(loc);
+      // a bare copy action, only where the Clipboard API exists
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        var cp=el("button","code-copy","copy"); cp.type="button";
+        cp.addEventListener("click",function(){
+          navigator.clipboard.writeText(ce.snippet||"").then(function(){
+            cp.textContent="copied";
+            setTimeout(function(){ cp.textContent="copy"; },1200);
+          }).catch(function(){});
+        });
+        cap.appendChild(cp);
+      }
+      if(ce.language) cap.appendChild(el("span","lang",ce.language));
+      fig.appendChild(cap);
+      var preWrap=el("div","pre-wrap");
+      var pre=el("pre"); var code=el("code");
+      if(ce.language && ce.language.toLowerCase()!=="text") code.innerHTML=highlight(ce.snippet||"", ce.language);
+      else code.textContent=ce.snippet||"";
+      pre.appendChild(code); preWrap.appendChild(pre); fig.appendChild(preWrap); body.appendChild(fig);
+      /* the right-edge fade tracks REAL scroll state (visible only while
+         content remains to the right), and a genuinely overflowing pane
+         becomes keyboard-scrollable; re-synced when Fira Code lands,
+         since the webfont changes scrollWidth */
+      function syncFade(){
+        preWrap.classList.toggle("has-more", pre.scrollLeft+pre.clientWidth < pre.scrollWidth-1);
+        if(!pre.hasAttribute("tabindex") &&
+           (pre.scrollWidth>pre.clientWidth+1 || pre.scrollHeight>pre.clientHeight+1)){
+          pre.setAttribute("tabindex","0");
+          pre.setAttribute("role","region");
+          pre.setAttribute("aria-label",(ce.location||"code evidence")+" — scrollable");
+        }
+      }
+      pre.addEventListener("scroll",syncFade,{passive:true});
+      window.addEventListener("resize",syncFade);
+      requestAnimationFrame(syncFade);
+      if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ requestAnimationFrame(syncFade); });
+    });
+
+    /* CITATIONS — a quiet label, then hanging marginal §-ref + beautifully set quote */
+    if((f.citations||[]).length){
+      var cc=el("p","cite-cap");
+      cc.appendChild(document.createTextNode("From "));
+      var ccem=el("em",null,"Magnifica Humanitas"); ccem.setAttribute("lang","la");
+      cc.appendChild(ccem);
+      body.appendChild(cc);
+      (f.citations||[]).forEach(function(ci){
+        var cg=el("div","cite");
+        var hasRef = ci.paragraph && String(ci.paragraph).trim();
+        if(hasRef){
+          var ref=el("div","cite-ref"); ref.textContent=String(ci.paragraph).trim(); cg.appendChild(ref);
+        } else {
+          cg.appendChild(el("div","cite-ref")); // empty rail cell, no bare §
+        }
+        var cb=el("div","cite-body");
+        var hasQuote = ci.quote && String(ci.quote).trim();
+        // the outer “ ” are REAL characters (copy/search fidelity); curlQuote
+        // demotes any inner doubles to singles so they can never collide
+        if(hasQuote){ var q=el("p","cite-quote"); q.textContent="“"+curlQuote(String(ci.quote).trim())+"”"; cb.appendChild(q); }
+        if(ci.gloss){ var gl=el("p","cite-gloss"); setProse(gl, ci.gloss); cb.appendChild(gl); }
+        cg.appendChild(cb);
+        body.appendChild(cg);
+      });
+    }
+
+    /* REMEDY — celestial four-point star bullets, no label */
+    if((f.remediation||[]).length){
+      var ul=el("ul","remedy");
+      f.remediation.forEach(function(x){ var li=el("li"); setProse(li, x); ul.appendChild(li); });
+      body.appendChild(ul);
+    }
+
+    /* STRUCTURAL note — one quiet closing sentence, only when present */
+    if(f.structural_note && String(f.structural_note).trim()){
+      var sd=el("div","structural");
+      var sp=el("p"); setProse(sp, String(f.structural_note).trim());
+      sd.appendChild(sp);
+      body.appendChild(sd);
+    }
+
+    wrap.appendChild(body);
+    return wrap;
+  }
+
+  /* ---------- closing sections (credited / dropped / limits) ---------- */
+  function renderList(secId, title, leadCopy, items, build, ulCls){
+    if(!items || !items.length) return;
+    var sec=$(secId);
+    /* v7: the closing header spans from the rail origin; the movement body
+       below keeps the ONE LEFT EDGE in the content column (col 2), the rail
+       empty to its left, exactly like the body sections */
+    sec.appendChild(sectionHead(title,null,null,true));
+    var g=el("div","grid");
+    g.appendChild(el("div","rail"));
+    var col=el("div","content-col");
+    var wrap=el("div","movement");
+    if(leadCopy){ var lead=el("p","lead"); setProse(lead, leadCopy); wrap.appendChild(lead); }
+    var ul=el("ul","plain "+(ulCls||""));
+    items.forEach(function(it){ ul.appendChild(build(it)); });
+    wrap.appendChild(ul);
+    col.appendChild(wrap);
+    g.appendChild(col);
+    sec.appendChild(g);
+  }
+  function fmtReason(r){
+    r=String(r==null?"":r);
+    if(/^merged_into:/.test(r)){ return "merged into "+r.split(":")[1]; }
+    return ({charitable_reading:"charitable reading", below_threshold:"below threshold", duplicate:"duplicate", out_of_scope:"out of scope"})[r] || r.replace(/_/g," ");
+  }
+  /* an unbreakable label+value pair for the dropped-list metadata */
+  function dcPair(label, value){
+    var s=el("span","dc-pair");
+    s.appendChild(el("span","dc-label",label+" "));
+    s.appendChild(document.createTextNode(value));
+    return s;
+  }
+
+  /* ---------- footer ---------- */
+  function renderFooter(meta){
+    var f=$("report-footer");
+    /* ONE LEFT EDGE: the footer text sits in the content column (col 2),
+       the rail empty to its left, exactly like the body sections */
+    var g=el("div","grid");
+    g.appendChild(el("div","rail"));
+    var col=el("div","content-col");
+    /* quiet wayfinding row above the credit — the route back up
+       (#top is the masthead anchor; #scorecard-sec is the index) */
+    var nav=el("p","foot-nav");
+    var a0=el("a",null,"↑ Back to top"); a0.href="#top"; nav.appendChild(a0);
+    nav.appendChild(el("span","fn-sep","·"));
+    var aSc=el("a",null,"Findings, by principle"); aSc.href="#scorecard-sec"; nav.appendChild(aSc);
+    col.appendChild(nav);
+    var p=el("p");
+    p.appendChild(document.createTextNode("This audit was conducted using the "));
+    /* v7: the credit links open in a new tab — the report is a long read the
+       visitor shouldn't lose; print still appends the full URLs */
+    var a1=el("a",null,"Magnificent Humanity Audit agent skill");
+    a1.href="https://github.com/Cache-Atelier/magnificent-humanity-audit/releases/latest";
+    a1.target="_blank"; a1.rel="noopener noreferrer";
+    p.appendChild(a1);
+    p.appendChild(document.createTextNode(" made by "));
+    var a2=el("a",null,"Cache Atelier");
+    a2.href="https://cacheatelier.work";
+    a2.target="_blank"; a2.rel="noopener noreferrer";
+    p.appendChild(a2);
+    p.appendChild(document.createTextNode("."));
+    col.appendChild(p);
+    g.appendChild(col);
+    f.appendChild(g);
+  }
+
+  /* ---------- page nav: the fixed mini-map ----------
+     synth -> #summary, index -> #scorecard-sec, ordinals -> #f-<dataId>,
+     notes -> the first closing movement that rendered. Built after render;
+     clicks are native anchors (the existing smooth-scroll + reduced-motion
+     guard + scroll-margins handle the jump). Active tracking: a zone is
+     "live" while it overlaps the top 35% of the viewport; the current item
+     is the LAST live zone in document order, so exactly one is current and
+     gaps (asterisms) keep the previous. Without IntersectionObserver the
+     nav degrades to a static link column. (#top stays in the DOM — the
+     footer's back-to-top link uses it.) */
+  function buildPageNav(ordered){
+    var nav=el("nav","pagenav");
+    nav.setAttribute("aria-label","On this page");
+    var links={};
+    function add(key, href, text, label, title){
+      var a=el("a",null,text); a.href=href;
+      if(label) a.setAttribute("aria-label",label);
+      if(title) a.title=title;
+      nav.appendChild(a); links[key]=a;
+    }
+    add("synth","#summary","synth","Synthesis");
+    add("index","#scorecard-sec","index","The findings, by principle");
+    ordered.forEach(function(item){
+      var f=item.f, ord=ORDINALS[f.id];
+      if(!ord) return;
+      var t="Finding "+ord+": "+dedash(curl(f.title||"Untitled finding"));
+      add(ord,"#f-"+f.id, ord, t, t);
+    });
+    /* the closing-notes anchor: the first closing section that actually
+       rendered (falling back to the footer); its grid wrapper keeps the
+       stable runtime id="coda" so the sections keep their own ids — only
+       the visible LABEL reads "notes" */
+    var codaHost=null;
+    ["mitigations","dropped","scope"].forEach(function(id){
+      if(!codaHost){ var s=$(id); if(s && s.firstElementChild) codaHost=s; }
+    });
+    if(!codaHost) codaHost=$("report-footer");
+    if(codaHost){
+      var anchor=codaHost.firstElementChild||codaHost;
+      if(!anchor.id) anchor.id="coda";
+      add("coda","#"+anchor.id,"notes","Closing notes");
+    }
+    document.body.appendChild(nav);
+
+    /* sticky-rail pin (V6-6): measure the nav's viewport top and publish it
+       as --rail-stick-top so each finding's stuck rail rides level with the
+       nav's first item; cleared while the nav is hidden (<1080px) so the CSS
+       7rem fallback applies. Re-measured on debounced resize, and again when
+       Fira Code lands (the webfont changes the nav's height, and the nav is
+       vertically centered — its top moves with its height). */
+    function setRailStick(){
+      var r=nav.getBoundingClientRect();
+      if(r.height>0) document.documentElement.style.setProperty("--rail-stick-top", Math.round(r.top)+"px");
+      else document.documentElement.style.removeProperty("--rail-stick-top");
+    }
+    setRailStick();
+    var rsTimer=null;
+    window.addEventListener("resize",function(){
+      if(rsTimer) clearTimeout(rsTimer);
+      rsTimer=setTimeout(setRailStick,150);
+    });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setRailStick(); });
+
+    /* active tracking */
+    var current=null;
+    function setActive(key){
+      if(key===current || !links[key]) return;
+      if(current && links[current]) links[current].removeAttribute("aria-current");
+      links[key].setAttribute("aria-current","true");
+      current=key;
+    }
+    if(typeof IntersectionObserver==="undefined") return; /* static nav, plain links */
+    var zones=[]; /* document order — built section-by-section below */
+    function zone(elm, key){ if(elm && links[key]) zones.push({el:elm, key:key, live:false}); }
+    /* masthead AND synthesis read as one opening zone -> synth */
+    zone(document.querySelector("header.report"),"synth");
+    zone($("summary"),"synth");
+    zone($("scorecard-sec"),"index");
+    ordered.forEach(function(item){
+      zone(document.getElementById("f-"+item.f.id), ORDINALS[item.f.id]);
+    });
+    ["mitigations","dropped","scope"].forEach(function(id){
+      var s=$(id); if(s && s.firstElementChild) zone(s,"coda");
+    });
+    zone($("report-footer"),"coda");
+    setActive("synth"); /* exactly one current from the first paint; IO corrects */
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        for(var i=0;i<zones.length;i++){
+          if(zones[i].el===en.target){ zones[i].live=en.isIntersecting; break; }
+        }
+      });
+      var key=null;
+      zones.forEach(function(z){ if(z.live) key=z.key; });
+      if(key) setActive(key);
+    },{root:null, rootMargin:"0px 0px -65% 0px", threshold:0});
+    zones.forEach(function(z){ io.observe(z.el); });
+  }
+
+  /* ---------- theme ---------- */
+  function wireTheme(){
+    var btn=$("theme-toggle");
+    var tc=document.querySelector('meta[name="theme-color"]');
+    function cur(){return document.documentElement.getAttribute("data-theme")||"dark";}
+    /* an ACTION button, not a pressed toggle: the aria-label names the theme
+       it switches TO; the sun/moon glyph is CSS-keyed to data-theme; mobile
+       browser chrome (theme-color) follows the theme */
+    function set(t){
+      document.documentElement.setAttribute("data-theme",t);
+      try{localStorage.setItem("mh-theme",t);}catch(e){}
+      var next = t==="dark" ? "light" : "dark";
+      btn.setAttribute("aria-label","Switch to "+next+" theme");
+      if(tc) tc.setAttribute("content", t==="dark" ? "#100F0F" : "#FEFEFC");
+    }
+    /* document the D shortcut where the action lives */
+    btn.title="Toggle theme — or press D";
+    btn.setAttribute("aria-keyshortcuts","d");
+    set(cur());
+    btn.addEventListener("click",function(){ set(cur()==="dark"?"light":"dark"); });
+    document.addEventListener("keydown",function(e){
+      if((e.key==="d"||e.key==="D") && !e.metaKey && !e.ctrlKey && !e.altKey){
+        var t=e.target.tagName; if(t==="INPUT"||t==="TEXTAREA"||e.target.isContentEditable) return;
+        set(cur()==="dark"?"light":"dark");
+      }
+    });
+  }
+
+  function showError(msg){
+    var c=$("content"); c.innerHTML="";
+    var b=el("div","errbox"); b.setAttribute("role","alert");
+    b.appendChild(el("h1",null,"Report data not loaded"));
+    b.appendChild(el("p",null,msg)); c.appendChild(b);
+  }
+
+  /* deep links: the fragment target doesn't exist at parse time (content is
+     built at DOMContentLoaded) and EB Garamond's arrival reflows the whole
+     serif page — re-scroll to the hash after render and again when fonts land */
+  function gotoHash(){
+    if(!location.hash) return;
+    try{
+      var t=document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if(t) t.scrollIntoView();
+    }catch(e){}
+  }
+
+  function init(){
+    wireTheme();
+    var raw=$("report-data").textContent||"";
+    if(raw.indexOf("@@REPORT_DATA@@")>=0 || !raw.replace(/[\s\/*]/g,"")){
+      showError("This is the unfilled template. Inject the audit's structured object in place of the @@REPORT_DATA@@ sentinel to render the report."); return;
+    }
+    var data;
+    try{ data=JSON.parse(raw); }catch(e){ showError("The embedded report data is not valid JSON: "+e.message); return; }
+    try{
+      var meta=data.meta||{};
+      /* most-specific-first for crowded tab bars; no dangling dash when unnamed */
+      document.title=(meta.system_name ? meta.system_name+" — " : "")+"Magnifica Humanitas Audit";
+      var principles=orderedPrinciples(data.principles);
+      /* the severity-first order is computed ONCE, here, filling ORDINALS
+         before any renderer (scorecard, findings, closings) reads it */
+      var ordered=orderFindings(principles);
+      renderHeader(meta);
+      renderSummary(data.synthesis, principles);
+      renderScorecard(principles, ordered);
+      renderFindings(ordered);
+      renderList("mitigations","What the system does well",
+        "Where the system’s design upholds the dignity it touches, that good is named here.",
+        data.mitigations, function(m){
+        var li=el("li");
+        var b=el("b"); setProse(b, ordinalize(m.title||"")); li.appendChild(b);
+        if(m.principle_key) li.appendChild(el("span","who"," — "+shortName(m.principle_key)));
+        if(m.note){
+          li.appendChild(document.createTextNode(curl(" — ")));
+          li.appendChild(setProse(el("span"), ordinalize(m.note)));
+        }
+        return li;
+      }, "mit");
+      renderList("dropped","Dropped and consolidated",
+        "Candidate findings set aside in triage, with the confidence they carried and the reason they were dropped.",
+        data.dropped, function(d){
+        var li=el("li");
+        var dt=el("span","dt"); setProse(dt, ordinalize(d.title||"")); li.appendChild(dt);
+        var dc=el("span","dc");
+        dc.appendChild(document.createTextNode(" — "));
+        // each label+value pair is an unbreakable .dc-pair, so lines break
+        // only at the separators, never between a label and its value
+        if(d.confidence!=null){
+          dc.appendChild(dcPair("conf", String(d.confidence)));
+          dc.appendChild(document.createTextNode(" · "));
+        }
+        var reason=el("span","dc-pair");
+        reason.appendChild(el("span","dc-label","reason "));
+        // "merged into finding 01" links to the finding it names (findings render
+        // first, so the anchor-target check is sound); the href keeps the stable
+        // data id while the link TEXT shows the display ordinal
+        var m=/^merged_into:(.+)$/.exec(String(d.reason||""));
+        if(m && document.getElementById("f-"+m[1])){
+          var a=el("a",null,"merged into "+(ORDINALS[m[1]]?"finding "+ORDINALS[m[1]]:m[1])); a.href="#f-"+m[1];
+          reason.appendChild(a);
+        } else {
+          reason.appendChild(document.createTextNode(ordinalize(fmtReason(d.reason))));
+        }
+        dc.appendChild(reason);
+        li.appendChild(dc);
+        return li;
+      }, "dropped");
+      renderList("scope","Limits of this audit",
+        "What the audit could not see, named so the reader can weigh its claims.",
+        data.scope_limits, function(s){
+        var li=el("li"); setProse(li, ordinalize(String(s))); return li;
+      }, "limits");
+      renderFooter(meta);
+      buildPageNav(ordered);
+    }catch(e){ showError("Render error: "+e.message+(e.stack?("\n"+e.stack):"")); }
+    gotoHash();
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(gotoHash);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();
+</script>
+</body>
+</html>

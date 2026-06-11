@@ -1,0 +1,42 @@
+{
+  "V6-1": {
+    "title": "Title wraps mid-line without reaching the container edge",
+    "spec": "h1.system currently has max-width:20ch AND sits in the text-wrap:balance list (line ~162) — balance is what breaks 'X “For You” Feed Algorithm' evenly in the middle. Remove h1.system from the balance list (keep balance for .sc-name/.f-title/.scf-title) and lift its cap to the shared measure (max-width:var(--prose) or none — the content-col already caps it). Result: the title fills toward the right edge and only wraps when it must. Check the 2.4rem mobile size still wraps acceptably (default greedy wrap is fine there)."
+  },
+  "V6-2": {
+    "title": "Dek (subtitle) sizing + space below the title",
+    "spec": "Make the dek a touch smaller and give it real separation from the title: .dek font-size 1.12rem -> 1.04rem, margin-top 1rem -> 1.5rem, line-height to 1.55. It must remain visually distinct from body prose (it keeps var(--tx-2))."
+  },
+  "V6-3": {
+    "title": "Verdict pill: drop the OVERALL eyebrow, right-justify the pill",
+    "spec": "Delete the vi-eyebrow span from renderSummary (and its .verdict-image .vi-eyebrow CSS) — the pill shows only the verdict image label (e.g. 'Toward Babel'). Reposition the pill: it moves INTO the Synthesis section header row (see V6-5), right-aligned at the prose right edge, vertically centered on the caption baseline. Delete the now-empty .sum-verdict block placement. The pill keeps its outline/ink treatment, :ARIA text, and AA colors in both themes."
+  },
+  "V6-4": {
+    "title": "Visible section title for the findings body",
+    "spec": "The flat findings list starts with only a visually-hidden h2 — replace it with a VISIBLE section header (V6-5 component): caption text 'The findings, in detail', keeping id=findings-cap and the h2 semantics for the existing aria wiring. It replaces the bare block-rule that currently separates the scorecard from the first finding (no double rules)."
+  },
+  "V6-5": {
+    "title": "Section captions: italic serif, inline with the dividing rules",
+    "spec": "New header component replacing the standalone caption + separate block-rule pattern for every major section: a flex row capped at var(--prose): [caption] [hairline rule filling the remaining width] [optional right slot]. Caption: EB Garamond italic (font-style:italic, NO small-caps, no letterspacing), ~1.02rem, color var(--tx-2), normal sentence case ('Synthesis', 'The findings, by principle', 'The findings, in detail', 'What the system does well', 'Dropped and consolidated', 'Limits of this audit'). Rule: flex:1, border-top:var(--rule), aligned to the caption's optical middle. Right slot: used ONLY by Synthesis for the verdict pill (V6-3). Apply to the summary caption (.sum-cap), scorecard caption (.sc-cap), the new findings caption (V6-4), and the three closing captions (.m-cap). Absorb/remove the old block-rules that preceded these sections so no double lines appear; the masthead rule and the post-findings rule before the closings keep whatever single-line form non-headed boundaries need. Keep all existing heading levels and ids (sum-cap/sc-cap/findings-cap ids feed aria-labelledby). The ratings key stays where it is (below the scorecard header)."
+  },
+  "V6-6": {
+    "title": "Sticky finding rails, star aligned to the page-nav top",
+    "spec": "Make each finding's rail marginalia sticky while its finding scrolls: the rail grid child gets align-self:start; position:sticky; top:var(--rail-stick-top, 7rem). After the pagenav is built (and on debounced resize), JS sets --rail-stick-top on :root to the pagenav's measured viewport top (navEl.getBoundingClientRect().top, rounded) so the rail's ✴ lines up with the top of the nav as you scroll through a long bug; when the nav is hidden (<1080px) the 7rem fallback applies. Constrain stickiness to the >=681px layout (the mobile rail is inline). Verify: sticky engages only within each finding (the rail releases at the finding's end), no overlap with the next card, and full-page headless captures are unaffected (sticky renders in-flow at page top)."
+  },
+  "V6-7": {
+    "title": "Nav active indicator: dot, not dash",
+    "spec": "The .pagenav a[aria-current=true]::after currently renders a small line/tick — replace it with a small round dot: ~.32em square, border-radius:50%, background var(--accent), same horizontal offset and vertical centering as the current tick. Both themes AA as non-text UI (accent on bg >= 3:1 — already true)."
+  },
+  "V6-8": {
+    "title": "Nav labels: 'synth' replaces the star; 'coda' becomes 'notes'",
+    "spec": "Top nav item: remove the ✴ glyph item entirely; the first item is the text label 'synth' linking to #summary (aria-label 'Synthesis'). Active-zone mapping: masthead AND synthesis -> 'synth'; scorecard -> 'index'; findings -> ordinals; closings + footer -> last item. Rename the last item's label from 'coda' to 'notes' (aria-label 'Closing notes'; the runtime anchor id may stay as-is). Keep the #top anchor in the DOM — the footer's back-to-top link uses it. Item order: synth, index, 01..08, notes."
+  },
+  "V6-9": {
+    "title": "Theme toggle: sun/moon icon button that never overlaps content",
+    "spec": "Replace the text 'Light/Dark' button content with an inline SVG icon (stroke/fill currentColor, ~17px, drawn inline — no external asset): DARK theme shows a sun (the action: switch to light), LIGHT theme shows a moon. Keep: the JS toggle + D key, aria-pressed semantics fixed per v4 (aria-label 'Switch to light theme'/'Switch to dark theme' updated on toggle), title with the D hint, aria-keyshortcuts, focus ring, border + padding (square icon button ~2.2rem), transition. FIX THE OVERLAP: the current right:max(1.5rem, calc((100vw - var(--measure))/2 + 1.5rem)) parks it INSIDE the measure where it can sit on top of the dek/meta at common widths. Re-position OUTSIDE the text: right:max(1rem, calc((100vw - var(--measure))/2 - 3.4rem)) style (clear of the content column's right edge by a visible gap) for wide viewports; at widths where the margin can't fit the button (~<=1000px), fall back to a static/absolute placement top-right of the masthead that provably clears the overline/title at 360/480/768/940px. Screenshot-verify the sweep 360/480/768/1024/1280/1600 in BOTH themes: zero overlap with any text at any width, no horizontal scroll."
+  },
+  "V6-10": {
+    "title": "Paper more white: #FFFCF0 -> #FEFEFC",
+    "spec": "Change the light paper from Flexoki's #FFFCF0 to #FEFEFC (chosen by rendered A/B against #FFFEF8 and #FFFFFF — white without going clinical; an explicitly approved single-token deviation from stock Flexoki). Update EVERY occurrence bound to the paper role: the :root --paper token, the light theme-color meta value in the JS (currently '#FFFCF0' near the theme toggle code), and the favicon SVG's text fill (%23FFFCF0 -> %23FEFEFC). Leave the warm base ramp (base-50 #F2F0E5 etc.) untouched — code blocks/surfaces deliberately stay warm against the whiter page. Re-check light-theme contrast for tx-2/links/chips on the new paper (it only improves, but verify) and that ::selection + hover tints still look right in light."
+  }
+}

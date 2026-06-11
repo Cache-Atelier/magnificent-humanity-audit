@@ -1,0 +1,1234 @@
+[
+ {
+  "id": "C01",
+  "title": "Scorecard rows 03/07 drop their chip + count to an orphan second line",
+  "severity": "high",
+  "area": "scorecard",
+  "priority": "must",
+  "problem": "Rows with long principle names ('The universal destination of goods', 'Integral human development') overflow the body track, so .sc-body's flex-wrap:wrap (line 264) dumps the verdict chip and finding count onto a stranded, right-aligned second line while the other five rows keep them inline. Two of seven rows are twice the height of the others for no semantic reason, breaking the table rhythm and the row-to-row chip alignment the code's own comment (line 263) promises. Confirmed in before-scorecard-top-dark.png (row 03) in both themes and before-scorecard-mid-dark.png (row 07).",
+  "recommendation": "Forbid the row from wrapping on desktop and let the principle NAME wrap internally instead \u2014 it already has min-width:0 and text-wrap:balance (line 138), so a long name becomes two balanced small-caps lines while \u00a7-range, chip and count stay on the first baseline. Trim the over-generous count column, and re-enable wrap only inside the existing 680px mobile query.",
+  "css_js_sketch": ".sc-body{flex-wrap:nowrap}\n.sc-name{flex:0 1 auto; min-width:0}\n.sc-range,.sc-chip-wrap{flex:0 0 auto}\n.sc-count{min-width:4.5rem}  /* was 5.5rem (line 269) */\n@media(max-width:680px){ .sc-body{flex-wrap:wrap} }",
+  "evidence": "before-scorecard-top-dark.png / before-scorecard-top-light.png (row 03 wrapped, rows 01\u201302 inline), before-scorecard-mid-dark.png (row 07); final-rail-stars-v3.html lines 263\u2013269, 138",
+  "lenses": [
+   "scorecard",
+   "spacing-rhythm"
+  ],
+  "amendments": [
+   "Land together with C36 so the mobile scorecard rules are written once, not twice."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Two of seven rows breaking the table rhythm is visibly wrong in the report's primary navigation, and the fix restores rather than adds; coordinate the 680px wrap re-enable with C36's flex rewrite of .sc-row.",
+   "risk: Y \u2014 Pure CSS, scoped to .sc-* selectors; name wraps internally via existing min-width:0 + balance so nowrap cannot overflow the 588px body track, and mobile wrap is explicitly restored in the existing 680px block.",
+   "value: Y \u2014 Verified in before-scorecard-top-dark.png: rows 03/07 are double-height with chip+count stranded on a second line while siblings stay inline \u2014 the primary nav table looks broken on first scroll."
+  ]
+ },
+ {
+  "id": "C02",
+  "title": "Ratings key wraps mid-definition with a widowed 'it.' and a stranded '\u00b7' at line start",
+  "severity": "high",
+  "area": "scorecard",
+  "priority": "must",
+  "problem": "The legend that teaches the whole rating system breaks as '\u2026In tension \u2014 strains / it. \u00b7 Violates \u2014 contradicts it.' \u2014 a two-word definition split across lines and a separator dot opening line 2 (confirmed in before-scorecard-top-dark.png and before-synthesis-dark.png). Root cause: ratingsKey() (lines 714\u2013724) emits terms, definitions and '\u00b7' separators as one flat text run with no whitespace around the separator spans (their .5rem padding is not a break opportunity), and .ratings-key carries a one-off max-width:60ch (line 224) that guarantees the wrap lands mid-phrase.",
+  "recommendation": "Wrap each 'Word \u2014 definition.' triple in a white-space:nowrap .rk-item span and put real spaces around each '\u00b7' so lines can only break at separators (longest item is ~24ch). Drop the 60ch override so the key inherits the shared measure (see C05), and reduce the separator padding to compensate for the real spaces.",
+  "css_js_sketch": "/* JS, ratingsKey() */\nfunction rkItem(cls,word,def){var s=el(\"span\",\"rk-item\");s.appendChild(ratingWord(cls,word));s.appendChild(document.createTextNode(\" \u2014 \"+def));return s;}\nkey.appendChild(rkItem(\"honors\",\"Honors\",\"upholds the principle.\"));\nkey.appendChild(document.createTextNode(\" \"));\nkey.appendChild(el(\"span\",\"rk-sep\",\"\u00b7\"));\nkey.appendChild(document.createTextNode(\" \"));\n/* \u2026repeat for tension, violates */\n/* CSS */\n.ratings-key{max-width:none}\n.ratings-key .rk-item{white-space:nowrap}\n.ratings-key .rk-sep{padding:0 .3rem}",
+  "evidence": "before-scorecard-top-dark.png (lines 1\u20132 of the legend), before-scorecard-top-light.png, before-synthesis-dark.png (bottom); final-rail-stars-v3.html lines 223\u2013228, 714\u2013724",
+  "lenses": [
+   "micro-typography",
+   "synthesis-block",
+   "scorecard",
+   "spacing-rhythm"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A legend that teaches the rating system must not widow its own two-word definition; nowrap items plus real break opportunities is exactly the invisible polish this page is about (coordinated, not conflicting, with C05's removal of the 60ch override).",
+   "risk: Y \u2014 Longest nowrap item (~24ch) fits any plausible measure, JS stays textContent-only, and dropping the 60ch override safely defers to the content-col cap; coordinates cleanly with C05 and C13.",
+   "value: Y \u2014 Verified: the legend that teaches the entire rating system reads 'strains / it. \u00b7 Violates' \u2014 the first explanatory text of the scorecard looks typeset by accident; coordinate with C05/C13 which also touch .ratings-key."
+  ]
+ },
+ {
+  "id": "C03",
+  "title": "Code-caption file paths break mid-extension ('\u2026hydrator.r / s:31,37')",
+  "severity": "high",
+  "area": "code",
+  "priority": "must",
+  "problem": "The figcaption location is injected as one unbroken text node (line 953) and .loc applies overflow-wrap:anywhere + word-break:break-word (line 333), so paths split at arbitrary characters \u2014 confirmed in before-boundary-dark.png where '\u2026user_inferred_gender_query_hydrator.r' wraps before 's:31,37', cutting the .rs extension in half. For a developer audience a filename broken inside its extension reads as a typo. The masthead repo URL already solves this with <wbr> after each '/' (lines 692\u2013698); the caption never got the same treatment.",
+  "recommendation": "Build .loc the same way as the repo URL: insert <wbr> after each '/' so wraps land at path-segment boundaries, and drop word-break:break-word, keeping overflow-wrap:anywhere only as a last-resort guard. The longest real segment fits comfortably on its own line at .7rem mono.",
+  "css_js_sketch": "/* JS, code figure builder (line ~953) */\nvar loc=el(\"span\",\"loc\");\nString(ce.location||\"\").split(\"/\").forEach(function(seg,j,arr){\n  loc.appendChild(document.createTextNode(seg+(j<arr.length-1?\"/\":\"\")));\n  if(j<arr.length-1) loc.appendChild(document.createElement(\"wbr\"));\n});\ncap.appendChild(loc);\n/* CSS (line 333) */\nfigure.code figcaption .loc{min-width:0; overflow-wrap:anywhere; word-break:normal}",
+  "evidence": "before-boundary-dark.png (caption 'home-mixer/query_hydrators/user_inferred_gender_query_hydrator.r' / 's:31,37'); final-rail-stars-v3.html lines 333, 953, 692\u2013698",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A filename broken inside its extension reads as a typo to the developer audience, and the fix reuses the file's own <wbr> pattern \u2014 pure coherence, zero new vocabulary.",
+   "risk: Y \u2014 Copies the proven masthead <wbr> pattern (lines 692\u2013698) and keeps overflow-wrap:anywhere as last resort, so no new overflow path is introduced.",
+   "value: Y \u2014 A file path breaking inside its .rs extension reads as a typo to the exact developer audience this report must convince, and the <wbr> pattern already exists in the masthead."
+  ]
+ },
+ {
+  "id": "C04",
+  "title": "Code figure's right-edge fade is always on \u2014 it washes out real terminal glyphs and never releases at scroll-end",
+  "severity": "high",
+  "area": "code",
+  "priority": "must",
+  "problem": "The 2rem gradient (.pre-wrap::after, lines 336\u2013340) renders unconditionally: snippets whose last line genuinely ends inside the fade zone have their closing characters (');' in both theme shots) visibly half-erased, and when a reader scrolls an overflowing line to its end the fade persists, falsely signalling more content. On mobile, where the scrollbar is invisible, the fade is the only affordance and it lies at scroll-end on all 8 snippets. Compounding it, padding-right on a horizontal scroll container is not reliably part of scrollable overflow, so at scroll-end the last glyph abuts the 1px border with zero inset.",
+  "recommendation": "Toggle the fade from the pre's scroll state with one passive listener per figure \u2014 visible only while content remains to the right \u2014 and move the right padding onto an inline-block code element so the final character always lands with the same .9rem inset the left edge gets. The reduced-motion block (line 410) already neutralizes the transition.",
+  "css_js_sketch": "/* CSS */\nfigure.code .pre-wrap::after{opacity:0; transition:opacity .12s linear}\nfigure.code .pre-wrap.has-more::after{opacity:1}\nfigure.code pre{padding:.8rem 0 .8rem .9rem}\nfigure.code code{display:inline-block; padding-right:.9rem}\n/* JS \u2014 in the code_evidence builder */\nfunction syncFade(){preWrap.classList.toggle(\"has-more\", pre.scrollLeft+pre.clientWidth < pre.scrollWidth-1);}\npre.addEventListener(\"scroll\",syncFade,{passive:true});\nwindow.addEventListener(\"resize\",syncFade);\nrequestAnimationFrame(syncFade);",
+  "evidence": "before-code-citations-dark.png and before-finding-card-light.png (terminal ');' dimmed; first line cut at 'weights.fa'); /tmp/mh-mobile/mob-code-end.png (fade persists at scrollLeft=max); final-rail-stars-v3.html lines 336\u2013344",
+  "lenses": [
+   "code-figure",
+   "responsive-mobile"
+  ],
+  "amendments": [
+   "Must land with C28 so print resets the new display/padding on code.",
+   "Use figure.code code{display:block; width:max-content; padding-right:.9rem} instead of inline-block (avoids the baseline descender gap inside pre), re-run syncFade on document.fonts.ready (CDN Fira Code load changes scrollWidth after the rAF), and land C28's print reset (display:block; padding-right:0) in the same change.",
+   "Land together with C28, which must reset the new display:inline-block/padding-right on code for print."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A decorative fade that half-erases real evidence glyphs and lies at scroll-end is Tufte's cardinal sin \u2014 decoration falsifying data; the scroll-state toggle is felt, never noticed; coordinate the inline-block code change with C28's print reset.",
+   "risk: Y \u2014 The fade-state JS is sound (passive listeners, no data paths), but the inline-block padding trick and font-load timing need the safer variant to avoid a visible vertical gap and a stale fade before fonts arrive.",
+   "value: Y \u2014 The report's own evidence glyphs are half-erased by an unconditional fade and the scroll affordance lies at scroll-end \u2014 an evidence-obscuring defect in an audit product."
+  ]
+ },
+ {
+  "id": "C05",
+  "title": "The 'ONE prose measure' resolves to four+ different widths \u2014 footer rule 22% short, summary rule 18px long, code figure ~80px wide",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "--prose is 52ch (line 59, documented as 'the ONE prose measure'), but ch resolves against each element's own font-size, and three blocks add explicit overrides. Measured: masthead/scorecard/findings rules = 474px; the summary's closing rule = 492.5px (.summary .content-col{max-width:54ch}, line 235, also catches the rule's wrapper); the footer rule = 367.5px \u2014 107px short \u2014 because footer.report{font-size:.92rem} (line 397) shrinks the ch before the column cap computes, which also forces the credit to wrap mid-link ('Magnificent Humanity / Audit agent skill', before-footer-dark.png). Inside one card, .f-explain (1rem), remedy (1.03), quote (1.08) and figure.code (19px inherited) each cap at different widths, so the right edge wanders within a single finding. The dek (54ch, line 201) drifts too.",
+  "recommendation": "Define the measure in a font-size-independent unit: --prose:29.6rem (exactly the 474px that 52ch resolves to at the 19px body). Every existing max-width:var(--prose) declaration then lands on one identical right edge \u2014 the footer is fixed automatically with no other change. Remove the three explicit overrides (dek 54ch, summary 54ch, ratings-key 60ch \u2014 the last as part of C02) so they inherit the unified measure.",
+  "css_js_sketch": ":root{--prose:29.6rem}  /* line 59 \u2014 474px, i.e. 52ch at the 19px body, now font-size-independent */\n.dek{max-width:none}                       /* line 201 */\n.summary .content-col{max-width:var(--prose)}  /* line 235 */\n/* .ratings-key 60ch removed in C02; footer needs no change \u2014 29.6rem no longer shrinks at .92rem */",
+  "evidence": "before-footer-dark.png / before-footer-light.png (short rule + mid-link wrap), before-scorecard-top-dark.png (summary rule), before-finding-card-dark.png (code figure wider than prose); measured 474 / 492.5 / 367.5px; final-rail-stars-v3.html lines 59, 125, 201, 235, 397\u2013398",
+  "lenses": [
+   "spacing-rhythm",
+   "closings-footer",
+   "finding-card",
+   "micro-typography"
+  ],
+  "amendments": [
+   "Comment the 29.6rem with its derivation (52ch at the 19px body) so the magic number stays legible to future editors.",
+   "Verify the 29.6rem value against the rendered 52ch before hardcoding; the ratings-key override removal is already owned by C02."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The design's own promise is ONE prose measure and the footer rule visibly breaks it; converting --prose to a font-size-independent unit makes the page more itself with no visual change elsewhere.",
+   "risk: Y \u2014 29.6rem is verified equal to the current 52ch at the 19px body, every var(--prose) consumer is a max-width so the unit swap cannot overflow --measure, and it removes the ch-resolves-per-font-size footgun for good.",
+   "value: Y \u2014 The footer rule visibly 22% short and the wandering right edge are real, and the single-token fix repairs them all at once."
+  ]
+ },
+ {
+  "id": "C06",
+  "title": "Theme toggle is unanchored at every breakpoint: orphaned at wide widths, overlapping content at 681\u2013940px, flush against the screen edge on mobile",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "Three provable failures of one element. (1) At 1100px+ the fixed toggle (top/right 1.1rem, line 180) floats ~140px beyond the report's right text edge, an off-grid inset that matches no token (layout padding is 1.5rem, line 116). (2) The static fallback only kicks in at \u2264680px (line 434), but the layout needs ~872px, so between 681 and ~940px (iPad portrait included) the opaque z-index:15 button sits ON the content track \u2014 measured at 760px it covers the scorecard's right-aligned '3 findings' count. (3) At \u2264680px the static button is a direct child of <body> outside .layout's padding: measured at 375px it renders at x=0, border clipped by the screen edge, the first thing a mobile reader sees. Its tap target is also ~61x28px, well under touch minimums.",
+  "recommendation": "Pin the toggle's right edge to the layout's right padding edge so it tracks the measure at any wide viewport; make it position:absolute below 940px so it sits in the masthead band and scrolls away instead of floating over data; give the \u2264680px static fallback the layout's 1.5rem left margin; and bump padding toward a usable tap target. One element, on the same grid music as everything else.",
+  "css_js_sketch": "#theme-toggle{\n  top:1.5rem;\n  right:max(1.5rem, calc((100vw - var(--measure)) / 2 + 1.5rem));\n  padding:.65rem .8rem;\n}\n@media(max-width:940px){ #theme-toggle{position:absolute} }  /* before the 680px block */\n@media(max-width:680px){ #theme-toggle{position:static; display:inline-block; margin:1rem 0 0 1.5rem; padding:.7rem .85rem} }",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png (toggle ~140px past content edge); /tmp/mh-mobile/mid-760-scorecard.png (button over '3 findings'); /tmp/mh-mobile/mob-pagetop.png (button at x=0, border clipped); final-rail-stars-v3.html lines 60, 116, 179\u2013184, 414, 433\u2013434",
+  "lenses": [
+   "masthead",
+   "responsive-mobile",
+   "spacing-rhythm"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A control that floats off-grid at wide widths, covers data at tablet widths, and clips at the screen edge on mobile is embarrassing in a release; pinning it to the layout's grid is restraint, not chrome.",
+   "risk: Y \u2014 The right:max(...) calc correctly tracks the layout's padding edge, the 940px absolute block is ordered before the existing 680px static rule so the cascade resolves correctly, and the measured 681\u2013940px content overlap is a real release-blocker; only residual nit is ~7px scrollbar skew in 100vw, acceptable.",
+   "value: Y \u2014 Verified failures at three breakpoints including the toggle overlapping scorecard data at tablet widths and rendering clipped at x=0 as a mobile reader's first impression \u2014 functional breakage, not polish."
+  ]
+ },
+ {
+  "id": "C07",
+  "title": "Dark theme's muted-text tier is collapsed: --tx-2 should be base-500, not base-300",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "Light has a real three-step hierarchy (body 18.6:1 vs secondary base-600 at 5.0:1 \u2014 a 3.7x ratio). Dark sets --tx-2 to base-300 (line 68), only a 1.29x step from body base-200 (9.3:1 vs 12.0:1), so the dek, meta labels, section captions, glosses and footer all read at near-body weight \u2014 the default theme looks flat where light looks layered (compare before-masthead-dark.png vs before-masthead-light.png). This also deviates from the Flexoki spec itself, which assigns dark tx-2 = base-500. Separately, --tx-3 is defined in both themes (lines 35, 68) but consumed nowhere \u2014 a dead token (grep confirms).",
+  "recommendation": "Set dark --tx-2 to base-500 per the Flexoki spec: 5.19:1 on black still clears the file's own 4.5:1 floor at the smallest tx-2 sizes (.64\u2013.7rem mono labels) and lands almost exactly on light's 4.97:1 \u2014 true parity. Either delete the unused --tx-3 or put it to work on the faintest marks (e.g. the dropped-list dash bullets).",
+  "css_js_sketch": "[data-theme=\"dark\"]{ --tx-2:var(--base-500); }  /* line 68 \u2014 5.19:1 on --black, parity with light's 4.97:1 */\n/* and either delete --tx-3 from both blocks or use it: */\nul.plain.dropped li::before{color:var(--tx-3)}",
+  "evidence": "final-rail-stars-v3.html lines 35, 68; grep: --tx-3 declared twice, used zero times; before-masthead-dark.png vs before-masthead-light.png; computed base-300/#100F0F = 9.31:1 vs base-200 = 11.98:1",
+  "lenses": [
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Just delete the dead --tx-3 token rather than inventing a new use for it; add uses only when a real need appears.",
+   "If C23 also lands, add a dark override for figure.code figcaption (e.g. color:var(--base-300)) \u2014 base-500 on base-900 measures 4.04:1, under the file's 4.5 floor; base-500 is fine on black (5.19) and base-950 (4.67)."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The default theme reading flat where light reads layered is a hierarchy failure, and base-500 is what the Flexoki spec itself prescribes \u2014 this is conforming to the settled palette, not changing it.",
+   "risk: Y \u2014 Matches the Flexoki spec and verifies AA on every current dark surface, but CONFLICTS with C23 on the code figcaption \u2014 the amendment resolves it.",
+   "value: Y \u2014 Dark is the default theme and its collapsed text hierarchy makes every page harder to scan than light; restoring the Flexoki-spec base-500 gives the reader back the layering the design promises."
+  ]
+ },
+ {
+  "id": "C08",
+  "title": "Finding IDs are displayed nowhere, leaving 'reason merged into F1' a dangling, unlinked cross-reference",
+  "severity": "high",
+  "area": "finding",
+  "priority": "must",
+  "problem": "Findings carry stable ids (anchors #f-F1\u2026, line 902) but the ID is never rendered \u2014 the rail shows only star/engages/confidence (lines 904\u2013928). Yet the 'Dropped and consolidated' closing prints 'reason merged into F1' as plain text (fmtReason, lines 1025\u20131028; visible in before-footer-dark.png), a reference to a label that does not exist anywhere on the page and is not a link. A reader cannot resolve which finding 'F1' is, and the flat list of near-identical cards gives no citable identity or positional sense.",
+  "recommendation": "Render the finding's ID as a small Fira Code label beside the rail \u2734 \u2014 same quiet mono voice as the confidence number \u2014 so every card has a visible, citable identity. Then make 'merged into F1' a real anchor to #f-F1 (only when the target exists). Pairs with C24's permalink/:target work.",
+  "css_js_sketch": "/* renderFinding rail (line ~905) */\nvar rh=el(\"div\",\"f-railhead\"); rh.appendChild(star);\nrh.appendChild(el(\"span\",\"f-id\",String(f.id||\"\")));\nrail.appendChild(rh);\n/* CSS */\n.f-railhead{display:flex; align-items:center; gap:.5rem}\n.f-id{font:500 .66rem/1 \"Fira Code\",monospace; letter-spacing:.14em; color:var(--tx-2); text-transform:uppercase}\n/* dropped builder (lines 1111\u20131112) */\nvar m=/^merged_into:(.+)$/.exec(String(d.reason||\"\"));\nif(m && document.getElementById(\"f-\"+m[1])){\n  dc.appendChild(el(\"span\",\"dc-label\",\"reason \"));\n  var a=el(\"a\",null,\"merged into \"+m[1]); a.href=\"#f-\"+m[1]; dc.appendChild(a);\n}else{ /* existing text path */ }\n/* CSS */ .dc a{color:inherit; text-decoration:underline; text-underline-offset:2px}\n.dc a:hover{color:var(--accent)}",
+  "evidence": "before-footer-dark.png / before-closings-dark.png ('reason merged / into F1'); final-rail-stars-v3.html lines 902, 904\u2013928, 1025\u20131028, 1111\u20131112",
+  "lenses": [
+   "navigation-wayfinding",
+   "closings-footer",
+   "finding-card"
+  ],
+  "amendments": [
+   "Coordinate with C24 \u2014 the railhead wrapper and the star-as-link must be built in one pass.",
+   "Coordinate the rail-head markup with C24's permalink star so the two changes share one structure."
+  ],
+  "reasons": [
+   "taste: Y \u2014 'Merged into F1' referencing a label that exists nowhere is a broken promise to the reader; a quiet mono ID in the rail is information, not decoration, for an artifact meant to be cited.",
+   "risk: Y \u2014 Renders via el()/textContent with a getElementById existence guard, findings render before the dropped list so the anchor check is sound; coordinate with C24 (star becomes an <a>) and C38 (both rewrite the dropped reason nodes) in one pass.",
+   "value: Y \u2014 Verified: 'reason merged into F1' references a label rendered nowhere \u2014 an unresolvable cross-reference in a rigor-themed audit is a direct trust break, and visible IDs make findings citable in issues."
+  ]
+ },
+ {
+  "id": "C09",
+  "title": "Printing from the default dark theme is broken \u2014 only 4 of ~30 tokens reset, code panels print near-black with #111 text",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "@media print (lines 439\u2013452) overrides only --bg/--bg-2/--tx/--tx-2. Because dark is the default, [data-theme=\"dark\"] still supplies everything else at print time: --code-bg stays base-950 so code panels print as near-black slabs holding forced #111 text (illegible); accents and verdict colors stay pale 400-level on white; chip tints stay color-mix'd with --black (dark pills on paper); --ui-3 hairlines (base-800) vanish. Print/PDF is a first-class path for a report artifact. The few values that ARE reset are also non-Flexoki grays (#111/#444 line 440, #666 line 450) \u2014 the only colors in the file that bypass the ramp.",
+  "recommendation": "Inside @media print, re-declare the full LIGHT semantic token set under ':root,[data-theme=\"dark\"]' (equal specificity, later in cascade \u2014 wins), using Flexoki inks instead of the generic grays: --tx:var(--black), --tx-2:var(--base-700), URL suffix var(--base-600). ~15 lines of pure CSS, no markup change.",
+  "css_js_sketch": "@media print{\n  :root,[data-theme=\"dark\"]{\n    --bg:#fff; --bg-2:#fff; --tx:var(--black); --tx-2:var(--base-700); --tx-3:var(--base-300);\n    --ui:var(--base-100); --ui-2:var(--base-150); --ui-3:var(--base-200);\n    --accent:var(--blue-600);\n    --honors:var(--green-600); --tension:var(--yellow-600); --violates:var(--red-600);\n    --code-bg:var(--base-50);\n    --hl-comment:var(--base-700); --hl-string:var(--cyan-700); --hl-number:var(--purple-700);\n    --hl-keyword:var(--green-700); --hl-constant:#7A5C01; --hl-function:var(--orange-700); --hl-builtin:var(--blue-700);\n    --honors-tint:#fff; --tension-tint:#fff; --violates-tint:#fff;\n    --honors-ink:#3C4D08; --tension-ink:#6F5401; --violates-ink:#871F1A;\n    --rel-violates:var(--violates-ink); --rel-tension:var(--tension-ink);\n    --rule:1px solid var(--black); --hair:1px solid var(--base-200); --hair-strong:1px solid var(--base-300);\n  }\n  a[href^=\"http\"]:not([data-href-shown])::after{color:var(--base-600)}\n}",
+  "evidence": "final-rail-stars-v3.html lines 439\u2013452 (print block) vs 66\u201388 (dark tokens that survive); line 71 --code-bg:base-950 + line 331 figure.code uses it with color:var(--tx)",
+  "lenses": [
+   "product-polish",
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Also reset --rk-honors-ink/--rk-tension-ink/--rk-violates-ink to the light values (sketch omits them, leaving pale 400-level key words on white in print), and consider the light color-mix tints instead of #fff so chips keep their wash."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Print/PDF is a first-class path for a report artifact and it currently ships near-black code slabs from the default theme; re-declaring the light tokens in Flexoki inks also purges the only non-ramp grays in the file.",
+   "risk: Y \u2014 Pure CSS at equal specificity later in cascade, all referenced ramp vars exist at :root, and it fixes a genuinely broken default-theme print path.",
+   "value: Y \u2014 Verified the print block resets only 4 of ~30 tokens while dark is default \u2014 print/PDF is how a CTO circulates this report, and near-black code slabs with #111 text are illegible."
+  ]
+ },
+ {
+  "id": "C10",
+  "title": "UA chrome ignores the active theme: bind the color-scheme property and a theme-color meta to data-theme",
+  "severity": "high",
+  "area": "global",
+  "priority": "must",
+  "problem": "The only color-scheme declaration is the meta on line 6 ('light dark'), which resolves UA surfaces from the OS preference \u2014 but the page forces dark via data-theme regardless of OS. A light-OS machine (Windows, Linux, macOS with always-visible scrollbars) renders the default dark page with bright light root scrollbars, plus light UA scrollbars inside every one of the 8 overflowing code panes; a dark-OS user gets the inverse on the light theme. No CSS color-scheme property exists in either token block (grep confirms), and there is no theme-color meta, so mobile browser chrome stays white above the #100F0F page.",
+  "recommendation": "Declare color-scheme on the theme roots so all UA-rendered surfaces follow the toggle, add a theme-color meta, and sync it in wireTheme()'s set() alongside localStorage.",
+  "css_js_sketch": "/* CSS */\n:root{color-scheme:light}\n[data-theme=\"dark\"]{color-scheme:dark}\n<!-- head -->\n<meta name=\"theme-color\" content=\"#100F0F\">\n/* in wireTheme set(t) */\nvar tc=document.querySelector('meta[name=\"theme-color\"]');\nif(tc) tc.setAttribute('content', t===\"dark\" ? \"#100F0F\" : \"#FFFCF0\");",
+  "evidence": "final-rail-stars-v3.html line 6 (meta only); grep: no color-scheme property in lines 33\u201388, no theme-color meta; lines 455\u2013466, 1055\u20131060 (theme bootstrap/toggle)",
+  "lenses": [
+   "color-theme-parity",
+   "product-polish",
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Light UA scrollbars on the default dark page (and white mobile chrome over #100F0F) is visibly wrong machinery the reader never asked to see; color-scheme plus theme-color is invisible correctness.",
+   "risk: Y \u2014 Two declarations plus a meta sync inside the existing set(); the pre-paint script already sets data-theme before first paint so color-scheme resolves correctly with no flash.",
+   "value: Y \u2014 Light UA scrollbars on the default dark page (root plus all 8 code panes) and white mobile chrome are visible on common configurations, and the fix is three declarations."
+  ]
+ },
+ {
+  "id": "C28",
+  "title": "Print clips long code lines: the code child's white-space:pre defeats the print pre-wrap rule",
+  "severity": "medium",
+  "area": "code",
+  "priority": "must",
+  "problem": "The print block sets figure.code pre{white-space:pre-wrap; overflow:visible} (line 451), but line 344 sets figure.code code{white-space:pre}, and that specified value on the code element beats the inherited pre-wrap at print time. With figure.code{overflow:hidden} (line 331) still in force, overflowing lines are silently truncated at the figure edge in every printed/PDF'd report \u2014 lost evidence in a report artifact.",
+  "recommendation": "Extend the print rule to the code child so the wrap actually applies. One added selector. (If C04's display:inline-block lands on code, also reset it to display:block here.)",
+  "css_js_sketch": "@media print{\n  figure.code pre, figure.code code{white-space:pre-wrap; overflow-wrap:break-word}\n  figure.code code{display:block; padding-right:0}\n}",
+  "evidence": "final-rail-stars-v3.html lines 331, 344 vs 451; the overflow itself visible in before-code-citations-dark.png",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [
+   "Ship in the same change as C04 and C09 as one coherent print/code fix."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Silently truncated evidence in every printed report is data loss in an audit artifact; once C09 makes print first-class this one-selector fix is non-negotiable, and it already anticipates C04's inline-block change.",
+   "risk: Y \u2014 The white-space:pre on code provably defeats the print pre-wrap rule (line 344 vs 451), silently truncating evidence in every PDF; one added selector, and it already anticipates C04's display change.",
+   "value: Y \u2014 Silently truncated evidence lines in every printed copy means lost proof in the artifact's most shareable form."
+  ]
+ },
+ {
+  "id": "C12",
+  "title": "Polish the hero verdict pill: baseline-align the OVERALL eyebrow, let it recede, and bind the pill to its caption",
+  "severity": "medium",
+  "area": "synthesis",
+  "priority": "should",
+  "problem": "Three small flaws compound on the page's single most important verdict. (1) .verdict-image uses align-items:center (line 165), so the .66rem mono eyebrow's baseline floats ~2px above the 1.02rem small-caps value \u2014 visible at reading size. (2) The eyebrow is explicitly opacity:1 (line 174) in the same color as the value with only a .55rem gap, so the pill mushes into one phrase, 'OVERALL TOWARD BABEL', label competing with verdict. (3) Spacing above the pill (1rem, line 233) and below it (1.2rem, line 238) are near-equal, so it floats ambiguously between the 'Synthesis' caption and the prose instead of reading as the section's headline. Keep the outline-only treatment \u2014 the 'distinct tier' styling is deliberate (comment, lines 162\u2013163).",
+  "recommendation": "Switch the pill to baseline alignment, let the eyebrow recede via opacity alone (no new borders or fills), and retune the caption/pill/prose margins so caption + verdict read as one head unit followed by the argument.",
+  "css_js_sketch": ".verdict-image{align-items:baseline; gap:.6rem}\n.verdict-image .vi-eyebrow{opacity:.72}  /* was opacity:1, line 174 */\n.sum-cap{margin:0 0 .65rem}\n.summary .sum-verdict{margin:0 0 1.5rem}",
+  "evidence": "before-synthesis-dark.png (3x zoom: OVERALL baseline high; near-equal gaps above/below pill); final-rail-stars-v3.html lines 164\u2013175, 231\u2013238",
+  "lenses": [
+   "synthesis-block",
+   "micro-typography"
+  ],
+  "amendments": [
+   "Replace .vi-eyebrow{opacity:.72} with color:var(--tx-2) (or keep opacity:1): the composited .72 eyebrow measures 3.55:1 on dark violates \u2014 an AA failure at .66rem; baseline alignment and the margin retune are safe as sketched."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Baseline alignment, a receding eyebrow, and asymmetric spacing around the page's single most important verdict are exactly the polish a careful reader feels but never notices.",
+   "risk: Y \u2014 Two of three fixes are safe pure CSS, but the opacity recede provably breaks the dark-theme AA floor and needs the token-based variant.",
+   "value: Y \u2014 The eyebrow mushing into 'OVERALL TOWARD BABEL' mildly hurts the page's key verdict, but the baseline and margin tweaks are designer-grade; cheap enough to ride along \u2014 coordinate margins with C47."
+  ]
+ },
+ {
+  "id": "C13",
+  "title": "Move the ratings key below 'The findings, by principle' caption",
+  "severity": "medium",
+  "area": "scorecard",
+  "priority": "should",
+  "problem": "renderScorecard() appends ratingsKey() BEFORE the h2 caption (lines 763\u2013765), so the section opens with an unanchored legend sentence floating between the synthesis-closing rule and the heading it belongs to (before-scorecard-top-dark.png). Structurally, content precedes the very heading the section is aria-labelledby'd to (line 477) \u2014 poor document outline. A legend belongs under its section title, directly above the chips it explains.",
+  "recommendation": "Swap the append order \u2014 caption first, then key \u2014 and retune margins so the key reads as the section's legend (slightly smaller, tighter to the first row) rather than stray body prose. Combine with C02's nowrap items.",
+  "css_js_sketch": "/* renderScorecard(): swap lines 763\u2013765 */\nvar cap=el(\"h2\",\"sc-cap\",\"The findings, by principle\"); cap.id=\"scorecard-cap\";\nhead.appendChild(cap);\nhead.appendChild(ratingsKey());\n/* CSS */\n.sc-cap{margin:0 0 .9rem}\n.ratings-key{margin:0 0 1.6rem; font-size:.95rem; line-height:1.6}",
+  "evidence": "before-scorecard-top-dark.png, before-synthesis-dark.png (legend above the caption); final-rail-stars-v3.html lines 477, 759\u2013766",
+  "lenses": [
+   "synthesis-block"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A legend floating above the heading it belongs to reads as a mistake and inverts the document outline; caption-then-key is the obvious quiet order (coordinate margins with C02).",
+   "risk: Y \u2014 A two-line append-order swap that also fixes the aria-labelledby outline (content currently precedes its own labelling h2); margins coordinate with C02 without overlap.",
+   "value: Y \u2014 Verified: the legend floats above the heading it belongs to, reading as orphaned synthesis text \u2014 moving it under the caption fixes comprehension and document outline together; sequence with C02."
+  ]
+ },
+ {
+  "id": "C14",
+  "title": "Scorecard finding rows \u2014 the report's primary navigation \u2014 have no resting link affordance and snap on hover",
+  "severity": "medium",
+  "area": "scorecard",
+  "priority": "should",
+  "problem": "The global reset strips underlines (line 99) and the rows render in plain body ink; nothing at rest marks them as links except the small accent \u2734, while the masthead and footer links are accent + underline (lines 214, 400) \u2014 two link grammars on one page, with the primary nav the unmarked one. On hover the only feedback is an instant color snap (lines 276\u2013278) with no transition.",
+  "recommendation": "Keep the quiet list aesthetic but give the title a hairline resting underline using the existing --ui-3 token, resolving to accent on hover/focus with a .15s ease \u2014 the same underline grammar as the masthead/footer links, dialed down.",
+  "css_js_sketch": ".scf-title{text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:var(--ui-3); text-underline-offset:3px; transition:color .15s ease, text-decoration-color .15s ease}\n.sc-findings a:hover .scf-title,.sc-findings a:focus-visible .scf-title{color:var(--accent); text-decoration-color:currentColor}",
+  "evidence": "before-scorecard-top-dark.png / before-scorecard-top-light.png (rows read as static list items); final-rail-stars-v3.html lines 99, 214, 275\u2013280, 400",
+  "lenses": [
+   "color-theme-parity",
+   "scorecard"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Two link grammars on one page with the primary navigation unmarked is incoherent; a hairline --ui-3 resting underline resolving to accent is the existing grammar dialed down, not new decoration.",
+   "risk: Y \u2014 Decorative underline uses the existing --ui-3 token (no text-contrast requirement), and the transition is already neutralized by the reduced-motion block at line 410.",
+   "value: Y \u2014 The report's primary navigation is the one set of links with no resting affordance \u2014 readers who don't discover the rows are clickable lose the whole jump-to-finding workflow."
+  ]
+ },
+ {
+  "id": "C15",
+  "title": "Pin the scorecard relation marker to the right rail \u2014 its column alignment is an accident of this dataset",
+  "severity": "medium",
+  "area": "scorecard",
+  "priority": "should",
+  "problem": "Only .scf-conf carries margin-left:auto (line 284); .scf-rel (line 282) sits flush after the title. The clean right-hand IN TENSION/VIOLATES + confidence column in the screenshots exists only because every title in this dataset happens to wrap to two lines at 1100px, forcing the title box to full width. Any one-line title (shorter finding, wider viewport, different audit) strands its relation label mid-line and shatters the column. A flagship template cannot depend on titles being long.",
+  "recommendation": "Move the auto margin from the confidence number to the relation marker so the rel+conf pair is always pushed to the right edge regardless of title length; keep the existing fixed gap between them.",
+  "css_js_sketch": ".scf-rel{margin-left:auto; padding-left:.9rem}\n.scf-conf{margin-left:0}",
+  "evidence": "/tmp/sc-crops/relconf-col-dark.png (column aligns, but every title is 2 lines); final-rail-stars-v3.html lines 275, 282\u2013284",
+  "lenses": [
+   "scorecard"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A flagship template cannot let its right-hand relation column depend on every title happening to wrap; moving margin-left:auto to the rel marker makes the design intentional instead of accidental.",
+   "risk: Y \u2014 One-property flex change that removes a dataset-dependent alignment accident; title min-width:0 already guarantees shrink behavior with one-line titles.",
+   "value: Y \u2014 This is a template product, and the right-column alignment surviving only because every current title happens to wrap two lines is a latent break for the very next audit."
+  ]
+ },
+ {
+  "id": "C16",
+  "title": "Scorecard's closing rule collides with its own full-measure hairlines",
+  "severity": "medium",
+  "area": "scorecard",
+  "priority": "should",
+  "problem": "The scorecard's internal group hairlines span the full grid (measured 162\u2192937px) \u2014 correct, since the rail holds row numbers and chips right-align to that edge. But the rule that closes the section is nested in a .content-col (lines 852\u2013854), so it runs 350\u2192823px: starting 188px right of the hairlines above it and stopping 114px short of their right edge. At the scorecard/findings boundary the short rule reads as a glitch where the table system and the prose system collide.",
+  "recommendation": "Let the one rule that closes the scorecard span the same full measure as the table's own hairlines \u2014 append it directly to the section instead of nesting it in the rail grid. Prose sections keep their content-edge rules; the table announces its own end on its own grid.",
+  "css_js_sketch": "/* renderScorecard, replacing lines 852\u2013854 */\nsec.appendChild(el(\"hr\",\"rule block-rule\"));  // spans rail+gutter+content like .sc-group borders",
+  "evidence": "before-scorecard-mid-dark.png (hairlines x=162\u2013937 vs closing rule x=350\u2013823, y\u22481064); final-rail-stars-v3.html lines 250, 852\u2013854",
+  "lenses": [
+   "spacing-rhythm"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The short rule colliding with the table's own full-grid hairlines reads as a glitch; letting the table close on its own grid is the coherent resolution of the two systems.",
+   "risk: Y \u2014 Appending the hr to the section instead of the rail grid is a two-line JS change; print's .grid display:block doesn't touch a direct section child, and mobile renders it identically.",
+   "value: Y \u2014 A closing rule starting 188px right of the hairlines directly above it reads as a rendering glitch at the most-trafficked section boundary."
+  ]
+ },
+ {
+  "id": "C17",
+  "title": "'confidence' and 'ENGAGES' speak in different voices 1.5rem apart in the same rail",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "The same Fira Code labelling voice is set five ways: .fe-label is uppercase with .1em tracking (lines 307\u2013310) while .f-conf directly beneath it in the same rail stack is lowercase with no tracking (line 314); masthead labels are lowercase .08em (line 210), the pill eyebrow and toggle uppercase .12em (lines 174, 182), and .dc-label .04em (line 393). The rail clash ('ENGAGES \u2026 confidence 88') is unmistakable once seen, on every card in both themes. The stylesheet defines tracking tokens for small-caps (lines 29\u201330) but none for the mono voice.",
+  "recommendation": "Add a --track-mono token (.1em) and give .f-conf the .fe-label treatment (uppercase, .68rem, .1em) so the rail speaks with one voice \u2014 pure CSS, since the bold number re-declares its own size/tracking (line 315) and digits are unaffected by text-transform. Align .dc-label and .mm-label to the same token (the lowercase-keys vs uppercase-headings case split is fine if consistent).",
+  "css_js_sketch": ":root{--track-mono:.1em}\n.f-rail .f-conf{font-family:\"Fira Code\",monospace; font-size:.68rem; letter-spacing:var(--track-mono); text-transform:uppercase; color:var(--tx-2); line-height:1.5}\n.f-engages .fe-label{letter-spacing:var(--track-mono)}\nul.plain.dropped .dc-label{letter-spacing:var(--track-mono)}\n.mast-meta .mm-label{letter-spacing:var(--track-mono)}",
+  "evidence": "before-finding-card-dark.png / before-finding-card-light.png ('ENGAGES' tracked vs 'confidence' untracked); final-rail-stars-v3.html lines 174, 182, 209\u2013212, 307\u2013315, 392\u2013393",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 'ENGAGES' and 'confidence' speaking in different voices 1.5rem apart in the same rail is unmistakable once seen; one --track-mono token is exactly how this stylesheet already thinks.",
+   "risk: Y \u2014 Pure CSS; the bold value re-declares size/tracking at line 315 and digits are immune to text-transform, so only the label's voice changes as intended.",
+   "value: Y \u2014 Verified: 'ENGAGES' and 'confidence' speak in two voices 1.5rem apart on every single card, and the fix is pure CSS with a reusable token."
+  ]
+ },
+ {
+  "id": "C18",
+  "title": "The em-dash in the rail ENGAGES list wraps inconsistently \u2014 bind it to the relation word",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "The dash lives in the breakable principle text node ('shortName + \" \u2014 \"', lines 916\u2013917) while only the relation span is nowrap (line 312), so line breaks fall on either side of it. Both failure modes appear in the shipped screenshots: 'Integral development / \u2014 violates' (dash opens line 2) and 'Social justice \u2014 / violates' (dash dangles at line end, before-boundary-dark.png). One list, two wrap grammars.",
+  "recommendation": "Move the dash into the no-wrap relation group so a wrap always reads 'Principle / \u2014 relation', never 'Principle \u2014 / relation'. Optionally add a small hanging indent so wrapped relation lines read as subordinate.",
+  "css_js_sketch": "/* renderFinding, lines 916\u2013917 */\nitem.appendChild(document.createTextNode(shortName(r.principle)+\" \"));\nvar grp=el(\"span\",\"fe-relgrp\");\ngrp.appendChild(document.createTextNode(\"\u2014 \"));\ngrp.appendChild(el(\"span\",\"fe-rel \"+rm.cls, rm.label));\nitem.appendChild(grp);\n/* CSS */\n.fe-relgrp{white-space:nowrap}\n.f-engages .fe-item{display:block; padding-left:.65rem; text-indent:-.65rem}",
+  "evidence": "before-finding-card-dark.png, before-finding-card-light.png, before-boundary-dark.png (both wrap patterns); final-rail-stars-v3.html lines 311\u2013313, 916\u2013917",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Two wrap grammars in one list \u2014 dash opening one line, dangling at another \u2014 is micro-typographic noise; binding the dash to the relation word makes every wrap read identically.",
+   "risk: Y \u2014 Safe textContent-only restructure, but scope the optional .65rem hanging indent to desktop \u2014 it conflicts with C58's mobile display:contents row where the negative text-indent reads as a stray left shift.",
+   "value: Y \u2014 Both wrap failures ('\u2014 violates' opening a line, dash dangling) are visible in shipped screenshots on the element repeated beside every finding."
+  ]
+ },
+ {
+  "id": "C19",
+  "title": "Collapse the eight near-identical body sizes (and the remedy > explanation inversion) to a three-step scale",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "Running text is set at eight nearly-identical sizes with five line-heights: f-explain 1.0/1.58 (line 327), remedy li 1.03/1.5 (371), plain li 1.03/1.55 (383), cite-gloss .96/1.45 (362), structural .98/1.5 (376), sc-note .98/1.45 (287), lead 1.0/1.5 (381), summary 1.06/1.56 (236), footer .92/1.55 (397). Within one card the remedy bullets are 3% larger and looser than the explanation above them \u2014 an inverted hierarchy (the card's argument is its smallest text), perceptible as 'something is off' without reading as intent. Paragraph gaps also drift (.8rem in f-explain, line 328, vs .85rem in content-col, line 126).",
+  "recommendation": "Tokenize a three-step prose scale and map every class onto it: primary 1rem/1.55 (f-explain, remedy, plain, lead), secondary .96rem/1.5 (gloss, structural, sc-note), small .92rem/1.55 (footer, dropped). Keep summary at 1.06/1.55 as the deliberate lead tier. Unify the paragraph gap on .85rem.",
+  "css_js_sketch": ":root{--fs-body:1rem; --lh-body:1.55; --fs-2nd:.96rem; --lh-2nd:1.5}\n.f-explain,ul.remedy li,ul.plain li,.movement p.lead{font-size:var(--fs-body); line-height:var(--lh-body)}\n.cite-gloss,.structural p,.sc-note{font-size:var(--fs-2nd); line-height:var(--lh-2nd)}\n.f-explain p{margin:0 0 .85rem}  /* match .content-col p, line 126 */",
+  "evidence": "final-rail-stars-v3.html lines 126, 236, 287, 327\u2013328, 362, 371, 376, 381, 383, 397; before-finding-card-dark.png (remedy optically heavier than explanation)",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [
+   "Keep the summary's 1.06 lead tier as stated, and land alongside C55 so the prose and mono scales are tokenized in one pass.",
+   "Add the missing ul.plain.dropped li{font-size:.92rem} the prose promises but the sketch omits, and land after C05 so size changes can't move ch-based measures."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Eight near-identical sizes with the card's argument set smaller than its bullets reads as drift, not hierarchy; a three-step tokenized scale is the systemic restraint this page deserves.",
+   "risk: Y \u2014 Token mapping is low risk and the remedy>explanation inversion is real, but the sketch under-specifies the dropped tier.",
+   "value: Y \u2014 The remedy-larger-than-explanation inversion is the kind of 'something is off' a reader feels without naming, and collapsing eight sizes to three tokens prevents future drift."
+  ]
+ },
+ {
+  "id": "C20",
+  "title": "Citation quote marks: make them real characters and hang the opening mark outside the text edge",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "Two related defects on the report's most precious typography. (1) The CSS-supplied opening \u201c (.cite-quote::before, line 361) sits inside the text column, pushing the quote's first letter ~0.5em right of the shared left edge while the gloss below sits flush \u2014 a visible left-edge wobble on every citation pair, in a design built on ONE shared left edge. (2) Because both marks are pseudo-content, selecting/copying a quote yields it WITHOUT its quotation marks \u2014 poor copy fidelity for the one element built to be quoted, and invisible to find-in-page.",
+  "recommendation": "Emit the curly marks as real text in JS (q.textContent = '\u201c'+curlQuote(...)+'\u201d'), delete the pseudo-elements, and hang the opening mark with a small negative text-indent tuned for EB Garamond italic, with hanging-punctuation as progressive enhancement. One change fixes alignment, copy, and search at once.",
+  "css_js_sketch": "/* JS, line 980 */\nq.textContent=\"\u201c\"+curlQuote(ci.quote)+\"\u201d\";\n/* CSS: delete line 361, then */\n.cite-quote{text-indent:-.5em}  /* tune \u00b1.05em optically */\n@supports(hanging-punctuation:first){ .cite-quote{text-indent:0; hanging-punctuation:first} }\n@media(max-width:680px){ .cite-quote{text-indent:0} }",
+  "evidence": "before-code-citations-dark.png / before-finding-card-light.png (quote first letters indented vs flush gloss; \u00a7104 line 1 at \u2248418px vs line 2 at the 400px edge at 2x); final-rail-stars-v3.html lines 356\u2013362, 980",
+  "lenses": [
+   "micro-typography",
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Real quotation marks fix copy fidelity, find-in-page, and the left-edge wobble at once \u2014 hanging the opening mark is classical typography in service of the page's one-left-edge creed.",
+   "risk: Y \u2014 The -.5em hang (\u22488.6px) fits inside the .8rem ref gap so it cannot collide with the \u00a7-column, curlQuote already normalizes inner doubles so the real outer marks are safe, and the 680px reset is included; copy/search fidelity is a genuine win.",
+   "value: Y \u2014 Copy fidelity and find-in-page on the report's most quotable element are real reader value, and the fix simultaneously repairs the visible left-edge wobble against the gloss."
+  ]
+ },
+ {
+  "id": "C21",
+  "title": "Remedy text and the structural note sit on their own indented left edges \u2014 hang their marks in the gutter instead",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "The page's core rule is one shared left text edge with marks hanging left of it (the \u00a7-refs do exactly this). But remedy items use padding-left:1.6rem with the \u2726 at left:0 (lines 371\u2013372), pushing remedy text 1.6rem right of the edge; and .structural puts its 2px rule AT the edge with 1rem padding (line 375), creating a third edge. Measured in the light crop at 2x: content edge \u2248400px, structural text \u2248435px, remedy text \u2248452px \u2014 the finding tail accumulates three competing left edges.",
+  "recommendation": "Treat the \u2726 and the structural rule like the \u00a7-ref: hang them in the gutter and return the text to the shared content edge. Restore the indents only at \u2264680px where the gutter disappears (mirroring the existing .cite fallback).",
+  "css_js_sketch": "ul.remedy li{padding-left:0; position:relative}\nul.remedy li::before{left:-1.6rem}\n.structural{margin-left:calc(-1rem - 2px)}\n@media(max-width:680px){\n  ul.remedy li{padding-left:1.6rem}\n  ul.remedy li::before{left:0}\n  .structural{margin-left:0}\n}",
+  "evidence": "before-finding-card-light.png (three left edges: 400 / 435 / 452px at 2x), before-code-citations-dark.png; final-rail-stars-v3.html lines 370\u2013376",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [
+   "Mirror the \u2264680px resets in @media print too \u2014 print keeps .layout's 1.5rem padding and the -1.6rem hang slightly exceeds it."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Three competing left edges in the finding tail contradict the page's core rule; hanging the \u2726 and the structural rule in the gutter like the \u00a7-refs makes the page more itself, with the existing 680px fallback pattern.",
+   "risk: Y \u2014 The 2.25rem gutter comfortably absorbs both hangs on desktop and the mobile fallback is specified; only the print path needs the small guard.",
+   "value: Y \u2014 Indented remedy bullets read as normal to any reader \u2014 this strengthens the design's one-edge thesis but only a designer would ever flag it; acceptable as a bundled nicety with C22."
+  ]
+ },
+ {
+  "id": "C22",
+  "title": "Remedies visually attach to the citation above them \u2014 give the block real separation",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "Citations get a labeled movement ('From Magnifica Humanitas', line 350) but remedies start only 1.2rem after the last gloss (ul.remedy margin-top, line 370) \u2014 barely more than the 1rem between successive citations (line 357). In both theme shots the \u2726 list reads as overflow of the last quote, so the report's most actionable content has the weakest sectional identity on the page.",
+  "recommendation": "Widen the gap to ~2rem so the block reads as a new movement; optionally mirror the cite-cap with a quiet small-caps 'Remedies' cap in tx-2, bound tightly to its list (the cap is the fuller fix but the gap alone restores the grouping).",
+  "css_js_sketch": "ul.remedy{margin-top:2rem}\n/* optional cap, JS line ~988 */\nif((f.remediation||[]).length){\n  body.appendChild(el(\"p\",\"rem-cap\",\"Remedies\"));\n  /* .rem-cap{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.8rem; color:var(--tx-2); font-weight:500; margin:1.6rem 0 0}\n     .rem-cap + ul.remedy{margin-top:.35rem} */\n}",
+  "evidence": "before-code-citations-dark.png, before-finding-card-light.png (gloss\u2192remedy gap \u2248 citation\u2192citation gap); final-rail-stars-v3.html lines 350, 357, 370, 987\u2013992",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [
+   "Take the 2rem gap only; drop the optional 'Remedies' cap \u2014 the code's own comment says 'no label' and that restraint is the design.",
+   "Take the optional 'Remedies' cap, not just the gap \u2014 scannable action items are what a CTO acts on."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The report's most actionable content reading as overflow of the last quote is a real grouping failure, but the gap alone restores it.",
+   "risk: Y \u2014 The margin widening is one safe declaration; the optional 'Remedies' cap reuses the existing small-caps caption vocabulary and is gated on remediation.length.",
+   "value: Y \u2014 Verified: the most actionable content on the page reads as overflow of the last quote, weakening exactly the section a decision-maker needs to find."
+  ]
+ },
+ {
+  "id": "C23",
+  "title": "Dark code panel is one ramp step off black and visually disappears \u2014 use base-900 for surface parity with light",
+  "severity": "medium",
+  "area": "code",
+  "priority": "should",
+  "problem": "In light, --code-bg is base-100 \u2014 two steps off the paper (1.24:1 surface contrast) and the block clearly reads as a panel. In dark it is base-950 (line 71) \u2014 one step, 1.11:1 \u2014 so the panel surface vanishes and the block is held together by its border alone. Same component, different material presence per theme.",
+  "recommendation": "Move dark --code-bg to base-900 (1.28:1 vs black \u2014 the same perceptual offset as light, and the same semantic slot: dark's --ui step). Nudge three syntax tokens to keep the file's documented 4.5:1 floor on the new surface, using the derive-off-the-ramp precedent already in the file (#5290C5, line 74). The pre-wrap fade keys off var(--code-bg) and follows automatically.",
+  "css_js_sketch": "[data-theme=\"dark\"]{\n  --code-bg:var(--base-900);  /* 1.28:1 vs bg \u2014 parity with light's 1.24:1 */\n  --hl-comment:#94928B;  /* 4.79:1 on base-900 */\n  --hl-number:#9A8FD0;   /* 5.12:1 */\n  --hl-builtin:#5E9ACB;  /* 4.94:1 */\n}",
+  "evidence": "final-rail-stars-v3.html lines 38, 71\u201374, 331, 339; before-finding-card-light.png vs before-code-citations-dark.png; computed base-950 vs #100F0F = 1.11:1, base-900 = 1.28:1, light base-100 vs paper = 1.24:1",
+  "lenses": [
+   "color-theme-parity"
+  ],
+  "amendments": [
+   "Also nudge --hl-function (orange-400 measures 4.498:1 on base-900 \u2014 exactly at the floor, e.g. lighten one step) and, if C07 lands, override the dark code figcaption color (base-500 on base-900 = 4.04:1 fails)."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Same component, different material presence per theme is a parity failure; base-900 is the same semantic slot light uses, and the off-ramp contrast nudges follow the file's own #5290C5 precedent.",
+   "risk: Y \u2014 Surface parity is right and most tokens verify (cyan 5.22, green 4.77), but two contrast edges need the amendment; CONFLICTS with C07 on the figcaption.",
+   "value: Y \u2014 The dark code panel still reads fine via its border and syntax color in the screenshots \u2014 surface parity is a connoisseur point, but the contrast math is done and it's token-only."
+  ]
+ },
+ {
+  "id": "C24",
+  "title": "Make the rail \u2734 a permalink and style :target so jumps visibly land",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "Findings have stable anchors and the scorecard deep-links to them (line 822), but the star is an inert aria-hidden span (line 906) and grep confirms no :target rule exists \u2014 a reader who wants to cite one finding has to open devtools, and after a smooth-scroll jump the landed card looks identical to every neighbor (with scroll-margin-top:5rem the previous finding's tail is visible above, so there is no confirmation of which card answered the click). For a report meant to be cited in issues and PRs, deep-linking is core product behavior.",
+  "recommendation": "Render the \u2734 as a self-link (<a href=\"#f-{id}\">) with an aria-label \u2014 the finding's sigil becomes its permalink, zero new decoration \u2014 and add a quiet persistent :target state in the existing vocabulary (title takes accent while the hash matches), plus an optional one-shot wash already neutralized by the reduced-motion block (line 410). Clicking the star also puts the copyable URL in the address bar.",
+  "css_js_sketch": "/* renderFinding (line 906) */\nvar star=el(\"a\",\"f-star\",\"\u2734\"); star.href=\"#f-\"+f.id;\nstar.setAttribute(\"aria-label\",\"Link to this finding (\"+f.id+\")\");\n/* CSS */\na.f-star{text-decoration:none}\na.f-star:hover,a.f-star:focus-visible{color:var(--tx)}\n.finding:target .f-title{color:var(--accent)}\n@media(prefers-reduced-motion:no-preference){\n  .finding:target{animation:f-land 1.4s ease-out 1}\n  @keyframes f-land{from{background:color-mix(in srgb,var(--accent) 7%,transparent)}to{background:transparent}}\n}",
+  "evidence": "final-rail-stars-v3.html lines 90, 291, 822, 905\u2013907, 935; grep ':target' returns nothing",
+  "lenses": [
+   "navigation-wayfinding",
+   "finding-card",
+   "product-features"
+  ],
+  "amendments": [
+   "Keep the persistent :target title accent; omit the one-shot background wash animation \u2014 the quiet state is confirmation enough.",
+   "Build the star-anchor alongside C08's rail-head ID so the rail is touched once."
+  ],
+  "reasons": [
+   "taste: Y \u2014 For an artifact cited in issues and PRs, the sigil-as-permalink is function disguised as the existing glyph, and a quiet :target state confirms the jump; coordinate the star markup with C08.",
+   "risk: Y \u2014 The anchor keeps the .f-star class so existing rail styles apply, :target plus the motion-gated wash uses only existing tokens (accent verifies 4.83:1 dark / 6.39:1 light on the title), and it must merge with C08's railhead wrapper in one edit.",
+   "value: Y \u2014 Citing individual findings in issues and PRs is core product behavior for this artifact, and landing a jump with zero confirmation of which card answered is a real wayfinding failure."
+  ]
+ },
+ {
+  "id": "C25",
+  "title": "Deep links land off-target: re-scroll to the URL fragment after render and after fonts load",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "Content is built at DOMContentLoaded (lines 1124\u20131125), so when someone opens report.html#f-F4 the target does not exist at parse time; and even after the browser's fragment retry, EB Garamond arrives from the CDN and reflows the entire serif page \u2014 on a document this long the anchor shifts substantially, parking the reader mid-way through the wrong finding.",
+  "recommendation": "After init() finishes, and again when document.fonts.ready resolves, re-scroll to location.hash if present. Three lines of vanilla JS, fully self-contained.",
+  "css_js_sketch": "function gotoHash(){\n  if(!location.hash) return;\n  var t=document.getElementById(decodeURIComponent(location.hash.slice(1)));\n  if(t) t.scrollIntoView();\n}\n/* end of init(): */ gotoHash();\nif(document.fonts && document.fonts.ready) document.fonts.ready.then(gotoHash);",
+  "evidence": "final-rail-stars-v3.html lines 1124\u20131125 (render at DOMContentLoaded), Google Fonts link line 11, line 90 (smooth scroll)",
+  "lenses": [
+   "navigation-wayfinding"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Deep links that park the reader mid-way through the wrong finding break the product behavior C24 establishes; three invisible lines of vanilla JS, fully in-budget.",
+   "risk: Y \u2014 Three lines, guarded on location.hash, self-contained; the only edge (a late fonts.ready re-scroll) targets the same fragment the reader navigated to, which is harmless.",
+   "value: Y \u2014 Deep links that park readers mid-wrong-finding after the Garamond reflow break the share moment entirely \u2014 and C24's permalinks are only as good as where they land."
+  ]
+ },
+ {
+  "id": "C26",
+  "title": "The page dead-ends: add a quiet wayfinding line (back to top \u00b7 findings index) above the footer credit",
+  "severity": "medium",
+  "area": "footer",
+  "priority": "should",
+  "problem": "This is one very long flat flow and there is NO route back up from anywhere: grep finds no '#top', no back-to-top, and no link to #scorecard-sec (line 477) anywhere. A reader who jumps from the scorecard to finding 7 has only a long manual scroll back; the footer ends on a single attribution sentence (renderFooter, lines 1032\u20131052).",
+  "recommendation": "End the page with a quiet mono wayfinding row above the colophon: '\u2191 Back to top \u00b7 Findings, by principle' \u2014 Fira Code, uppercase, tx-2, accent on hover. '#top' is a spec-defined fragment that scrolls to document top with no matching id needed; #scorecard-sec already exists. Preferred over a floating \u2191 button (extra fixed chrome, off-brand) \u2014 the footer pair is the restrained shippable fix.",
+  "css_js_sketch": "/* renderFooter, before the credit <p> */\nvar nav=el(\"p\",\"foot-nav\");\nvar a1=el(\"a\",null,\"\u2191 Back to top\"); a1.href=\"#top\"; nav.appendChild(a1);\nnav.appendChild(el(\"span\",\"fn-sep\",\"\u00b7\"));\nvar a2=el(\"a\",null,\"Findings, by principle\"); a2.href=\"#scorecard-sec\"; nav.appendChild(a2);\ncol.appendChild(nav);\n/* CSS */\n.foot-nav{margin:0 0 1.4rem}\n.foot-nav a{font:500 .68rem/1 \"Fira Code\",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--tx-2); text-decoration:none}\n.foot-nav a:hover,.foot-nav a:focus-visible{color:var(--accent)}\n.foot-nav .fn-sep{color:var(--ui-3); padding:0 .6rem}",
+  "evidence": "before-footer-dark.png; final-rail-stars-v3.html lines 477, 1032\u20131052; grep for '#top'/'scrollTo' returns nothing",
+  "lenses": [
+   "navigation-wayfinding",
+   "product-features"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A very long flat flow with no route back up is a real dead-end, and the footer pair is the restrained answer \u2014 correctly rejecting the floating button that would have been off-brand; coordinate placement with C51 (nav above credit, colophon below).",
+   "risk: Y \u2014 '#top' is spec-defined with no id required, #scorecard-sec exists at line 477, and the additive footer row touches no invariant.",
+   "value: Y \u2014 A 12,000px document with provably no route back up is a genuine wayfinding gap, and the footer pair is the restrained fix versus floating chrome."
+  ]
+ },
+ {
+  "id": "C27",
+  "title": "Scrollable code regions are unreachable by keyboard \u2014 add tabindex/role when a pre overflows",
+  "severity": "medium",
+  "area": "code",
+  "priority": "should",
+  "problem": "figure.code pre scrolls both axes (overflow-x:auto, max-height:24rem, line 341) but the JS creates it with no tabindex (grep confirms zero in the file), so keyboard users cannot scroll it and the cut-off tokens are unreadable for them. Chrome/Firefox accessibility audits flag exactly this ('scrollable region not focusable'); the page is otherwise careful about a11y (skip-link, visually-hidden), so the gap is out of character.",
+  "recommendation": "After render, if the pre actually overflows, set tabindex=0, role=region, and an aria-label from the figcaption location. The existing global :focus-visible accent outline (line 100) styles it for free. Hook into the same rAF callback as C04's fade sync.",
+  "css_js_sketch": "requestAnimationFrame(function(){\n  if(pre.scrollWidth > pre.clientWidth+1 || pre.scrollHeight > pre.clientHeight+1){\n    pre.setAttribute(\"tabindex\",\"0\");\n    pre.setAttribute(\"role\",\"region\");\n    pre.setAttribute(\"aria-label\",(ce.location||\"code evidence\")+\" \u2014 scrollable\");\n  }\n});",
+  "evidence": "final-rail-stars-v3.html lines 100, 341, 956\u2013960; grep 'tabindex' returns nothing; overflow visible in before-code-citations-dark.png",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The page is otherwise scrupulous about a11y (skip link, visually-hidden), so keyboard-unreachable scrollable evidence is out of character; the fix is invisible and rides C04's rAF hook.",
+   "risk: Y \u2014 Standard fix for a real audit-flagged a11y gap; the overflow check should also re-run on document.fonts.ready (piggyback C04's syncFade) since CDN fonts change scrollWidth.",
+   "value: Y \u2014 Keyboard users literally cannot read truncated evidence in 8 scrollable panes, and the page's existing a11y care (skip-link, focus styles) makes this gap look like an oversight audits will flag."
+  ]
+ },
+ {
+  "id": "C29",
+  "title": "Footer links wrongly carry data-href-shown, so print drops the tool's provenance URLs",
+  "severity": "medium",
+  "area": "footer",
+  "priority": "should",
+  "problem": "The print rule appends hrefs only for links NOT marked data-href-shown (line 450) \u2014 the marker means 'the link text already shows the URL'. The masthead repo link is correctly marked (line 691; its text IS the URL), but both footer anchors also set it (lines 1042, 1046) despite their text being 'Magnificent Humanity Audit agent skill' and 'Cache Atelier' \u2014 inverting the attribute's documented meaning. A printed page loses the GitHub releases URL and cacheatelier.work entirely, exactly the links a paper reader cannot click.",
+  "recommendation": "Delete the two setAttribute(\"data-href-shown\",\"\") calls on the footer anchors so the existing print rule appends their URLs.",
+  "css_js_sketch": "// renderFooter(): remove\n// a1.setAttribute(\"data-href-shown\",\"\");  (line 1042)\n// a2.setAttribute(\"data-href-shown\",\"\");  (line 1046)",
+  "evidence": "final-rail-stars-v3.html lines 449\u2013450 (rule + comment), 691 (correct usage), 1042, 1046 (inverted usage); before-footer-dark.png",
+  "lenses": [
+   "product-polish",
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The attribute's documented meaning is inverted on exactly the links a paper reader cannot click; deleting two lines restores the print machinery's intent (complementary with C44's correct use of the same mechanism).",
+   "risk: Y \u2014 Deleting two setAttribute calls restores the print rule's documented semantics with zero side effects; complementary with C44, not conflicting.",
+   "value: Y \u2014 Verified at lines 1042/1046: the attribute's meaning is inverted, so printed copies lose the only provenance URLs a paper reader cannot click \u2014 a two-line deletion."
+  ]
+ },
+ {
+  "id": "C30",
+  "title": "Theme toggle semantics are self-contradicting: aria-pressed fights the action label; dead under noscript; D shortcut undocumented",
+  "severity": "medium",
+  "area": "global",
+  "priority": "should",
+  "problem": "The visible label names the ACTION ('Light' while dark) but aria-pressed tracks the CURRENT theme (lines 464, 471, 1058), so a screen reader announces 'Light, toggle button, pressed' in dark mode \u2014 asserting light is on when it is off. With JS off, the hardcoded toggle still renders but does nothing. And the global D keyboard shortcut (lines 1061\u20131066) is documented nowhere \u2014 no title, no aria-keyshortcuts (grep confirms) \u2014 undiscoverable for those who'd want it and startling for anyone who brushes the keyboard.",
+  "recommendation": "Treat it as an action button: drop aria-pressed, set a self-describing aria-label that updates with the text, attach title + aria-keyshortcuts to document the shortcut where the action lives, and hide the control under noscript. Visuals unchanged (the tap-target bump rides with C06).",
+  "css_js_sketch": "<noscript><style>#theme-toggle{display:none}</style></noscript>\n/* in set(t) (line 1058) and the pre-paint script (line 464): */\nbtn.removeAttribute(\"aria-pressed\");\nvar next = t===\"dark\" ? \"light\" : \"dark\";\nbtn.textContent = next===\"light\" ? \"Light\" : \"Dark\";\nbtn.setAttribute(\"aria-label\",\"Switch to \"+next+\" theme\");\n/* once, in wireTheme(): */\nbtn.title=\"Toggle theme \u2014 or press D\";\nbtn.setAttribute(\"aria-keyshortcuts\",\"d\");\n<!-- markup (line 471): <button id=\"theme-toggle\" type=\"button\" aria-label=\"Switch to light theme\">Light</button> -->",
+  "evidence": "final-rail-stars-v3.html lines 455\u2013466, 471, 1054\u20131066; grep 'aria-keyshortcuts' returns nothing",
+  "lenses": [
+   "masthead",
+   "product-polish",
+   "navigation-wayfinding",
+   "product-features"
+  ],
+  "amendments": [
+   "Place the noscript style block in <head> (spec-clean location for noscript>style) rather than body, and add a .catch-free guard is not needed; rest as sketched."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A toggle announcing 'pressed' for the theme that is off is a genuine semantic contradiction; action-button semantics, noscript hiding, and documenting the D shortcut are all invisible correctness (layout side rides C06).",
+   "risk: Y \u2014 Action-button semantics are correct and both write sites (pre-paint script and set()) are covered; only the noscript placement needs the tidier variant.",
+   "value: Y \u2014 A screen reader announcing 'Light, pressed' while dark is active is factually wrong state communication, and a visible-but-dead control under noscript erodes trust; visuals ride with C06."
+  ]
+ },
+ {
+  "id": "C31",
+  "title": "Put the system name first in document.title, guard the dangling dash, and drop lang=\"la\" from the <title>",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "init() sets document.title=\"Magnifica Humanitas Audit \u2014 \"+(meta.system_name||\"\") (line 1086): every report shares the same long prefix so crowded tabs all truncate to the identical 'Magnifica Hum\u2026' with the one distinguishing fact cut off, and a missing system_name leaves a dangling ' \u2014 '. The static <title> also carries lang=\"la\" (line 8), which after the JS rewrite mislabels the English system name as Latin for screen readers.",
+  "recommendation": "Order most-specific-first (system \u2014 brand), guard the empty case, and remove lang from the title element (the in-page <em lang=\"la\"> elements are correctly scoped and stay).",
+  "css_js_sketch": "// line 1086\ndocument.title = (meta.system_name ? meta.system_name + \" \u2014 \" : \"\") + \"Magnifica Humanitas Audit\";\n<!-- line 8 -->\n<title>Magnifica Humanitas Audit</title>",
+  "evidence": "final-rail-stars-v3.html lines 8, 672, 967, 1086",
+  "lenses": [
+   "product-polish"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Most-specific-first titles, a guarded dash, and removing the now-wrong lang='la' are the kind of detail a Stripe-grade page gets right without anyone noticing.",
+   "risk: Y \u2014 Single-call-site title rewrite with an empty-name guard, and removing lang='la' from <title> fixes a real screen-reader mislabel after the JS rewrite.",
+   "value: Y \u2014 Developers live in crowded tab bars \u2014 every report truncating to the identical 'Magnifica Hum\u2026' hides the one distinguishing fact, and the lang=la mislabel is a real a11y wrinkle."
+  ]
+ },
+ {
+  "id": "C32",
+  "title": "No meta description or Open Graph tags \u2014 shared links unfurl bare",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "The head (lines 3\u201311) has no <meta name=\"description\">, no og:*, no twitter:card (grep confirms). Pasting the report URL into Slack, iMessage, X or LinkedIn \u2014 the natural way an audit circulates \u2014 yields no summary and no card; search snippets fall back to arbitrary body text. Crawlers don't run the JS, so the static copy must stand alone \u2014 which it can, since the framing is constant across reports.",
+  "recommendation": "Add static description/og/twitter tags reusing the dek's own sentence so the card speaks in the report's voice; optionally have init() sync og:title alongside document.title for the rare JS-executing scraper.",
+  "css_js_sketch": "<meta name=\"description\" content=\"An anthropological audit reading a software system against the seven principles of Catholic social doctrine set out in the encyclical Magnifica Humanitas.\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:title\" content=\"Magnifica Humanitas Audit\">\n<meta property=\"og:description\" content=\"This reads the system against the seven principles of Catholic social doctrine, asking what its workings imply about the human person.\">\n<meta name=\"twitter:card\" content=\"summary\">\n/* in init(): */\nvar ogt=document.querySelector('meta[property=\"og:title\"]');\nif(ogt) ogt.setAttribute('content', document.title);",
+  "evidence": "final-rail-stars-v3.html lines 3\u201311; grep 'description'/'og:' returns nothing",
+  "lenses": [
+   "product-polish",
+   "product-features"
+  ],
+  "amendments": [
+   "Static tags only \u2014 drop the init() og:title sync, since scrapers don't run JS and the extra machinery buys nothing."
+  ],
+  "reasons": [
+   "taste: Y \u2014 An audit circulates by being pasted into Slack and issues, and the static framing copy genuinely stands alone; the card should speak in the dek's own voice.",
+   "risk: Y \u2014 Static head tags with constant framing copy survive the no-JS crawler path by design; zero interaction with the data contract.",
+   "value: Y \u2014 Slack/iMessage/X unfurls are precisely how an audit circulates, and a bare card at share time is a first-impression failure the static dek text can fix for free."
+  ]
+ },
+ {
+  "id": "C33",
+  "title": "Add a data-URI \u2734 SVG favicon",
+  "severity": "medium",
+  "area": "meta",
+  "priority": "should",
+  "problem": "No <link rel=\"icon\"> exists (grep confirms), so every tab shows the generic document glyph and file:// or hosted copies 404 on /favicon.ico. For a flagship artifact whose identity is built on the \u2734 glyph set, the tab is the one place the brand never appears \u2014 and developers keep many tabs open.",
+  "recommendation": "One self-contained data-URI SVG: a Flexoki black rounded tile with the \u2734 glyph in paper #FFFCF0 (reads on both light and dark tab bars; system serif renders the glyph, no font dependency). Percent-encode the glyph and append U+FE0E so text presentation applies. Zero external requests; keeps the single-file constraint.",
+  "css_js_sketch": "<link rel=\"icon\" href='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"16\" fill=\"%23100F0F\"/><text x=\"50\" y=\"74\" font-size=\"66\" text-anchor=\"middle\" fill=\"%23FFFCF0\">%E2%9C%B4%EF%B8%8E</text></svg>'>",
+  "evidence": "final-rail-stars-v3.html lines 3\u201311; grep 'rel=\"icon' returns nothing",
+  "lenses": [
+   "product-polish",
+   "product-features"
+  ],
+  "amendments": [
+   "Percent-encode the spaces in the SVG data URI for strict URL validity; Safari ignoring SVG favicons degrades gracefully to the current state."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The \u2734 is the brand and the tab is the one place it never appears; a data-URI SVG keeps the single-file constraint and adds zero requests.",
+   "risk: Y \u2014 Explicitly within the data-URI favicon allowance, zero external requests, and the quoting (single-quoted href, %23, U+FE0E) is correct.",
+   "value: Y \u2014 The tab is the one surface where the \u2734 identity never appears, and the data-URI keeps the single-file constraint at zero cost."
+  ]
+ },
+ {
+  "id": "C34",
+  "title": "Mobile rail: the confidence number stacks on its own line inside the inline meta strip",
+  "severity": "medium",
+  "area": "finding",
+  "priority": "should",
+  "problem": "Desktop sets .f-rail .f-conf b{display:block} (line 315) so the number sits under its label in the vertical rail; the \u2264680px block (lines 431\u2013432) flips the rail to a horizontal wrapped row but never overrides the block display, so the inline strip fractures \u2014 measured at 375px the conf box is 37px tall with 'confidence' and '88' stacked, inside what should be one quiet inline run before the title.",
+  "recommendation": "In the mobile media query, render the value inline after its label.",
+  "css_js_sketch": "@media(max-width:680px){\n  .f-rail .f-conf b{display:inline; margin-left:.3rem}\n}",
+  "evidence": "/tmp/mh-mobile/mob-frail.png; measured conf box h=37 with b at y+17; final-rail-stars-v3.html lines 314\u2013315 vs 414\u2013436",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A 37px-tall stacked fragment inside what should be one quiet inline strip is visibly unfinished on mobile; one declaration fixes it.",
+   "risk: Y \u2014 One declaration inside the existing 680px block; no desktop or print exposure.",
+   "value: Y \u2014 A 37px-tall stacked fragment inside what should be one quiet inline strip is visible breakage on every mobile finding, fixed by one declaration."
+  ]
+ },
+ {
+  "id": "C35",
+  "title": "Mobile masthead meta loses label\u2013value pairing: gap within a pair equals gap between pairs",
+  "severity": "medium",
+  "area": "masthead",
+  "priority": "should",
+  "problem": "At \u2264680px .mast-meta{grid-template-columns:1fr; gap:.15rem 0} (line 427) stacks labels and values with one uniform ~2.4px gap \u2014 'evidence' sits as close to the preceding scope text as to its own value 'Source code'. The block reads as one undifferentiated list; Gestalt pairing needs more space between pairs than within them.",
+  "recommendation": "Zero the uniform gap and give each label (except the first) a top margin so pairs cluster.",
+  "css_js_sketch": "@media(max-width:680px){\n  .mast-meta{grid-template-columns:1fr; gap:0}\n  .mast-meta .mm-label{margin-top:.55rem}\n  .mast-meta .mm-label:first-child{margin-top:0}\n  .mast-meta .mm-value{margin-top:.1rem}\n}",
+  "evidence": "/tmp/mh-mobile/mob-meta.png; measured label\u2192own-value 2.4px and prior-value\u2192label 2.4px; final-rail-stars-v3.html line 427",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Gestalt pairing \u2014 more space between pairs than within them \u2014 is exactly the felt-not-noticed polish standard; the current uniform 2.4px gap dissolves the label-value structure.",
+   "risk: Y \u2014 Scoped to the existing mobile query and :first-child correctly targets the first label in the alternating grid.",
+   "value: Y \u2014 With identical 2.4px gaps within and between pairs, mobile readers cannot tell which value belongs to which label in the first screen they see."
+  ]
+ },
+ {
+  "id": "C36",
+  "title": "Mobile scorecard strands '01 \u25cf' on its own line above the principle name",
+  "severity": "medium",
+  "area": "scorecard",
+  "priority": "should",
+  "problem": "At \u2264680px .sc-row{grid-template-columns:1fr; row-gap:.4rem} (line 417) puts the ordinal+dot marker on its own row above the name (measured: marker row y=1814.8 h=17.3, name at y=1838.5). Each principle opens with a tiny orphaned number-and-dot line that reads as debris rather than the row's ordinal.",
+  "recommendation": "Collapse .sc-row to a wrapped flex row on mobile so the marker sits inline before the name, letting the chip/count wrap naturally below.",
+  "css_js_sketch": "@media(max-width:680px){\n  .sc-row{display:flex; flex-wrap:wrap; align-items:baseline; gap:.4rem .7rem}\n  .sc-marker{flex:0 0 auto}\n  .sc-body{flex:1 1 16rem; min-width:0}\n}",
+  "evidence": "/tmp/mh-mobile/mob-scorecard.png ('03 \u25cf' alone above THE UNIVERSAL DESTINATION OF GOODS); final-rail-stars-v3.html lines 417, 421\u2013423",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 '03 \u25cf' stranded as debris above each principle name is visibly wrong on mobile; the flex collapse is minimal \u2014 coordinate with C01's desktop nowrap and 680px wrap rules so .sc-row is rewritten once.",
+   "risk: Y \u2014 The flex collapse verifies at 375px (16rem basis fits beside the marker) and is confined to the 680px block, leaving desktop grid untouched.",
+   "value: Y \u2014 '03 \u25cf' stranded alone above each principle name reads as debris at the top of every mobile scorecard row."
+  ]
+ },
+ {
+  "id": "C37",
+  "title": "Give 'Dropped' and 'Limits' the one-line leads the first closing has, and use the full 'Limits of this audit' caption",
+  "severity": "medium",
+  "area": "closings",
+  "priority": "should",
+  "problem": "The coda is asymmetric: 'What the system does well' opens with a considered lead sentence (lines 1092\u20131093), but 'Dropped and consolidated' and 'Limits' pass null leads (lines 1101, 1116) and drop straight into terse bullets \u2014 the 'appendix dump' feel. The third caption is just 'Limits' while its own section aria-label is 'Limits of this audit' (line 481), breaking parallelism with the two full-phrase captions above it.",
+  "recommendation": "Pass a one-sentence lead to both remaining movements in the same voice as the first, and title the third 'Limits of this audit' to match its landmark label.",
+  "css_js_sketch": "renderList(\"dropped\",\"Dropped and consolidated\",\n  \"Candidate findings set aside in triage, with the confidence they carried and the reason they were dropped.\",\n  data.dropped, ...);\nrenderList(\"scope\",\"Limits of this audit\",\n  \"What the audit could not see, named so the reader can weigh its claims.\",\n  data.scope_limits, ...);",
+  "evidence": "before-closings-dark.png; final-rail-stars-v3.html lines 481, 1092\u20131093, 1101, 1116",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Keep each lead to the single sentence proposed \u2014 no longer \u2014 so the closings stay terse end-matter."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The asymmetric coda \u2014 one considered lead then two bare dumps \u2014 and the caption that breaks parallelism with its own aria-label are real register failures; the proposed copy stays in voice.",
+   "risk: Y \u2014 Copy-only change through the existing renderList lead parameter, and it restores parallelism with the aria-label at line 481.",
+   "value: Y \u2014 The asymmetric coda and the caption/aria-label mismatch are real but editorial \u2014 leads improve finish without being load-bearing for trust."
+  ]
+ },
+ {
+  "id": "C38",
+  "title": "Dropped-list mono metadata wraps mid-pair ('conf 35 \u00b7 reason / charitable reading')",
+  "severity": "medium",
+  "area": "closings",
+  "priority": "should",
+  "problem": "The renderer emits label and value as separate inline nodes with no wrap control (lines 1105\u20131113), so lines break between a label and its value: before-closings-dark.png shows 'conf 35 \u00b7 reason' ending a line with 'charitable reading' orphaned below, '\u00b7 reason' / 'below threshold', and 'reason merged' / 'into F1' \u2014 three of four items break awkwardly.",
+  "recommendation": "Wrap each label+value pair in a white-space:nowrap span so wrapping happens only at the ' \u2014 ' and ' \u00b7 ' separators; the pairs are short, so nowrap cannot overflow the column. (The merged-into pair becomes a link per C08.)",
+  "css_js_sketch": "/* CSS */ .dc .dc-pair{white-space:nowrap}\n/* JS in the dropped builder */\nfunction dcPair(label,value){var s=el(\"span\",\"dc-pair\");s.appendChild(el(\"span\",\"dc-label\",label+\" \"));s.appendChild(document.createTextNode(value));return s;}\nif(d.confidence!=null){dc.appendChild(dcPair(\"conf\",String(d.confidence)));dc.appendChild(document.createTextNode(\" \u00b7 \"));}\ndc.appendChild(dcPair(\"reason\",fmtReason(d.reason)));",
+  "evidence": "before-closings-dark.png (items 1, 3, 4 of Dropped); final-rail-stars-v3.html lines 392\u2013393, 1105\u20131113",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Build on C08's linked merged-into pair so the dropped-list builder is rewritten once."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Three of four dropped items breaking between a label and its value reads as carelessness in the section about editorial discipline; nowrap pairs is the same fix grammar as C02 (coordinate the merged-into pair with C08's link).",
+   "risk: Y \u2014 Short nowrap pairs cannot overflow the column, but this rewrites the same dropped-builder nodes as C08's merged-into link \u2014 apply both as one coordinated edit with the anchor inside the reason pair.",
+   "value: Y \u2014 Verified in before-closings-dark.png: three of four dropped items break between label and value, making the metadata genuinely harder to parse."
+  ]
+ },
+ {
+  "id": "C39",
+  "title": "Define an on-brand ::selection instead of the OS default blue",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "No ::selection rule exists anywhere (grep confirms). Selecting text \u2014 constant behavior for readers of a quotable report \u2014 paints the stock saturated UA blue across the warm paper and the #100F0F ground: the one interaction color that ignores the tuned Flexoki accents.",
+  "recommendation": "One rule using the color-mix pattern already used for chip tints (lines 45\u201347, 77\u201379) so the wash derives from the theme's own accent and flips automatically with data-theme.",
+  "css_js_sketch": "::selection{background:color-mix(in oklab, var(--accent) 28%, var(--bg)); color:var(--tx)}",
+  "evidence": "grep '::selection' returns nothing; color-mix precedent at final-rail-stars-v3.html lines 45\u201347, 77\u201379",
+  "lenses": [
+   "product-polish",
+   "color-theme-parity"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Stock UA blue across warm paper is the one interaction color outside the tuned palette; deriving the wash from the theme's own accent via the existing color-mix pattern is on-brand and invisible until touched.",
+   "risk: Y \u2014 One rule using the file's established color-mix pattern; computed selection contrast verifies comfortably in both themes (\u22488.3:1 dark, \u224812:1 light).",
+   "value: Y \u2014 Readers select and copy this report constantly and stock UA blue ignores the tuned palette \u2014 a one-line nicety worth bundling."
+  ]
+ },
+ {
+  "id": "C40",
+  "title": "Masthead and footer links have no hover state; existing hovers snap instead of easing",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "The repo link (.mm-value a, line 214) and both footer links (line 400) have no :hover rule at all \u2014 the only link hovers are the scorecard rows and the toggle (lines 185, 276\u2013278) \u2014 and none of the hovers that do exist are eased, while the body's theme change is eased at .2s (line 95). The artifact's only outbound credits give zero interaction feedback.",
+  "recommendation": "One shared quiet hover (text shifts to primary ink, underline keeps the accent \u2014 matching the toggle's hover logic) plus a single .15s ease on links and the toggle. The reduced-motion block (line 410) already neutralizes it.",
+  "css_js_sketch": "a,#theme-toggle{transition:color .15s ease, text-decoration-color .15s ease}\n.mm-value a:hover,footer.report a:hover{color:var(--tx); text-decoration-color:var(--accent)}",
+  "evidence": "final-rail-stars-v3.html lines 95, 185, 214, 276\u2013278, 400, 410; before-masthead-dark.png, before-footer-dark.png",
+  "lenses": [
+   "product-polish",
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The artifact's only outbound credits giving zero hover feedback, and every hover snapping while the theme eases, is a small coherence gap; one shared eased hover closes it without new vocabulary.",
+   "risk: Y \u2014 Global a transition is safe (reduced-motion block neutralizes it) and hover states reuse existing tokens only.",
+   "value: Y \u2014 Zero hover feedback on the only outbound credits is unpolished but minor; one shared rule fixes it."
+  ]
+ },
+ {
+  "id": "C41",
+  "title": "Apply dedash() to scorecard titles so the same title reads identically in both places",
+  "severity": "low",
+  "area": "scorecard",
+  "priority": "could",
+  "problem": "The finding card runs titles through dedash() so em-dashes become spaced en-dashes (line 935, the settled mono-title style), but the scorecard cross-reference uses curl() only (line 825) \u2014 the same sentence reads '\u2026engagement \u2014 including dwell \u2014\u2026' in the scorecard and '\u2026engagement \u2013 including dwell \u2013\u2026' on the card. A reader navigating scorecard\u2192card sees the punctuation silently change.",
+  "recommendation": "Apply dedash() in the scorecard too, making the title one canonical string everywhere (the en-dash also wraps better in the narrow bullet column).",
+  "css_js_sketch": "/* renderScorecard, line 825 */\na.appendChild(el(\"span\",\"scf-title\", dedash(curl(f.title||\"Untitled finding\"))));",
+  "evidence": "before-scorecard-top-dark.png vs before-finding-card-dark.png; final-rail-stars-v3.html lines 558, 825, 935",
+  "lenses": [
+   "micro-typography"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The same title silently changing punctuation between scorecard and card breaks the reader's trust in precision; one canonical dedash'd string is a one-line fix.",
+   "risk: Y \u2014 One-line reuse of the existing dedash() helper at a single call site; makes titles canonical across both surfaces.",
+   "value: Y \u2014 Punctuation silently changing between the scorecard and the card it links to is a subtle consistency leak; one-word fix."
+  ]
+ },
+ {
+  "id": "C42",
+  "title": "Format the masthead date for reading inside a <time> element",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The date row prints the raw ISO string '2026-06-02' (line 679) in serif with global oldstyle figures (onum, line 94) \u2014 the 6s ascend while 0/2 sit at x-height, a bouncy machine-format string in an otherwise literary masthead, and it carries no <time datetime> semantics. (Lining figures were proposed as the minimal fix, but a prose date is where oldstyle figures are actually correct.)",
+  "recommendation": "Render 'June 2, 2026' inside <time datetime=\"2026-06-02\">, falling back to the raw string when it does not parse \u2014 fixes the figure style and the semantics in one move.",
+  "css_js_sketch": "function fmtDate(s){\n  var m=/^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s)); if(!m) return null;\n  var MO=[\"January\",\"February\",\"March\",\"April\",\"May\",\"June\",\"July\",\"August\",\"September\",\"October\",\"November\",\"December\"];\n  return MO[+m[2]-1]+\" \"+(+m[3])+\", \"+m[1];\n}\n/* rows loop, when r[0]===\"date\": */\nvar tEl=document.createElement(\"time\"); tEl.dateTime=String(r[1]);\ntEl.textContent=fmtDate(r[1])||String(r[1]); v.appendChild(tEl);",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html lines 94, 679, 699\u2013701",
+  "lenses": [
+   "masthead",
+   "micro-typography"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A raw ISO string in an otherwise literary masthead is the first thing a careful reader notices; 'June 2, 2026' in a <time> element is more itself in both register and semantics \u2014 and C51's colophon should reuse the same formatter.",
+   "risk: Y \u2014 Regex-based formatting avoids Date timezone pitfalls entirely and falls back to the raw string; purely additive in the rows loop.",
+   "value: Y \u2014 '2026-06-02' raw in a literary masthead is slightly machine-flavored, but ISO dates don't actively hurt a technical reader; the <time> semantics are a bonus."
+  ]
+ },
+ {
+  "id": "C43",
+  "title": "Keep hyphenated identifiers like 'home-mixer' from fracturing in the scope row",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The scope value wraps mid-identifier in both theme shots \u2014 '(home-' ends one line and 'mixer, phoenix, grok\u2026' opens the next \u2014 momentarily reading as the word 'home'. The value is a plain text node (line 700) and .mm-value's overflow-wrap:anywhere + word-break:break-word (line 213) makes it maximally willing to break.",
+  "recommendation": "When rendering meta values, wrap any token containing an intra-word hyphen in a nowrap span so system identifiers stay whole; ordinary prose is untouched (safer than U+2011, which risks a fallback-glyph mismatch in EB Garamond).",
+  "css_js_sketch": "function protectNames(s){\n  var frag=document.createDocumentFragment();\n  String(s).split(/(\\s+)/).forEach(function(tok){\n    if(/\\w-\\w/.test(tok)){var sp=el(\"span\",\"nb\");sp.textContent=tok;frag.appendChild(sp);}\n    else frag.appendChild(document.createTextNode(tok));\n  });\n  return frag;\n}\n/* CSS */ .mm-value .nb{white-space:nowrap}\n/* line 700: */ v.appendChild(protectNames(curl(String(r[1]))));",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png ('home-' / 'mixer' break); final-rail-stars-v3.html lines 207\u2013213, 699\u2013701",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 'home-' / 'mixer' momentarily reading as the word 'home' is a real comprehension stutter; protecting hyphenated identifiers with nowrap spans is safer than U+2011 and invisible elsewhere.",
+   "risk: Y \u2014 Safer than U+2011 as argued; only residual edge is a pathologically long hyphenated token refusing to break, which mm-value's anywhere fallback no longer catches inside the span \u2014 acceptable for identifier-length tokens.",
+   "value: Y \u2014 Verified in the masthead: 'home-' / 'mixer' fractures a system identifier in the first viewport, momentarily misreading as the word 'home' for the audience that knows these repos."
+  ]
+ },
+ {
+  "id": "C44",
+  "title": "Display the repository URL without its scheme; let print append the full address",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "The repository row prints the raw 'https://github.com/\u2026' verbatim, underlined end to end (renderHeader lines 689\u2013698). The scheme is noise in an editorial masthead; Stripe-grade documents display 'github.com/\u2026' and keep the full URL in href. The print machinery already handles text-vs-href divergence via data-href-shown (line 450), so dropping that attribute makes print correctly append the full URL.",
+  "recommendation": "Strip the scheme from the displayed text (href stays complete), keep the existing <wbr> insertion after slashes, and remove data-href-shown on this anchor.",
+  "css_js_sketch": "var url=String(r[1]);\nvar a=el(\"a\"); a.href=url; a.rel=\"noopener\"; /* no data-href-shown */\nvar shown=url.replace(/^https?:\\/\\//i,\"\");\nshown.split(\"/\").forEach(function(seg,i,arr){\n  a.appendChild(document.createTextNode(seg+(i<arr.length-1?\"/\":\"\")));\n  if(i<arr.length-1) a.appendChild(document.createElement(\"wbr\"));\n});",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html lines 450, 689\u2013698",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Dropping the scheme is the established editorial convention for displayed URLs, and it correctly uses the print machinery C29 repairs \u2014 display loses noise, print gains the full address.",
+   "risk: Y \u2014 href stays complete, the <wbr> pattern is preserved, and dropping data-href-shown correctly re-engages the existing print URL rule.",
+   "value: Y \u2014 Scheme-stripping is an editorial nicety, and it correctly reuses the existing print machinery \u2014 note it interacts benignly with C29's attribute cleanup."
+  ]
+ },
+ {
+  "id": "C45",
+  "title": "Fix the collapsed margin under 'From Magnifica Humanitas' so the cap binds to its quotes",
+  "severity": "low",
+  "area": "citations",
+  "priority": "could",
+  "problem": "The cap is authored to sit .2rem above its first quote (.cite-cap margin:1.4rem 0 .2rem, line 350), but the adjacent .cite's 1rem top margin (line 356) collapses with it to a flat 1rem \u2014 the authored tight grouping never renders, so the label floats equidistant between the prose above and the quote it introduces (gap equals the citation-to-citation gap). Line 357's '.cite + .cite{margin-top:1rem}' is fully redundant with 356 \u2014 evidence of the confused intent.",
+  "recommendation": "Move inter-citation spacing onto the sibling selector only and bind the cap to the first citation with a small explicit gap.",
+  "css_js_sketch": ".cite-cap{margin:1.6rem 0 0}\n.cite{margin:0 0 0 -4.3rem}\n.cite-cap + .cite{margin-top:.4rem}\n.cite + .cite{margin-top:1.1rem}",
+  "evidence": "before-code-citations-dark.png (cap\u2194quote gap equals quote\u2194quote gap); final-rail-stars-v3.html lines 350, 356\u2013357",
+  "lenses": [
+   "spacing-rhythm",
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Margin collapse silently defeating the authored cap-to-quote binding is a real bug in intent; the sibling-selector rewrite restores what the designer already meant (sequence before C47's tokenization).",
+   "risk: Y \u2014 Correct margin-collapse diagnosis; every first .cite is provably preceded by a .cite-cap (lines 964\u2013984) so the sibling selectors cover all cases.",
+   "value: Y \u2014 The collapsed margin defeating the authored cap-to-quote binding is real but reads as ordinary spacing to non-designers; coordinate with C47's tokens."
+  ]
+ },
+ {
+  "id": "C46",
+  "title": "Add .cite-quote to the text-wrap:pretty list",
+  "severity": "low",
+  "area": "citations",
+  "priority": "could",
+  "problem": "Line 137 grants text-wrap:pretty to glosses, structural notes, remedies and explanations \u2014 but not .cite-quote, the most precious typography in the card. The \u00a7170 quote already shows the consequence: a long first line breaking to a short second with no rag protection against future orphans.",
+  "recommendation": "Add .cite-quote to the existing pretty list (consistent with its siblings; balance would be the bolder pull-quote treatment, pretty matches the page's restraint).",
+  "css_js_sketch": "/* line 137 */\n.f-explain p,.cite-quote,.cite-gloss,.dek,.summary p,.sc-note,.structural p,ul.remedy li,ul.plain li{text-wrap:pretty}",
+  "evidence": "final-rail-stars-v3.html lines 137, 360; before-finding-card-light.png (\u00a7170 quote rag)",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The most precious typography on the card being the one block without rag protection is an obvious omission from the existing pretty list; one selector.",
+   "risk: Y \u2014 One selector added to an existing list; no interaction with C20's text-indent.",
+   "value: Y \u2014 One selector added to an existing list, protecting the rag of the page's most precious text \u2014 costless."
+  ]
+ },
+ {
+  "id": "C47",
+  "title": "Tokenize the drifting caption gaps, intra-finding block margins, and asterism margins",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "Spacing values playing the same role drift by small unjustified amounts: caption bottom margins are 1rem (.sum-cap, 233), 1.2rem (.sc-cap, 247) and 1.3rem (.m-cap, 380); intra-finding block top margins are 1.1rem (figure.code, 331), 1.2rem (remedy/structural, 370/375) and 1.4rem (cite-cap, 350); the asterism is 2.8rem top / 2.6rem bottom (296). None of these deltas reads as hierarchy \u2014 they read as drift.",
+  "recommendation": "Tokenize the rhythm: one caption gap, one intra-finding block gap, a symmetric asterism margin. Coordinate with C12 (sum-cap), C13 (sc-cap), C22 (remedy gap) and C45 (cite-cap) which set the deliberate exceptions.",
+  "css_js_sketch": ":root{--gap-cap:1.2rem; --gap-blk:1.2rem}\n.sc-cap,.movement .m-cap{margin-bottom:var(--gap-cap)}\nfigure.code{margin-top:var(--gap-blk)}  /* was 1.1rem */\n.f-aster{margin:2.7rem 0}              /* was 2.8rem 0 2.6rem */",
+  "evidence": "final-rail-stars-v3.html lines 233, 247, 296, 331, 350, 370, 375, 380; before-synthesis-dark.png vs before-closings-dark.png",
+  "lenses": [
+   "spacing-rhythm"
+  ],
+  "amendments": [
+   "Apply last, after C12/C13/C22/C45 establish the deliberate exceptions, so the tokens encode final intent rather than the current drift.",
+   "Drop the .sc-cap line from this candidate and let C13's contextual .9rem win \u2014 they set conflicting bottom margins on the same property.",
+   "Apply last, after C12/C13/C22/C45 set their deliberate values, or the token pass will overwrite them."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The drifting near-values read as cascade noise, not hierarchy, and tokenizing them is how this stylesheet already works.",
+   "risk: Y \u2014 Tokenization itself is safe, but it CONFLICTS with C13 on .sc-cap margin-bottom (1.2rem vs .9rem) and must defer to the candidates it acknowledges as deliberate exceptions (C12, C22, C45).",
+   "value: Y \u2014 Pure system hygiene no reader will perceive, acceptable only as the cleanup pass bundled behind the accepted spacing fixes \u2014 mild sequencing conflict with C12/C13/C22/C45."
+  ]
+ },
+ {
+  "id": "C48",
+  "title": "Set the closing captions in the running caption voice, not the masthead overline's loud tracking",
+  "severity": "low",
+  "area": "closings",
+  "priority": "could",
+  "problem": "The three closing captions (.m-cap, line 380) are .86rem with the loud --track-label (.13em) \u2014 the masthead overline's frame voice (lines 189\u2013192) \u2014 while sibling section captions .sum-cap/.sc-cap are .92rem with --track-cap (.06em). The comment at line 30 shows a deliberate bookend, but three consecutive loud-tracked section heads read as a different register from the two captions above them; one closing element could bookend the overline, three section heads cannot.",
+  "recommendation": "Set .m-cap to the running caption voice (.92rem, --track-cap), reserving --track-label for the masthead overline alone.",
+  "css_js_sketch": ".movement .m-cap{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.92rem; color:var(--tx-2); margin:0 0 1.2rem; font-weight:500}",
+  "evidence": "before-closings-dark.png vs before-scorecard-top-dark.png; final-rail-stars-v3.html lines 30, 189\u2013192, 231\u2013234, 245\u2013248, 380",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A bookend executed three times in a row stops being a bookend \u2014 sections at the same outline level as Synthesis should share its caption voice, and the loud --track-label is rightly reserved for the overline alone.",
+   "risk: Y \u2014 Single-rule retune using existing tracking tokens; no layout consequence.",
+   "value: Y \u2014 The register shift in the closing captions is perceptible only on direct comparison with the captions far above; quiet improvement, not reader-blocking."
+  ]
+ },
+ {
+  "id": "C49",
+  "title": "Give the masthead more air above the overline",
+  "severity": "low",
+  "area": "masthead",
+  "priority": "could",
+  "problem": "header.report has padding:3.6rem 0 0 (line 188), putting the overline \u224868px from the viewport top \u2014 visibly less than the masthead's own internal bands below the dek (1.6rem meta + 2.4rem rule + 2.4rem section). The formal serif masthead starts slightly crowded against browser chrome rather than opening like a title page.",
+  "recommendation": "Increase desktop top padding to ~5.5rem so the document opens with deliberate white space; keep 3.6rem under the 680px breakpoint where vertical economy matters.",
+  "css_js_sketch": "header.report{padding:5.5rem 0 0}\n@media(max-width:680px){ header.report{padding:3.6rem 0 0} }",
+  "evidence": "before-masthead-dark.png / before-masthead-light.png; final-rail-stars-v3.html line 188",
+  "lenses": [
+   "masthead"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A title page should open with deliberate white space, and the current top padding is visibly tighter than the masthead's own internal bands; keeping 3.6rem on mobile shows the right judgment.",
+   "risk: Y \u2014 Padding-only change with the mobile value preserved; compatible with C06's toggle placement at top:1.5rem.",
+   "value: Y \u2014 More opening air is a taste call that does improve the title-page feel, but nobody distrusts the current 68px."
+  ]
+ },
+ {
+  "id": "C50",
+  "title": "Support inline code in closing bullets so Rust paths stop rendering in serif",
+  "severity": "low",
+  "area": "closings",
+  "priority": "could",
+  "problem": "The first Limits bullet sets util::phoenix_request::build_prediction_request in EB Garamond (before-footer-dark.png) because setProse is text-only (line 560). Everywhere else the report is scrupulous about code-in-Fira-Code; a long Rust path in serif with serif underscores is the one place that discipline lapses.",
+  "recommendation": "Teach setProse to split on backtick spans and emit <code> for them (data then carries the identifier in backticks), with a small inline-code size so mono sits on the serif line.",
+  "css_js_sketch": "/* CSS */ ul.plain code,.f-explain code{font-size:.82em; overflow-wrap:anywhere}\n/* JS */\nfunction setProse(e,txt){ String(curl(txt)).split(/(`[^`]+`)/).forEach(function(t){\n  if(t.charAt(0)===\"`\"){var c=document.createElement(\"code\");c.textContent=t.slice(1,-1);e.appendChild(c);}\n  else if(t) e.appendChild(document.createTextNode(t)); }); return e; }",
+  "evidence": "before-footer-dark.png / before-closings-dark.png (Limits, first bullet); final-rail-stars-v3.html line 560",
+  "lenses": [
+   "closings-footer"
+  ],
+  "amendments": [
+   "Document the backtick convention in the data schema so authors know the contract, and confirm no existing prose fields carry literal backticks.",
+   "Split on backticks BEFORE applying curl() \u2014 the sketch curls the whole string first, so apostrophes and quotes inside code spans would be typographically mangled; curl only the non-code segments.",
+   "Requires the data/template side to emit backticks around identifiers \u2014 confirm the skill's findings schema can carry them."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A Rust path in serif with serif underscores is the one lapse in the page's code-in-mono discipline; the backtick mini-syntax is acceptable because the skill controls the data contract.",
+   "risk: Y \u2014 setProse is used on every prose path so the ordering bug in the sketch would corrupt code identifiers; with the amendment it is safe and unmatched backticks already pass through literally.",
+   "value: Y \u2014 A long Rust path in serif with serif underscores, verified in the footer shot, is the one visible lapse in the report's otherwise scrupulous code discipline."
+  ]
+ },
+ {
+  "id": "C52",
+  "title": "Add a bare 'copy' text-button to the code figure caption",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "The figure header carries path and language but no way to copy the snippet \u2014 the one action a developer reader actually takes with evidence (to grep, file an issue, test a remedy). Selecting inside a horizontally scrolling pre is fiddly. Done as a bare mono text-button it adds zero visual weight.",
+  "recommendation": "Insert a 'copy' text button between loc and lang: Fira Code at caption size, tx-2 ink, no border or fill, 'copied' feedback for ~1.2s, hidden in print. navigator.clipboard is available in file:// and https contexts; keep the button only when the API exists.",
+  "css_js_sketch": "/* CSS */\n.code-copy{font:inherit; background:none; border:0; padding:0; color:var(--tx-2); cursor:pointer; flex:0 0 auto}\n.code-copy:hover{color:var(--tx)}\n@media print{ .code-copy{display:none} }\n/* JS \u2014 in the figure builder */\nif(navigator.clipboard){\n  var cp=el(\"button\",\"code-copy\",\"copy\"); cp.type=\"button\";\n  cp.addEventListener(\"click\",function(){\n    navigator.clipboard.writeText(ce.snippet||\"\").then(function(){\n      cp.textContent=\"copied\"; setTimeout(function(){cp.textContent=\"copy\";},1200);\n    });\n  });\n  cap.insertBefore(cp, cap.querySelector(\".lang\"));\n}",
+  "evidence": "final-rail-stars-v3.html lines 332, 950\u2013961 (figcaption contains only .loc and .lang)",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [
+   "The figcaption is justify-content:space-between, so a third child centers mid-bar \u2014 give .code-copy{margin-left:auto} (with lang keeping a fixed gap) or wrap copy+lang in a right group; also add a .catch() so a clipboard permission rejection doesn't throw unhandled."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Borderline gadgetry, but copying evidence is the one action this audience actually takes and the bare lowercase mono text-button passes the Stripe test \u2014 keep it exactly this quiet, no icon, no border, ever.",
+   "risk: Y \u2014 Feature-detected, print-hidden, and dependency-free, but the flex placement in the sketch visibly mislands and needs the amendment.",
+   "value: Y \u2014 Copying a snippet to grep or file an issue is the single action a developer takes with evidence, selecting inside a scrolling pre is genuinely fiddly, and the bare-text treatment matches Stripe-grade docs."
+  ]
+ },
+ {
+  "id": "C53",
+  "title": "Disable Fira Code ligatures inside code evidence so snippets are verbatim",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "body enables liga globally (line 94) and Fira Code ships calt programming ligatures on by default, so evidence snippets render '::', '->', '=>' as merged glyphs rather than the literal source characters (the re-spaced 'Self::apply' is visible in both theme shots). For forensic evidence quoted at file:line, glyphs should be character-faithful.",
+  "recommendation": "Turn off ligatures and contextual alternates inside figure.code only; titles and labels elsewhere keep the default.",
+  "css_js_sketch": "figure.code code{font-variant-ligatures:none; font-feature-settings:\"liga\" 0, \"calt\" 0}",
+  "evidence": "before-code-citations-dark.png / before-finding-card-light.png ('Self::apply'); final-rail-stars-v3.html lines 94, 98, 344",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 For evidence quoted at file:line, character-faithful glyphs are more trustworthy than Fira Code's merged ligatures, and scoping the change to figure.code preserves the mono voice everywhere else.",
+   "risk: Y \u2014 One scoped CSS rule; improves evidence fidelity with zero interaction with the highlighter's markup.",
+   "value: Y \u2014 Most developers read ligatured code daily without doubting fidelity \u2014 verbatim glyphs are the purist's choice and the rule is one line scoped to evidence."
+  ]
+ },
+ {
+  "id": "C54",
+  "title": "Theme the Firefox scrollbar with scrollbar-color to match the WebKit thumb",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "Code scrollbars are themed only for WebKit (lines 342\u2013343); Firefox gets scrollbar-width:thin (line 341) with UA default colors (grep confirms no scrollbar-color), which \u2014 especially before C10 lands \u2014 can render a light default thumb inside the dark code panel.",
+  "recommendation": "Add the standard two-value scrollbar-color alongside the existing rules, using the same tokens so both engines render an identically muted, theme-following thumb.",
+  "css_js_sketch": "figure.code pre{scrollbar-width:thin; scrollbar-color:var(--ui-3) var(--code-bg)}",
+  "evidence": "final-rail-stars-v3.html lines 341\u2013343; grep 'scrollbar-color' returns nothing",
+  "lenses": [
+   "color-theme-parity",
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Theming one engine's scrollbar and not the other's is a parity gap with a one-line standard fix using the same tokens.",
+   "risk: Y \u2014 Standard-property one-liner using existing tokens; complements C10 rather than depending on it.",
+   "value: Y \u2014 Firefox-only thumb color parity is a one-line guard that matters more before C10 lands than after."
+  ]
+ },
+ {
+  "id": "C55",
+  "title": "Unify the three near-identical mono micro-sizes on one token",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "Within one card the mono voice uses .70rem (figcaption, 332), .72rem (pre, 341; .dc, 392) and .74rem (cite-ref, 358; skip-link, 101) \u2014 differences of ~0.4px at the 16px root that read as cascade noise, not hierarchy, and make future tuning error-prone.",
+  "recommendation": "Define one --mono-micro token (.72rem) for the figcaption, pre, cite-ref and dropped-counts; if a deliberate step is wanted later, change it in one place.",
+  "css_js_sketch": ":root{--mono-micro:.72rem}\nfigure.code figcaption{font-size:var(--mono-micro)}\nfigure.code pre{font-size:var(--mono-micro)}\n.cite-ref{font-size:var(--mono-micro)}\nul.plain.dropped .dc{font-size:var(--mono-micro)}",
+  "evidence": "final-rail-stars-v3.html lines 101, 332, 341, 358, 392",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Three mono sizes 0.4px apart are cascade noise that makes future tuning error-prone; one --mono-micro token is pure housekeeping (land with C19's prose tokens).",
+   "risk: Y \u2014 Sub-pixel size unification with no measure consequences (cite-ref's 3.5rem column absorbs the .02rem change); skip-link intentionally left out is fine.",
+   "value: Y \u2014 0.4px deltas are invisible to every reader; worth taking only as bundled token hygiene."
+  ]
+ },
+ {
+  "id": "C56",
+  "title": "Empty-principle state: accessible count and a non-list note",
+  "severity": "low",
+  "area": "scorecard",
+  "priority": "could",
+  "problem": "When a principle has zero engaging findings the count cell renders a bare '\u2014' (line 810) \u2014 screen readers announce 'em dash' where siblings say 'N findings' \u2014 and the note is wrapped as ul > li > p (lines 839\u2013847), announcing 'list, 1 item' for a single sentence. Not visible in this dataset (all seven principles engage), but the template ships the state and an honors-heavy audit will surface it.",
+  "recommendation": "Keep the em dash visually but pair it with visually-hidden 'no findings' text; render the note as a grid-aligned div + p instead of a one-item list.",
+  "css_js_sketch": "/* count */\nvar cnt=el(\"span\",\"sc-count\");\nif(n){cnt.textContent=n+(n===1?\" finding\":\" findings\");}\nelse{cnt.appendChild(document.createTextNode(\"\u2014\"));\n     cnt.appendChild(el(\"span\",\"visually-hidden\",\" no findings\"));}\n/* empty note: div instead of ul>li */\nvar noteWrap=el(\"div\",\"sc-findings sc-empty\"); noteWrap.appendChild(note); group.appendChild(noteWrap);\n/* CSS: loosen ul.sc-findings selectors to .sc-findings */",
+  "evidence": "final-rail-stars-v3.html lines 286\u2013287, 810, 839\u2013847",
+  "lenses": [
+   "scorecard"
+  ],
+  "amendments": [
+   "Also update the two mobile selectors at lines 418\u2013420 (ul.sc-findings, ul.sc-findings > li) when loosening to .sc-findings, or the empty-state div loses its single-column collapse."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The template ships the empty-principle state even if this dataset doesn't exercise it; a screen reader announcing 'em dash' and a one-item list for a sentence are real flaws an honors-heavy audit will surface.",
+   "risk: Y \u2014 Sound a11y fix for a shipped-but-latent state; the selector loosening just needs to cover the 680px block too.",
+   "value: Y \u2014 Not reachable in this dataset, but the template ships the state and the next honors-heavy audit will surface the bare 'em dash' announcement."
+  ]
+ },
+ {
+  "id": "C57",
+  "title": "Hide the empty-rail ghost rows at the 680px collapse",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "Eight sections emit an empty el(\"div\",\"rail\") as the grid's first child (JS lines 664, 732, 750, 761, 852, 892, 1013, 1037). At \u2264680px, .grid{grid-template-columns:1fr; row-gap:.5rem} (line 416) turns each into a 0-height first row plus a .5rem gap \u2014 a uniform 8px dead offset above every section, closing rule and ref-less citation cell (line 976).",
+  "recommendation": "Hide empty marginalia cells when the grid collapses; the DOM-built divs are truly empty so :empty matches.",
+  "css_js_sketch": "@media(max-width:680px){\n  .rail:empty, .cite-ref:empty{display:none}\n}",
+  "evidence": "Measured at 375px: mast grid top 101.8, rail h=0, content-col top 109.8; final-rail-stars-v3.html lines 416, 664, 732, 750, 761, 852, 892, 976, 1013, 1037",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A uniform 8px dead offset above every mobile section is exactly the kind of invisible slack a finished product doesn't carry; :empty on the DOM-built rails is the minimal fix.",
+   "risk: Y \u2014 :empty provably matches \u2014 el() creates the rail divs with no child nodes at all \u2014 and the rule is scoped inside the existing mobile query.",
+   "value: Y \u2014 A uniform 8px dead offset on mobile reads as spacing, not breakage, but the :empty rule is a free two-line cleanup."
+  ]
+ },
+ {
+  "id": "C58",
+  "title": "Mobile rail: let the \u2734 share the ENGAGES line instead of sitting alone",
+  "severity": "low",
+  "area": "finding",
+  "priority": "could",
+  "problem": "In the \u2264680px rail row, .f-engages is a single flex item whose max-content width forces it to wrap below the star, so the \u2734 opens the finding as a stray lone glyph line above a 2\u20133 line meta strip (measured star at y=4522 alone, ENGAGES label at y=4549.8) \u2014 four lines of marginalia before the title.",
+  "recommendation": "Use display:contents on .f-engages in the mobile query so the label and items become flex items of .f-rail and flow inline after the star.",
+  "css_js_sketch": "@media(max-width:680px){\n  .f-rail{gap:.3rem .8rem}\n  .f-engages{display:contents}\n}",
+  "evidence": "/tmp/mh-mobile/mob-frail.png (lone \u2734 line above ENGAGES); final-rail-stars-v3.html lines 304\u2013306, 431\u2013432",
+  "lenses": [
+   "responsive-mobile"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A stray lone glyph line above the mobile meta strip is visible debris; display:contents on a div of styled spans is safe here since the element carries no semantics to flatten.",
+   "risk: Y \u2014 display:contents on semantics-free spans is safe in all current engines, but flag the interaction with C18: its hanging text-indent on fe-items must be reset (or desktop-scoped) in this mobile row or first lines shift left oddly.",
+   "value: Y \u2014 The lone \u2734 line on mobile is mildly awkward rather than broken; display:contents is fine on these plain divs and costs one rule."
+  ]
+ },
+ {
+  "id": "C59",
+  "title": "Add text-size-adjust to prevent iOS landscape font inflation",
+  "severity": "low",
+  "area": "global",
+  "priority": "could",
+  "problem": "html carries only scroll-behavior (line 90); with no text-size-adjust, iOS Safari in landscape arbitrarily inflates some blocks (prose, but not the mono rail labels), breaking the tuned 19px measure and the rail's type hierarchy.",
+  "recommendation": "One declaration on html alongside the existing scroll-behavior.",
+  "css_js_sketch": "html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%}",
+  "evidence": "final-rail-stars-v3.html line 90; grep 'text-size-adjust' returns nothing",
+  "lenses": [
+   "product-polish"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 One zero-cost standard declaration protects the tuned 19px measure and the rail hierarchy from iOS landscape inflation; every Stripe-grade page ships it.",
+   "risk: Y \u2014 Inert everywhere except the iOS landscape case it guards; one declaration on the existing html rule.",
+   "value: Y \u2014 Standard guard against iOS landscape inflation that would visibly distort the tuned measure; one declaration, no downside."
+  ]
+ }
+]

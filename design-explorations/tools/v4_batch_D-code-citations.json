@@ -1,0 +1,239 @@
+[
+ {
+  "id": "C03",
+  "title": "Code-caption file paths break mid-extension ('\u2026hydrator.r / s:31,37')",
+  "severity": "high",
+  "area": "code",
+  "priority": "must",
+  "problem": "The figcaption location is injected as one unbroken text node (line 953) and .loc applies overflow-wrap:anywhere + word-break:break-word (line 333), so paths split at arbitrary characters \u2014 confirmed in before-boundary-dark.png where '\u2026user_inferred_gender_query_hydrator.r' wraps before 's:31,37', cutting the .rs extension in half. For a developer audience a filename broken inside its extension reads as a typo. The masthead repo URL already solves this with <wbr> after each '/' (lines 692\u2013698); the caption never got the same treatment.",
+  "recommendation": "Build .loc the same way as the repo URL: insert <wbr> after each '/' so wraps land at path-segment boundaries, and drop word-break:break-word, keeping overflow-wrap:anywhere only as a last-resort guard. The longest real segment fits comfortably on its own line at .7rem mono.",
+  "css_js_sketch": "/* JS, code figure builder (line ~953) */\nvar loc=el(\"span\",\"loc\");\nString(ce.location||\"\").split(\"/\").forEach(function(seg,j,arr){\n  loc.appendChild(document.createTextNode(seg+(j<arr.length-1?\"/\":\"\")));\n  if(j<arr.length-1) loc.appendChild(document.createElement(\"wbr\"));\n});\ncap.appendChild(loc);\n/* CSS (line 333) */\nfigure.code figcaption .loc{min-width:0; overflow-wrap:anywhere; word-break:normal}",
+  "evidence": "before-boundary-dark.png (caption 'home-mixer/query_hydrators/user_inferred_gender_query_hydrator.r' / 's:31,37'); final-rail-stars-v3.html lines 333, 953, 692\u2013698",
+  "lenses": [
+   "micro-typography",
+   "finding-card"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 A filename broken inside its extension reads as a typo to the developer audience, and the fix reuses the file's own <wbr> pattern \u2014 pure coherence, zero new vocabulary.",
+   "risk: Y \u2014 Copies the proven masthead <wbr> pattern (lines 692\u2013698) and keeps overflow-wrap:anywhere as last resort, so no new overflow path is introduced.",
+   "value: Y \u2014 A file path breaking inside its .rs extension reads as a typo to the exact developer audience this report must convince, and the <wbr> pattern already exists in the masthead."
+  ]
+ },
+ {
+  "id": "C04",
+  "title": "Code figure's right-edge fade is always on \u2014 it washes out real terminal glyphs and never releases at scroll-end",
+  "severity": "high",
+  "area": "code",
+  "priority": "must",
+  "problem": "The 2rem gradient (.pre-wrap::after, lines 336\u2013340) renders unconditionally: snippets whose last line genuinely ends inside the fade zone have their closing characters (');' in both theme shots) visibly half-erased, and when a reader scrolls an overflowing line to its end the fade persists, falsely signalling more content. On mobile, where the scrollbar is invisible, the fade is the only affordance and it lies at scroll-end on all 8 snippets. Compounding it, padding-right on a horizontal scroll container is not reliably part of scrollable overflow, so at scroll-end the last glyph abuts the 1px border with zero inset.",
+  "recommendation": "Toggle the fade from the pre's scroll state with one passive listener per figure \u2014 visible only while content remains to the right \u2014 and move the right padding onto an inline-block code element so the final character always lands with the same .9rem inset the left edge gets. The reduced-motion block (line 410) already neutralizes the transition.",
+  "css_js_sketch": "/* CSS */\nfigure.code .pre-wrap::after{opacity:0; transition:opacity .12s linear}\nfigure.code .pre-wrap.has-more::after{opacity:1}\nfigure.code pre{padding:.8rem 0 .8rem .9rem}\nfigure.code code{display:inline-block; padding-right:.9rem}\n/* JS \u2014 in the code_evidence builder */\nfunction syncFade(){preWrap.classList.toggle(\"has-more\", pre.scrollLeft+pre.clientWidth < pre.scrollWidth-1);}\npre.addEventListener(\"scroll\",syncFade,{passive:true});\nwindow.addEventListener(\"resize\",syncFade);\nrequestAnimationFrame(syncFade);",
+  "evidence": "before-code-citations-dark.png and before-finding-card-light.png (terminal ');' dimmed; first line cut at 'weights.fa'); /tmp/mh-mobile/mob-code-end.png (fade persists at scrollLeft=max); final-rail-stars-v3.html lines 336\u2013344",
+  "lenses": [
+   "code-figure",
+   "responsive-mobile"
+  ],
+  "amendments": [
+   "Must land with C28 so print resets the new display/padding on code.",
+   "Use figure.code code{display:block; width:max-content; padding-right:.9rem} instead of inline-block (avoids the baseline descender gap inside pre), re-run syncFade on document.fonts.ready (CDN Fira Code load changes scrollWidth after the rAF), and land C28's print reset (display:block; padding-right:0) in the same change.",
+   "Land together with C28, which must reset the new display:inline-block/padding-right on code for print."
+  ],
+  "reasons": [
+   "taste: Y \u2014 A decorative fade that half-erases real evidence glyphs and lies at scroll-end is Tufte's cardinal sin \u2014 decoration falsifying data; the scroll-state toggle is felt, never noticed; coordinate the inline-block code change with C28's print reset.",
+   "risk: Y \u2014 The fade-state JS is sound (passive listeners, no data paths), but the inline-block padding trick and font-load timing need the safer variant to avoid a visible vertical gap and a stale fade before fonts arrive.",
+   "value: Y \u2014 The report's own evidence glyphs are half-erased by an unconditional fade and the scroll affordance lies at scroll-end \u2014 an evidence-obscuring defect in an audit product."
+  ]
+ },
+ {
+  "id": "C27",
+  "title": "Scrollable code regions are unreachable by keyboard \u2014 add tabindex/role when a pre overflows",
+  "severity": "medium",
+  "area": "code",
+  "priority": "should",
+  "problem": "figure.code pre scrolls both axes (overflow-x:auto, max-height:24rem, line 341) but the JS creates it with no tabindex (grep confirms zero in the file), so keyboard users cannot scroll it and the cut-off tokens are unreadable for them. Chrome/Firefox accessibility audits flag exactly this ('scrollable region not focusable'); the page is otherwise careful about a11y (skip-link, visually-hidden), so the gap is out of character.",
+  "recommendation": "After render, if the pre actually overflows, set tabindex=0, role=region, and an aria-label from the figcaption location. The existing global :focus-visible accent outline (line 100) styles it for free. Hook into the same rAF callback as C04's fade sync.",
+  "css_js_sketch": "requestAnimationFrame(function(){\n  if(pre.scrollWidth > pre.clientWidth+1 || pre.scrollHeight > pre.clientHeight+1){\n    pre.setAttribute(\"tabindex\",\"0\");\n    pre.setAttribute(\"role\",\"region\");\n    pre.setAttribute(\"aria-label\",(ce.location||\"code evidence\")+\" \u2014 scrollable\");\n  }\n});",
+  "evidence": "final-rail-stars-v3.html lines 100, 341, 956\u2013960; grep 'tabindex' returns nothing; overflow visible in before-code-citations-dark.png",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The page is otherwise scrupulous about a11y (skip link, visually-hidden), so keyboard-unreachable scrollable evidence is out of character; the fix is invisible and rides C04's rAF hook.",
+   "risk: Y \u2014 Standard fix for a real audit-flagged a11y gap; the overflow check should also re-run on document.fonts.ready (piggyback C04's syncFade) since CDN fonts change scrollWidth.",
+   "value: Y \u2014 Keyboard users literally cannot read truncated evidence in 8 scrollable panes, and the page's existing a11y care (skip-link, focus styles) makes this gap look like an oversight audits will flag."
+  ]
+ },
+ {
+  "id": "C28",
+  "title": "Print clips long code lines: the code child's white-space:pre defeats the print pre-wrap rule",
+  "severity": "medium",
+  "area": "code",
+  "priority": "must",
+  "problem": "The print block sets figure.code pre{white-space:pre-wrap; overflow:visible} (line 451), but line 344 sets figure.code code{white-space:pre}, and that specified value on the code element beats the inherited pre-wrap at print time. With figure.code{overflow:hidden} (line 331) still in force, overflowing lines are silently truncated at the figure edge in every printed/PDF'd report \u2014 lost evidence in a report artifact.",
+  "recommendation": "Extend the print rule to the code child so the wrap actually applies. One added selector. (If C04's display:inline-block lands on code, also reset it to display:block here.)",
+  "css_js_sketch": "@media print{\n  figure.code pre, figure.code code{white-space:pre-wrap; overflow-wrap:break-word}\n  figure.code code{display:block; padding-right:0}\n}",
+  "evidence": "final-rail-stars-v3.html lines 331, 344 vs 451; the overflow itself visible in before-code-citations-dark.png",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [
+   "Ship in the same change as C04 and C09 as one coherent print/code fix."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Silently truncated evidence in every printed report is data loss in an audit artifact; once C09 makes print first-class this one-selector fix is non-negotiable, and it already anticipates C04's inline-block change.",
+   "risk: Y \u2014 The white-space:pre on code provably defeats the print pre-wrap rule (line 344 vs 451), silently truncating evidence in every PDF; one added selector, and it already anticipates C04's display change.",
+   "value: Y \u2014 Silently truncated evidence lines in every printed copy means lost proof in the artifact's most shareable form."
+  ]
+ },
+ {
+  "id": "C52",
+  "title": "Add a bare 'copy' text-button to the code figure caption",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "The figure header carries path and language but no way to copy the snippet \u2014 the one action a developer reader actually takes with evidence (to grep, file an issue, test a remedy). Selecting inside a horizontally scrolling pre is fiddly. Done as a bare mono text-button it adds zero visual weight.",
+  "recommendation": "Insert a 'copy' text button between loc and lang: Fira Code at caption size, tx-2 ink, no border or fill, 'copied' feedback for ~1.2s, hidden in print. navigator.clipboard is available in file:// and https contexts; keep the button only when the API exists.",
+  "css_js_sketch": "/* CSS */\n.code-copy{font:inherit; background:none; border:0; padding:0; color:var(--tx-2); cursor:pointer; flex:0 0 auto}\n.code-copy:hover{color:var(--tx)}\n@media print{ .code-copy{display:none} }\n/* JS \u2014 in the figure builder */\nif(navigator.clipboard){\n  var cp=el(\"button\",\"code-copy\",\"copy\"); cp.type=\"button\";\n  cp.addEventListener(\"click\",function(){\n    navigator.clipboard.writeText(ce.snippet||\"\").then(function(){\n      cp.textContent=\"copied\"; setTimeout(function(){cp.textContent=\"copy\";},1200);\n    });\n  });\n  cap.insertBefore(cp, cap.querySelector(\".lang\"));\n}",
+  "evidence": "final-rail-stars-v3.html lines 332, 950\u2013961 (figcaption contains only .loc and .lang)",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [
+   "The figcaption is justify-content:space-between, so a third child centers mid-bar \u2014 give .code-copy{margin-left:auto} (with lang keeping a fixed gap) or wrap copy+lang in a right group; also add a .catch() so a clipboard permission rejection doesn't throw unhandled."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Borderline gadgetry, but copying evidence is the one action this audience actually takes and the bare lowercase mono text-button passes the Stripe test \u2014 keep it exactly this quiet, no icon, no border, ever.",
+   "risk: Y \u2014 Feature-detected, print-hidden, and dependency-free, but the flex placement in the sketch visibly mislands and needs the amendment.",
+   "value: Y \u2014 Copying a snippet to grep or file an issue is the single action a developer takes with evidence, selecting inside a scrolling pre is genuinely fiddly, and the bare-text treatment matches Stripe-grade docs."
+  ]
+ },
+ {
+  "id": "C53",
+  "title": "Disable Fira Code ligatures inside code evidence so snippets are verbatim",
+  "severity": "low",
+  "area": "code",
+  "priority": "could",
+  "problem": "body enables liga globally (line 94) and Fira Code ships calt programming ligatures on by default, so evidence snippets render '::', '->', '=>' as merged glyphs rather than the literal source characters (the re-spaced 'Self::apply' is visible in both theme shots). For forensic evidence quoted at file:line, glyphs should be character-faithful.",
+  "recommendation": "Turn off ligatures and contextual alternates inside figure.code only; titles and labels elsewhere keep the default.",
+  "css_js_sketch": "figure.code code{font-variant-ligatures:none; font-feature-settings:\"liga\" 0, \"calt\" 0}",
+  "evidence": "before-code-citations-dark.png / before-finding-card-light.png ('Self::apply'); final-rail-stars-v3.html lines 94, 98, 344",
+  "lenses": [
+   "code-figure"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 For evidence quoted at file:line, character-faithful glyphs are more trustworthy than Fira Code's merged ligatures, and scoping the change to figure.code preserves the mono voice everywhere else.",
+   "risk: Y \u2014 One scoped CSS rule; improves evidence fidelity with zero interaction with the highlighter's markup.",
+   "value: Y \u2014 Most developers read ligatured code daily without doubting fidelity \u2014 verbatim glyphs are the purist's choice and the rule is one line scoped to evidence."
+  ]
+ },
+ {
+  "id": "C20",
+  "title": "Citation quote marks: make them real characters and hang the opening mark outside the text edge",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "Two related defects on the report's most precious typography. (1) The CSS-supplied opening \u201c (.cite-quote::before, line 361) sits inside the text column, pushing the quote's first letter ~0.5em right of the shared left edge while the gloss below sits flush \u2014 a visible left-edge wobble on every citation pair, in a design built on ONE shared left edge. (2) Because both marks are pseudo-content, selecting/copying a quote yields it WITHOUT its quotation marks \u2014 poor copy fidelity for the one element built to be quoted, and invisible to find-in-page.",
+  "recommendation": "Emit the curly marks as real text in JS (q.textContent = '\u201c'+curlQuote(...)+'\u201d'), delete the pseudo-elements, and hang the opening mark with a small negative text-indent tuned for EB Garamond italic, with hanging-punctuation as progressive enhancement. One change fixes alignment, copy, and search at once.",
+  "css_js_sketch": "/* JS, line 980 */\nq.textContent=\"\u201c\"+curlQuote(ci.quote)+\"\u201d\";\n/* CSS: delete line 361, then */\n.cite-quote{text-indent:-.5em}  /* tune \u00b1.05em optically */\n@supports(hanging-punctuation:first){ .cite-quote{text-indent:0; hanging-punctuation:first} }\n@media(max-width:680px){ .cite-quote{text-indent:0} }",
+  "evidence": "before-code-citations-dark.png / before-finding-card-light.png (quote first letters indented vs flush gloss; \u00a7104 line 1 at \u2248418px vs line 2 at the 400px edge at 2x); final-rail-stars-v3.html lines 356\u2013362, 980",
+  "lenses": [
+   "micro-typography",
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Real quotation marks fix copy fidelity, find-in-page, and the left-edge wobble at once \u2014 hanging the opening mark is classical typography in service of the page's one-left-edge creed.",
+   "risk: Y \u2014 The -.5em hang (\u22488.6px) fits inside the .8rem ref gap so it cannot collide with the \u00a7-column, curlQuote already normalizes inner doubles so the real outer marks are safe, and the 680px reset is included; copy/search fidelity is a genuine win.",
+   "value: Y \u2014 Copy fidelity and find-in-page on the report's most quotable element are real reader value, and the fix simultaneously repairs the visible left-edge wobble against the gloss."
+  ]
+ },
+ {
+  "id": "C21",
+  "title": "Remedy text and the structural note sit on their own indented left edges \u2014 hang their marks in the gutter instead",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "The page's core rule is one shared left text edge with marks hanging left of it (the \u00a7-refs do exactly this). But remedy items use padding-left:1.6rem with the \u2726 at left:0 (lines 371\u2013372), pushing remedy text 1.6rem right of the edge; and .structural puts its 2px rule AT the edge with 1rem padding (line 375), creating a third edge. Measured in the light crop at 2x: content edge \u2248400px, structural text \u2248435px, remedy text \u2248452px \u2014 the finding tail accumulates three competing left edges.",
+  "recommendation": "Treat the \u2726 and the structural rule like the \u00a7-ref: hang them in the gutter and return the text to the shared content edge. Restore the indents only at \u2264680px where the gutter disappears (mirroring the existing .cite fallback).",
+  "css_js_sketch": "ul.remedy li{padding-left:0; position:relative}\nul.remedy li::before{left:-1.6rem}\n.structural{margin-left:calc(-1rem - 2px)}\n@media(max-width:680px){\n  ul.remedy li{padding-left:1.6rem}\n  ul.remedy li::before{left:0}\n  .structural{margin-left:0}\n}",
+  "evidence": "before-finding-card-light.png (three left edges: 400 / 435 / 452px at 2x), before-code-citations-dark.png; final-rail-stars-v3.html lines 370\u2013376",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [
+   "Mirror the \u2264680px resets in @media print too \u2014 print keeps .layout's 1.5rem padding and the -1.6rem hang slightly exceeds it."
+  ],
+  "reasons": [
+   "taste: Y \u2014 Three competing left edges in the finding tail contradict the page's core rule; hanging the \u2726 and the structural rule in the gutter like the \u00a7-refs makes the page more itself, with the existing 680px fallback pattern.",
+   "risk: Y \u2014 The 2.25rem gutter comfortably absorbs both hangs on desktop and the mobile fallback is specified; only the print path needs the small guard.",
+   "value: Y \u2014 Indented remedy bullets read as normal to any reader \u2014 this strengthens the design's one-edge thesis but only a designer would ever flag it; acceptable as a bundled nicety with C22."
+  ]
+ },
+ {
+  "id": "C22",
+  "title": "Remedies visually attach to the citation above them \u2014 give the block real separation",
+  "severity": "medium",
+  "area": "citations",
+  "priority": "should",
+  "problem": "Citations get a labeled movement ('From Magnifica Humanitas', line 350) but remedies start only 1.2rem after the last gloss (ul.remedy margin-top, line 370) \u2014 barely more than the 1rem between successive citations (line 357). In both theme shots the \u2726 list reads as overflow of the last quote, so the report's most actionable content has the weakest sectional identity on the page.",
+  "recommendation": "Widen the gap to ~2rem so the block reads as a new movement; optionally mirror the cite-cap with a quiet small-caps 'Remedies' cap in tx-2, bound tightly to its list (the cap is the fuller fix but the gap alone restores the grouping).",
+  "css_js_sketch": "ul.remedy{margin-top:2rem}\n/* optional cap, JS line ~988 */\nif((f.remediation||[]).length){\n  body.appendChild(el(\"p\",\"rem-cap\",\"Remedies\"));\n  /* .rem-cap{font-variant:small-caps; letter-spacing:var(--track-cap); font-size:.8rem; color:var(--tx-2); font-weight:500; margin:1.6rem 0 0}\n     .rem-cap + ul.remedy{margin-top:.35rem} */\n}",
+  "evidence": "before-code-citations-dark.png, before-finding-card-light.png (gloss\u2192remedy gap \u2248 citation\u2192citation gap); final-rail-stars-v3.html lines 350, 357, 370, 987\u2013992",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [
+   "Take the 2rem gap only; drop the optional 'Remedies' cap \u2014 the code's own comment says 'no label' and that restraint is the design.",
+   "Take the optional 'Remedies' cap, not just the gap \u2014 scannable action items are what a CTO acts on."
+  ],
+  "reasons": [
+   "taste: Y \u2014 The report's most actionable content reading as overflow of the last quote is a real grouping failure, but the gap alone restores it.",
+   "risk: Y \u2014 The margin widening is one safe declaration; the optional 'Remedies' cap reuses the existing small-caps caption vocabulary and is gated on remediation.length.",
+   "value: Y \u2014 Verified: the most actionable content on the page reads as overflow of the last quote, weakening exactly the section a decision-maker needs to find."
+  ]
+ },
+ {
+  "id": "C45",
+  "title": "Fix the collapsed margin under 'From Magnifica Humanitas' so the cap binds to its quotes",
+  "severity": "low",
+  "area": "citations",
+  "priority": "could",
+  "problem": "The cap is authored to sit .2rem above its first quote (.cite-cap margin:1.4rem 0 .2rem, line 350), but the adjacent .cite's 1rem top margin (line 356) collapses with it to a flat 1rem \u2014 the authored tight grouping never renders, so the label floats equidistant between the prose above and the quote it introduces (gap equals the citation-to-citation gap). Line 357's '.cite + .cite{margin-top:1rem}' is fully redundant with 356 \u2014 evidence of the confused intent.",
+  "recommendation": "Move inter-citation spacing onto the sibling selector only and bind the cap to the first citation with a small explicit gap.",
+  "css_js_sketch": ".cite-cap{margin:1.6rem 0 0}\n.cite{margin:0 0 0 -4.3rem}\n.cite-cap + .cite{margin-top:.4rem}\n.cite + .cite{margin-top:1.1rem}",
+  "evidence": "before-code-citations-dark.png (cap\u2194quote gap equals quote\u2194quote gap); final-rail-stars-v3.html lines 350, 356\u2013357",
+  "lenses": [
+   "spacing-rhythm",
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 Margin collapse silently defeating the authored cap-to-quote binding is a real bug in intent; the sibling-selector rewrite restores what the designer already meant (sequence before C47's tokenization).",
+   "risk: Y \u2014 Correct margin-collapse diagnosis; every first .cite is provably preceded by a .cite-cap (lines 964\u2013984) so the sibling selectors cover all cases.",
+   "value: Y \u2014 The collapsed margin defeating the authored cap-to-quote binding is real but reads as ordinary spacing to non-designers; coordinate with C47's tokens."
+  ]
+ },
+ {
+  "id": "C46",
+  "title": "Add .cite-quote to the text-wrap:pretty list",
+  "severity": "low",
+  "area": "citations",
+  "priority": "could",
+  "problem": "Line 137 grants text-wrap:pretty to glosses, structural notes, remedies and explanations \u2014 but not .cite-quote, the most precious typography in the card. The \u00a7170 quote already shows the consequence: a long first line breaking to a short second with no rag protection against future orphans.",
+  "recommendation": "Add .cite-quote to the existing pretty list (consistent with its siblings; balance would be the bolder pull-quote treatment, pretty matches the page's restraint).",
+  "css_js_sketch": "/* line 137 */\n.f-explain p,.cite-quote,.cite-gloss,.dek,.summary p,.sc-note,.structural p,ul.remedy li,ul.plain li{text-wrap:pretty}",
+  "evidence": "final-rail-stars-v3.html lines 137, 360; before-finding-card-light.png (\u00a7170 quote rag)",
+  "lenses": [
+   "citations-remedies"
+  ],
+  "amendments": [],
+  "reasons": [
+   "taste: Y \u2014 The most precious typography on the card being the one block without rag protection is an obvious omission from the existing pretty list; one selector.",
+   "risk: Y \u2014 One selector added to an existing list; no interaction with C20's text-indent.",
+   "value: Y \u2014 One selector added to an existing list, protecting the rag of the page's most precious text \u2014 costless."
+  ]
+ }
+]
